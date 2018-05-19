@@ -11,7 +11,7 @@ There are several cool things about this approach:
     we can use filtering when needed without slowing the main controller down
     we can extend our controller more than we’ll ever need
     unified interface for everything, buttons or axes
-    because of Leo board, we can now use a nice Joystick library, which simplifies things like ten times; 
+    Leo board allows us to use a nice Joystick library by MHeironimus, which simplifies things like ten times; 
     no more pain with USB descriptors
 
 Note that you will need either an arduino pro mini or an ADS1115 for each peripheral (see thingiverse and http://hc625ma.org).
