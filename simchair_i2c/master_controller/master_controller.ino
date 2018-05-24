@@ -15,6 +15,8 @@ Joystick_ simchair_aux1(0x21,0x04,32, 0,true, true, true, true, true, true, fals
 Adafruit_ADS1115 cyclic;
 Adafruit_ADS1115 pedals(0x4A);
 
+#define ADS1115_RESOLUTION 15 //bits
+
 bool b8stick_lastButtonState[] = {0,0,0,0,0,0};
 bool dev_b8stick = 0;
 bool dev_cyclic = 0;
@@ -84,8 +86,10 @@ void setup_cyclic()
   int error = Wire.endTransmission();
   if(error == 0)
   {
-    simchair.setXAxisRange(0, 4096);
-    simchair.setYAxisRange(0, 4096);
+    //simchair.setXAxisRange(0, 4096);
+   // simchair.setYAxisRange(0, 4096);
+    simchair.setXAxisRange(0, 0.5 + pow(2,ADS1115_RESOLUTION));
+    simchair.setYAxisRange(0, 0.5 + pow(2,ADS1115_RESOLUTION));
     dev_cyclic = 1;
     cyclic.begin();
     cyclic.setGain(GAIN_ONE);
@@ -99,7 +103,8 @@ void setup_pedals()
   if(error == 0)
   {
     Serial.print("BANG");
-    simchair.setRudderRange(0, 4096);
+    //simchair.setRudderRange(0, 4096);
+    simchair.setRudderRange(0, 0.5 + pow(2,ADS1115_RESOLUTION));
     dev_pedals = 1;
     pedals.begin();
     pedals.setGain(GAIN_ONE);
@@ -167,8 +172,9 @@ void poll_b8stick()
 }
 void poll_cyclic()
 {
-    uint16_t x = cyclic.readADC_SingleEnded(0) >> 3;
-    uint16_t y = cyclic.readADC_SingleEnded(1) >> 3;
+    uint16_t x = cyclic.readADC_SingleEnded(0) >> (15 - ADS1115_RESOLUTION);
+    uint16_t y = cyclic.readADC_SingleEnded(1) >> (15 - ADS1115_RESOLUTION);
+
    
     simchair.setXAxis(x);
     simchair.setYAxis(y);
@@ -176,8 +182,9 @@ void poll_cyclic()
 
 void poll_pedals()
 {
-    uint16_t rudder = pedals.readADC_SingleEnded(0) >> 3;
+    uint16_t rudder = pedals.readADC_SingleEnded(0) >> (15 - ADS1115_RESOLUTION);
     simchair.setRudder(rudder);
+    
 }
 
 void poll_simple_collective()
@@ -231,4 +238,6 @@ void poll_cessna_engine_and_prop_controls()
     simchair.setRyAxis(ry);
     simchair.setThrottle(throttle);
 }
+
+
 
