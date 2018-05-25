@@ -2,6 +2,7 @@
 #include <Joystick.h>
 #include <Adafruit_ADS1015.h>
 
+
 //Joystick_ b8stick(0x20,JOYSTICK_TYPE_GAMEPAD,
 //  6, 0,                  // Button Count, Hat Switch Count
 //  true, true, false,     // X and Y, but no Z Axis
@@ -15,7 +16,36 @@ Joystick_ simchair_aux1(0x21,0x04,32, 0,true, true, true, true, true, true, fals
 Adafruit_ADS1115 cyclic;
 Adafruit_ADS1115 pedals(0x4A);
 
-#define ADS1115_RESOLUTION 15 //bits
+#define LINEAR 0
+
+#define ADS1115_RESOLUTION 15 //bits, min 12, max 15
+
+// use a button on cyclic to switch sensitivity in flight.
+// this kind of functionality is not available in a real aircraft, however
+// it may somewhat resemble simulated force trim.
+
+#define SENS_DEVICE "b8_stick"
+#define SENS_SWITCH_ENABLED 1
+#define SENS_SWITCH_BUTTON 0 //0 is the first button
+
+// sens. switch behavior available options: "FORCE_TRIM" or "TOGGLE"
+// FORCE_TRIM will reduce sensitivity to CYCLIC_SENS and RUDDER_SENS
+// while SENSITIVITY_SWITCH_BUTTON is pressed, "TOGGLE" will act
+// as a regular switch
+
+#define SENS_SWITCH_MODE "TOGGLE" 
+
+// if SENS_SWITCH is disabled, these values will be used;
+// set to 100 for full axis range
+#define CUSTOM_CYCLIC_SENS 80
+#define CUSTOM_RUDDER_SENS 80
+
+#define XY_FILTERING_ENABLED 0
+#define RUDDER_FILTERING_ENABLED 0
+
+
+int cyclic_sens = 100;
+int rudder_sens = 100;
 
 bool b8stick_lastButtonState[] = {0,0,0,0,0,0};
 bool dev_b8stick = 0;
@@ -24,6 +54,18 @@ bool dev_simple_collective = 0;
 bool dev_pedals = 0;
 bool dev_cessna_engine_and_prop_controls = 0;
 bool zero = 0;
+
+//ADS1115 filter variables
+const int xy_readings = 6;
+const int rudder_readings = 8;
+int buf_x[xy_readings]; 
+int buf_y[xy_readings]; 
+int buf_rudder[rudder_readings];
+int xy_read_index = 0; // the index of the current reading
+int rudder_read_index = 0;
+long total_x = 0;  // the running total
+long total_y = 0;
+long total_rudder = 0;
 
 void setup() 
 {
@@ -67,6 +109,22 @@ void loop()
 }
 
 
+int adjust_sensitivity (bool type,int val, float param)
+{
+  if ((type == LINEAR) && (param < 100))
+  {
+    int percent = (int) param;
+    // this will simply limit your controls throw range by the given percent,
+    // and map full ADC range for it.
+    // may be a good option for flying helicopters in x-plane
+    int center = (0.5 + pow(2,ADS1115_RESOLUTION))/2;
+    int adj_range = ((0.5 + pow(2,ADS1115_RESOLUTION)) / 100 * percent);
+    val = map(val,0,0.5 + pow(2,ADS1115_RESOLUTION),center - (adj_range / 2), center + (adj_range / 2));
+  }
+  
+  return val;
+}
+
 void setup_b8stick()
 {
   //MKIII B8 stick
@@ -86,8 +144,12 @@ void setup_cyclic()
   int error = Wire.endTransmission();
   if(error == 0)
   {
-    //simchair.setXAxisRange(0, 4096);
-   // simchair.setYAxisRange(0, 4096);
+    //initialize ADS1115 filters
+    for (int thisReading = 0; thisReading < xy_readings; thisReading++) 
+    {
+      buf_x[thisReading] = 0;
+      buf_y[thisReading] = 0;
+    }
     simchair.setXAxisRange(0, 0.5 + pow(2,ADS1115_RESOLUTION));
     simchair.setYAxisRange(0, 0.5 + pow(2,ADS1115_RESOLUTION));
     dev_cyclic = 1;
@@ -102,8 +164,11 @@ void setup_pedals()
   int error = Wire.endTransmission();
   if(error == 0)
   {
-    Serial.print("BANG");
-    //simchair.setRudderRange(0, 4096);
+    //initialize ADS1115 filters
+    for (int thisReading = 0; thisReading < xy_readings; thisReading++) 
+    {
+      buf_rudder[thisReading] = 0;
+    }
     simchair.setRudderRange(0, 0.5 + pow(2,ADS1115_RESOLUTION));
     dev_pedals = 1;
     pedals.begin();
@@ -164,26 +229,113 @@ void poll_b8stick()
       bool v = (b >> i) & 1;
       if (v != b8stick_lastButtonState[i])
       {
-        simchair.setButton(i,v);
+        if ((SENS_SWITCH_ENABLED == 1) && (SENS_DEVICE == "b8_stick"))
+        {
+          if (i != SENS_SWITCH_BUTTON)
+          {
+            simchair.setButton(i,v);
+          }
+          else
+          {
+            if ((SENS_SWITCH_MODE == "FORCE_TRIM") || ((SENS_SWITCH_MODE == "TOGGLE") && (v == 1)))
+            {
+              if (cyclic_sens == 100)
+              {
+                cyclic_sens = CUSTOM_CYCLIC_SENS;
+                rudder_sens = CUSTOM_RUDDER_SENS;
+              }
+              else
+              {
+                cyclic_sens = 100;
+                rudder_sens = 100;
+              }
+            }
+          }
+        }
+        else
+        {
+          simchair.setButton(i,v);
+        }
       }
       b8stick_lastButtonState[i] = v;
     }
   }
 }
+
 void poll_cyclic()
 {
-    uint16_t x = cyclic.readADC_SingleEnded(0) >> (15 - ADS1115_RESOLUTION);
-    uint16_t y = cyclic.readADC_SingleEnded(1) >> (15 - ADS1115_RESOLUTION);
+  uint16_t x,y;
+  if (XY_FILTERING_ENABLED == 1)
+  {
+    total_x = total_x - buf_x[xy_read_index];
+    total_y = total_y - buf_y[xy_read_index];
+    buf_x[xy_read_index] = cyclic.readADC_SingleEnded(0) >> (15 - ADS1115_RESOLUTION);
+    buf_y[xy_read_index] = cyclic.readADC_SingleEnded(1) >> (15 - ADS1115_RESOLUTION);
 
-   
-    simchair.setXAxis(x);
-    simchair.setYAxis(y);
+    total_x = total_x + buf_x[xy_read_index];
+    total_y = total_y + buf_y[xy_read_index];
+    xy_read_index = xy_read_index + 1;
+
+    if (xy_read_index >= xy_readings) 
+    {
+      // ...wrap around to the beginning:
+      xy_read_index = 0;
+    }
+
+    x = total_x / xy_readings;
+    y = total_y / xy_readings;
+    
+
+  }
+  else
+  {
+    x = cyclic.readADC_SingleEnded(0) >> (15 - ADS1115_RESOLUTION);
+    y = cyclic.readADC_SingleEnded(1) >> (15 - ADS1115_RESOLUTION);    
+  }
+
+  if (SENS_SWITCH_ENABLED == 1)
+  {
+    x = adjust_sensitivity(LINEAR,x,cyclic_sens);
+    y = adjust_sensitivity(LINEAR,y,cyclic_sens);
+  }
+  else
+  {
+    x = adjust_sensitivity(LINEAR,x,CUSTOM_CYCLIC_SENS);
+    y = adjust_sensitivity(LINEAR,y,CUSTOM_CYCLIC_SENS);
+  }
+  simchair.setXAxis(x);
+  simchair.setYAxis(y);
 }
 
 void poll_pedals()
 {
-    uint16_t rudder = pedals.readADC_SingleEnded(0) >> (15 - ADS1115_RESOLUTION);
-    simchair.setRudder(rudder);
+  uint16_t rudder;
+  if (RUDDER_FILTERING_ENABLED == 1)
+  {
+    total_rudder = total_rudder - buf_rudder[rudder_read_index];
+    buf_rudder[rudder_read_index] = pedals.readADC_SingleEnded(0) >> (15 - ADS1115_RESOLUTION);
+    total_rudder = total_rudder + buf_rudder[rudder_read_index];
+    rudder_read_index = rudder_read_index + 1;
+    if (rudder_read_index >= rudder_readings) 
+    {
+      rudder_read_index = 0;
+    }
+    rudder = total_rudder / rudder_readings;
+    
+  }
+  else
+  {
+    rudder = pedals.readADC_SingleEnded(0) >> (15 - ADS1115_RESOLUTION);
+  }
+  if (SENS_SWITCH_ENABLED == 1)
+  {
+    rudder = adjust_sensitivity(LINEAR,rudder,rudder_sens);
+  }
+  else
+  {
+    rudder = adjust_sensitivity(LINEAR,rudder,CUSTOM_RUDDER_SENS);
+  }
+  simchair.setRudder(rudder);
     
 }
 
