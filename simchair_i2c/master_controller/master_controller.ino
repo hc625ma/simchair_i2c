@@ -10,13 +10,17 @@
 //  false, false,          // No rudder or throttle
 //  false, false, false);  // No accelerator, brake, or steering
 
-Joystick_ simchair(0x20,0x04,32, 0,true, true, true, true, true, false, true, true, false, false, false);
+Joystick_ simchair(0x20,0x04,32, 1,true, true, true, true, true, false, true, true, false, false, false);
 Joystick_ simchair_aux1(0x21,0x04,32, 0,true, true, true, true, true, true, false, true, false, false, false);
 //Joystick_ simchair(0x20,0x04,64, 0,true, true, true, true, true, true, true, true, true, true, true);
 Adafruit_ADS1115 cyclic;
 Adafruit_ADS1115 pedals(0x4A);
 
-#define LINEAR 0
+//#define LINEAR 0
+
+#define B8_POT_MODE "HAT_SW" // HAT_SW or ANALOG
+
+#define SENS_ADJ_METHOD  "LINEAR"
 
 #define ADS1115_RESOLUTION 15 //bits, min 12, max 15
 
@@ -109,11 +113,11 @@ void loop()
 }
 
 
-int adjust_sensitivity (bool type,int val, float param)
+int adjust_sensitivity (int val, int param)
 {
-  if ((type == LINEAR) && (param < 100))
+  if ((SENS_ADJ_METHOD == "LINEAR") && (param < 100))
   {
-    int percent = (int) param;
+    int percent = param;
     // this will simply limit your controls throw range by the given percent,
     // and map full ADC range for it.
     // may be a good option for flying helicopters in x-plane
@@ -222,8 +226,59 @@ void poll_b8stick()
       rx = b1;
       ry = b2;
     }
-    simchair_aux1.setXAxis(rx);
-    simchair_aux1.setYAxis(ry);
+    if (B8_POT_MODE == "ANALOG")
+    {
+      simchair_aux1.setXAxis(rx);
+      simchair_aux1.setYAxis(ry);
+    }
+    else
+    {
+      int16_t hat_val;
+
+      if (ry > 145)
+      {
+        if (rx > 145)
+        {
+          hat_val = 45;
+        }
+        else if (rx < 105)
+        {
+          hat_val = 315;
+        }
+        else
+        {
+          hat_val = 0;
+        }
+      }
+      else if (ry < 105)
+      {
+        if (rx > 160)
+        {
+          hat_val = 135;
+        }
+        else if (rx < 105)
+        {
+          hat_val = 225;
+        }
+        else
+        {
+          hat_val = 180;
+        }
+      }
+      else if (rx > 145)
+      {
+        hat_val = 90;
+      }
+      else if (rx < 105)
+      {
+        hat_val = 270;
+      }
+      else
+      {
+        hat_val = JOYSTICK_HATSWITCH_RELEASE;
+      }
+      simchair.setHatSwitch(0,hat_val);
+    }
     for (byte i=0; i<6; i++)
     {
       bool v = (b >> i) & 1;
@@ -295,13 +350,13 @@ void poll_cyclic()
 
   if (SENS_SWITCH_ENABLED == 1)
   {
-    x = adjust_sensitivity(LINEAR,x,cyclic_sens);
-    y = adjust_sensitivity(LINEAR,y,cyclic_sens);
+    x = adjust_sensitivity(x,cyclic_sens);
+    y = adjust_sensitivity(y,cyclic_sens);
   }
   else
   {
-    x = adjust_sensitivity(LINEAR,x,CUSTOM_CYCLIC_SENS);
-    y = adjust_sensitivity(LINEAR,y,CUSTOM_CYCLIC_SENS);
+    x = adjust_sensitivity(x,CUSTOM_CYCLIC_SENS);
+    y = adjust_sensitivity(y,CUSTOM_CYCLIC_SENS);
   }
   simchair.setXAxis(x);
   simchair.setYAxis(y);
@@ -329,11 +384,11 @@ void poll_pedals()
   }
   if (SENS_SWITCH_ENABLED == 1)
   {
-    rudder = adjust_sensitivity(LINEAR,rudder,rudder_sens);
+    rudder = adjust_sensitivity(rudder,rudder_sens);
   }
   else
   {
-    rudder = adjust_sensitivity(LINEAR,rudder,CUSTOM_RUDDER_SENS);
+    rudder = adjust_sensitivity(rudder,CUSTOM_RUDDER_SENS);
   }
   simchair.setRudder(rudder);
     
