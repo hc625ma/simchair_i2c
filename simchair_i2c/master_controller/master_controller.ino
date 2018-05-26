@@ -1,6 +1,7 @@
 #include <Wire.h>
 #include <Joystick.h>
 #include <Adafruit_ADS1015.h>
+#include <Keyboard.h>
 
 
 //Joystick_ b8stick(0x20,JOYSTICK_TYPE_GAMEPAD,
@@ -16,7 +17,6 @@ Joystick_ simchair_aux1(0x21,0x04,32, 0,true, true, true, true, true, true, fals
 Adafruit_ADS1115 cyclic;
 Adafruit_ADS1115 pedals(0x4A);
 
-//#define LINEAR 0
 
 #define B8_POT_MODE "HAT_SW" // HAT_SW or ANALOG
 
@@ -46,6 +46,13 @@ Adafruit_ADS1115 pedals(0x4A);
 
 #define XY_FILTERING_ENABLED 0
 #define RUDDER_FILTERING_ENABLED 0
+
+#define PTT_KEYBOARD_PRESS 0 // set to 1 to enable keyboard combination press instead of a joystick button
+#define PTT_BUTTON 4 //1st button is 0, 4 should be PTT trigger position
+
+// this should press CTRL + Q
+#define PTT_KEYBOARD_KEY 'q'
+char PTT_KEYBOARD_KEY_MOD = KEY_LEFT_CTRL;
 
 
 int cyclic_sens = 100;
@@ -83,7 +90,10 @@ void setup()
   setup_simple_collective();
   setup_pedals();
   setup_cessna_engine_and_prop_controls();
-
+  if (PTT_KEYBOARD_PRESS == 1)
+  {
+    Keyboard.begin();
+  }
 }
 
 
@@ -284,15 +294,15 @@ void poll_b8stick()
       bool v = (b >> i) & 1;
       if (v != b8stick_lastButtonState[i])
       {
-        if ((SENS_SWITCH_ENABLED == 1) && (SENS_DEVICE == "b8_stick"))
+        if (((SENS_SWITCH_ENABLED == 1) && (SENS_DEVICE == "b8_stick")) || (PTT_KEYBOARD_PRESS == 1))
         {
-          if (i != SENS_SWITCH_BUTTON)
+          if ((i != SENS_SWITCH_BUTTON) && (i != PTT_BUTTON))
           {
             simchair.setButton(i,v);
           }
           else
           {
-            if ((SENS_SWITCH_MODE == "FORCE_TRIM") || ((SENS_SWITCH_MODE == "TOGGLE") && (v == 1)))
+            if (((SENS_SWITCH_MODE == "FORCE_TRIM") || ((SENS_SWITCH_MODE == "TOGGLE") && (v == 1))) && (i != PTT_BUTTON))
             {
               if (cyclic_sens == 100)
               {
@@ -304,6 +314,23 @@ void poll_b8stick()
                 cyclic_sens = 100;
                 rudder_sens = 100;
               }
+            }
+            else if ((i == PTT_BUTTON) && (PTT_KEYBOARD_PRESS == 1))
+            {
+              if (v == 1)
+              {
+                Keyboard.press(PTT_KEYBOARD_KEY_MOD);
+                Keyboard.press(PTT_KEYBOARD_KEY);
+              }
+              else
+              {
+                Keyboard.releaseAll();
+              }
+              
+            }
+            else
+            {
+              simchair.setButton(i,v);
             }
           }
         }
