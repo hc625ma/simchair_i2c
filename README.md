@@ -27,6 +27,7 @@ http://hc625ma.org/files/simchair3/
 
 or thingiverse:
 https://www.thingiverse.com/thing:2919692
-Search for "simchair" to list all compatible stuff
+
+Search for "simchair" to list all compatible stuff.
 
 Writing of documentation for the project takes as much effort as creating new models. If you have questions, please don't hesitate to ask, I'll do my best to help. Stay tuned for new updates!
