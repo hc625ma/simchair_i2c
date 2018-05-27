@@ -20,7 +20,7 @@ All simchair compatible controllers can be upgraded to work with this software a
 
 I don’t think there’s any point in using an old analog version anymore, as there are now controllers with buttons (an old UNO – based analog controller only supported 6 axes as it had to do some massive filtering because of a noisy 10 bit built-in ADC).
 
-Master controller sketch is updated frequently, please update it regularly.
+Master controller sketch is updated frequently, please update it accordingly.
 
 You can find STL files and sources, as well as new peripherals dev snapshots on http://hc625ma.org (preferred)
 http://hc625ma.org/files/simchair3/
