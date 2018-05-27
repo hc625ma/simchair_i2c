@@ -4,6 +4,7 @@
 #include <Keyboard.h>
 
 
+
 //Joystick_ b8stick(0x20,JOYSTICK_TYPE_GAMEPAD,
 //  6, 0,                  // Button Count, Hat Switch Count
 //  true, true, false,     // X and Y, but no Z Axis
@@ -17,6 +18,8 @@ Joystick_ simchair_aux1(0x21,0x04,32, 0,true, true, true, true, true, true, fals
 Adafruit_ADS1115 cyclic;
 Adafruit_ADS1115 pedals(0x4A);
 
+//<CONFIGURATION>
+//----------------------------------------------------------------------------------------------
 
 #define B8_POT_MODE "HAT_SW" // HAT_SW or ANALOG
 
@@ -53,6 +56,8 @@ Adafruit_ADS1115 pedals(0x4A);
 // this should press CTRL + Q
 #define PTT_KEYBOARD_KEY 'q'
 char PTT_KEYBOARD_KEY_MOD = KEY_LEFT_CTRL;
+//----------------------------------------------------------------------------------------------
+//</CONFIGURATION>
 
 
 int cyclic_sens = 100;
