@@ -14,14 +14,19 @@ There are several cool things about this approach:
     Leo board allows us to use a nice Joystick library by MHeironimus, which simplifies things like ten times; 
     no more pain with USB descriptors
 
-Note that you will need either an arduino pro mini or an ADS1115 for each peripheral (see thingiverse and http://hc625ma.org).
-All simchair compatible controllers can be upgraded to work with this software and the new controller, see corresponding peripherals pages on thingiverse.
+Note that you will need either an arduino pro mini or an ADS1115 for each peripheral (visit http://hc625ma.org for build manuals).
+All simchair compatible controllers can be upgraded to work with this software and the new controller, see corresponding peripherals pages on hc625ma.org or thingiverse.
 
 
 I don’t think there’s any point in using an old analog version anymore, as there are now controllers with buttons (an old UNO – based analog controller only supported 6 axes as it had to do some massive filtering because of a noisy 10 bit built-in ADC).
 
-You can find STL files and sources on thingiverse:
-https://www.thingiverse.com/thing:2919692
-Look for "simchair" to list all compatible stuff
+Master controller sketch is updated frequently, please update it regularly.
 
-Manuals, build videos etc. are in the process of creation, stay tuned!
+You can find STL files and sources, as well as new peripherals dev snapshots on http://hc625ma.org (preferred)
+http://hc625ma.org/files/simchair3/
+
+or thingiverse:
+https://www.thingiverse.com/thing:2919692
+Search for "simchair" to list all compatible stuff
+
+Writing of documentation for the project takes as much effort as creating new models. If you have questions, please don't hesitate to ask, I'll do my best to help. Stay tuned for new updates!
