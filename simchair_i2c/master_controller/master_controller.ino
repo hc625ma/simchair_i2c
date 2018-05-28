@@ -38,6 +38,7 @@ Adafruit_ADS1115 pedals(0x4A);
 // ADAPTIVE will release trim when your lever will be close to the position it is held after the button press
 // INSTANT will release instantly, on press
 #define PSEUDO_FORCE_TRIM_RELEASE_DEVIATION 5  // how much deviation is allowed from trimmed position when releasing trim, percent
+#define SENS_SWITCH_TRIM_EMERGENCY_RELEASE 1 // release the trim when you press SENS SWITCH
 
 // use a button on cyclic to switch sensitivity in flight.
 // this kind of functionality is not available in a real aircraft, however
@@ -332,11 +333,21 @@ void poll_b8stick()
               {
                 cyclic_sens = CUSTOM_CYCLIC_SENS;
                 rudder_sens = CUSTOM_RUDDER_SENS;
+                if ((force_trim_on == 1) && (SENS_SWITCH_TRIM_EMERGENCY_RELEASE == 1))
+                {
+                  force_trim_on = 0;
+                  force_trim_position_set = 0;
+                }
               }
               else
               {
                 cyclic_sens = 100;
                 rudder_sens = 100;
+                if ((force_trim_on == 1) && (SENS_SWITCH_TRIM_EMERGENCY_RELEASE == 1))
+                {
+                  force_trim_on = 0;
+                  force_trim_position_set = 0;
+                }
               }
             }
             else if ((i == PTT_BUTTON) && (PTT_KEYBOARD_PRESS == 1))
