@@ -1,4 +1,4 @@
-//version 0.2
+//version 0.3
 #include <Wire.h>
 #include <Joystick.h>
 #include <Adafruit_ADS1015.h>
@@ -27,6 +27,17 @@ Adafruit_ADS1115 pedals(0x4A);
 #define SENS_ADJ_METHOD  "LINEAR"
 
 #define ADS1115_RESOLUTION 15 //bits, min 12, max 15
+
+#define PSEUDO_FORCE_TRIM 1
+// this will freeze cyclic in-place until you press the button again.
+// this is not exactly how it works in a real helicopter (force trim only provides centering forces, not disables cyclic input), 
+// but is useful in a sim and probably is the closest thing we can get on a non-FFB stick. 
+#define PSEUDO_FORCE_TRIM_BUTTON 1
+// this will disable a choosen button and dedicate it to force trim. Top button in Huey, mid button in 407
+#define PSEUDO_FORCE_TRIM_RELEASE_MODE "ADAPTIVE" //INSTANT or ADAPTIVE
+// ADAPTIVE will release trim when your lever will be close to the position it is held after the button press
+// INSTANT will release instantly, on press
+#define PSEUDO_FORCE_TRIM_RELEASE_DEVIATION 5  // how much deviation is allowed from trimmed position when releasing trim, percent
 
 // use a button on cyclic to switch sensitivity in flight.
 // this kind of functionality is not available in a real aircraft, however
@@ -60,6 +71,11 @@ char PTT_KEYBOARD_KEY_MOD = KEY_LEFT_CTRL;
 //----------------------------------------------------------------------------------------------
 //</CONFIGURATION>
 
+bool force_trim_on = 0;
+bool force_trim_position_set = 0;
+uint16_t force_trim_x = 0;
+uint16_t force_trim_y =0 ;
+
 
 int cyclic_sens = 100;
 int rudder_sens = 100;
@@ -83,6 +99,8 @@ int rudder_read_index = 0;
 long total_x = 0;  // the running total
 long total_y = 0;
 long total_rudder = 0;
+
+int ADC_RANGE = 0.5 + pow(2,ADS1115_RESOLUTION);
 
 void setup() 
 {
@@ -137,9 +155,9 @@ int adjust_sensitivity (int val, int param)
     // this will simply limit your controls throw range by the given percent,
     // and map full ADC range for it.
     // may be a good option for flying helicopters in x-plane
-    int center = (0.5 + pow(2,ADS1115_RESOLUTION))/2;
-    int adj_range = ((0.5 + pow(2,ADS1115_RESOLUTION)) / 100 * percent);
-    val = map(val,0,0.5 + pow(2,ADS1115_RESOLUTION),center - (adj_range / 2), center + (adj_range / 2));
+    int center = ADC_RANGE/2;
+    int adj_range = (ADC_RANGE / 100) * percent;
+    val = map(val,0,ADC_RANGE,center - (adj_range / 2), center + (adj_range / 2));
   }
   
   return val;
@@ -170,8 +188,8 @@ void setup_cyclic()
       buf_x[thisReading] = 0;
       buf_y[thisReading] = 0;
     }
-    simchair.setXAxisRange(0, 0.5 + pow(2,ADS1115_RESOLUTION));
-    simchair.setYAxisRange(0, 0.5 + pow(2,ADS1115_RESOLUTION));
+    simchair.setXAxisRange(0, ADC_RANGE);
+    simchair.setYAxisRange(0, ADC_RANGE);
     dev_cyclic = 1;
     cyclic.begin();
     cyclic.setGain(GAIN_ONE);
@@ -189,7 +207,7 @@ void setup_pedals()
     {
       buf_rudder[thisReading] = 0;
     }
-    simchair.setRudderRange(0, 0.5 + pow(2,ADS1115_RESOLUTION));
+    simchair.setRudderRange(0, ADC_RANGE);
     dev_pedals = 1;
     pedals.begin();
     pedals.setGain(GAIN_ONE);
@@ -300,15 +318,15 @@ void poll_b8stick()
       bool v = (b >> i) & 1;
       if (v != b8stick_lastButtonState[i])
       {
-        if (((SENS_SWITCH_ENABLED == 1) && (SENS_DEVICE == "b8_stick")) || (PTT_KEYBOARD_PRESS == 1))
+        if (((SENS_SWITCH_ENABLED == 1) && (SENS_DEVICE == "b8_stick")) || (PTT_KEYBOARD_PRESS == 1) || (PSEUDO_FORCE_TRIM == 1))
         {
-          if ((i != SENS_SWITCH_BUTTON) && (i != PTT_BUTTON))
+          if ((i != SENS_SWITCH_BUTTON) && (i != PTT_BUTTON) && (i != PSEUDO_FORCE_TRIM_BUTTON))
           {
             simchair.setButton(i,v);
           }
           else
           {
-            if (((SENS_SWITCH_MODE == "FORCE_TRIM") || ((SENS_SWITCH_MODE == "TOGGLE") && (v == 1))) && (i != PTT_BUTTON))
+            if (((SENS_SWITCH_MODE == "FORCE_TRIM") || ((SENS_SWITCH_MODE == "TOGGLE") && (v == 1))) && (i != PTT_BUTTON) && (i != PSEUDO_FORCE_TRIM_BUTTON))
             {
               if (cyclic_sens == 100)
               {
@@ -333,6 +351,17 @@ void poll_b8stick()
                 Keyboard.releaseAll();
               }
               
+            }
+            else if ((i == PSEUDO_FORCE_TRIM_BUTTON) && (PSEUDO_FORCE_TRIM == 1) && (v == 1))
+            {
+              if (force_trim_on == 0)
+              {
+                force_trim_on = 1;
+              }
+              else
+              {
+                force_trim_on = 0;
+              }
             }
             else
             {
@@ -391,8 +420,42 @@ void poll_cyclic()
     x = adjust_sensitivity(x,CUSTOM_CYCLIC_SENS);
     y = adjust_sensitivity(y,CUSTOM_CYCLIC_SENS);
   }
-  simchair.setXAxis(x);
-  simchair.setYAxis(y);
+
+  if (PSEUDO_FORCE_TRIM_RELEASE_MODE == "ADAPTIVE")
+  {
+    if ((force_trim_on == 0) && (force_trim_position_set == 0))
+    {
+      simchair.setXAxis(x);
+      simchair.setYAxis(y);
+    }
+    else if ((force_trim_on == 1) && (force_trim_position_set == 0))
+    {
+      force_trim_x = x;
+      force_trim_y = y;
+      force_trim_position_set = 1;
+    }
+    else if ((force_trim_on == 0) && (force_trim_position_set == 1))
+    {     
+      int one_percent_range = ADC_RANGE / 100;
+      int diff_x = x - force_trim_x; // this is needed because of how the abs() works
+      int diff_y = y - force_trim_y;
+      
+      if (((abs(diff_x)) < (PSEUDO_FORCE_TRIM_RELEASE_DEVIATION * one_percent_range)) && ((abs(diff_y)) < (PSEUDO_FORCE_TRIM_RELEASE_DEVIATION * one_percent_range)))
+      {
+        simchair.setXAxis(x);
+        simchair.setYAxis(y);
+        force_trim_position_set = 0;        
+      }
+    }
+  }
+  else //INSTANT mode
+  {
+    if (force_trim_on == 0)
+    {
+      simchair.setXAxis(x);
+      simchair.setYAxis(y);
+    }
+  }
 }
 
 void poll_pedals()
@@ -473,7 +536,6 @@ void poll_cessna_engine_and_prop_controls()
     ry = b5;
     ry = (ry << 8)|b6;  
   }
-    //Serial.println(rx);
     simchair.setRxAxis(rx);
     simchair.setRyAxis(ry);
     simchair.setThrottle(throttle);
