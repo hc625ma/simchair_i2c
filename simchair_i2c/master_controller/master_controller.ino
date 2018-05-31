@@ -1,4 +1,4 @@
-//version 0.3
+//version 0.4
 #include <Wire.h>
 #include <Joystick.h>
 #include <Adafruit_ADS1015.h>
@@ -34,6 +34,7 @@ Adafruit_ADS1115 pedals(0x4A);
 // but is useful in a sim and probably is the closest thing we can get on a non-FFB stick. 
 #define PSEUDO_FORCE_TRIM_BUTTON 1
 // this will disable a choosen button and dedicate it to force trim. Top button in Huey, mid button in 407
+#define PSEUDO_FORCE_TRIM_AFFECTS_PEDALS 1 //in a real heli force trim affects both cyclic and pedals, this is a default behavior
 #define PSEUDO_FORCE_TRIM_RELEASE_MODE "ADAPTIVE" //INSTANT or ADAPTIVE
 // ADAPTIVE will release trim when your lever will be close to the position it is held after the button press
 // INSTANT will release instantly, on press
@@ -74,8 +75,12 @@ char PTT_KEYBOARD_KEY_MOD = KEY_LEFT_CTRL;
 
 bool force_trim_on = 0;
 bool force_trim_position_set = 0;
+bool force_trim_rudder_on = 0;
+bool force_trim_rudder_position_set = 0;
 uint16_t force_trim_x = 0;
-uint16_t force_trim_y =0 ;
+uint16_t force_trim_y = 0 ;
+uint16_t force_trim_rudder = 0;
+
 
 
 int cyclic_sens = 100;
@@ -224,7 +229,6 @@ void setup_simple_collective()
     simchair.setZAxisRange(0, 961);
     simchair.setThrottleRange(0, 982);
     dev_simple_collective = 1;
-    //Serial.println("BOOM");
   }
 }
 
@@ -337,6 +341,8 @@ void poll_b8stick()
                 {
                   force_trim_on = 0;
                   force_trim_position_set = 0;
+                  force_trim_rudder_on = 0;
+                  force_trim_rudder_position_set = 0;
                 }
               }
               else
@@ -347,6 +353,8 @@ void poll_b8stick()
                 {
                   force_trim_on = 0;
                   force_trim_position_set = 0;
+                  force_trim_rudder_on = 0;
+                  force_trim_rudder_position_set = 0;
                 }
               }
             }
@@ -368,10 +376,12 @@ void poll_b8stick()
               if (force_trim_on == 0)
               {
                 force_trim_on = 1;
+                force_trim_rudder_on = 1;
               }
               else
               {
                 force_trim_on = 0;
+                force_trim_rudder_on = 0;
               }
             }
             else
@@ -497,7 +507,43 @@ void poll_pedals()
   {
     rudder = adjust_sensitivity(rudder,CUSTOM_RUDDER_SENS);
   }
-  simchair.setRudder(rudder);
+  if (PSEUDO_FORCE_TRIM_AFFECTS_PEDALS == 1)
+  {
+    if (PSEUDO_FORCE_TRIM_RELEASE_MODE == "ADAPTIVE")
+    {
+      if ((force_trim_rudder_on == 0) && (force_trim_rudder_position_set == 0))
+      {
+        simchair.setRudder(rudder);
+      }
+      else if ((force_trim_rudder_on == 1) && (force_trim_rudder_position_set == 0))
+      {
+        force_trim_rudder = rudder;
+        force_trim_rudder_position_set = 1;
+      }
+      else if ((force_trim_rudder_on == 0) && (force_trim_rudder_position_set == 1))
+      {     
+        int one_percent_range = ADC_RANGE / 100;
+        int diff_rudder = rudder - force_trim_rudder; // this is needed because of how the abs() works
+        
+        if ((abs(diff_rudder)) < (PSEUDO_FORCE_TRIM_RELEASE_DEVIATION * one_percent_range))
+        {
+          simchair.setRudder(rudder);
+          force_trim_rudder_position_set = 0;        
+        }
+      }
+    }
+    else //INSTANT mode
+    {
+      if (force_trim_rudder_on == 0)
+      {
+        simchair.setRudder(rudder);
+      }
+    }
+  }
+  else
+  {
+    simchair.setRudder(rudder);
+  }
     
 }
 
@@ -532,14 +578,12 @@ void poll_cessna_engine_and_prop_controls()
   Wire.requestFrom(11, 6);
   while (Wire.available()) 
   { 
-    Serial.println("test");
     byte b1 = Wire.read(); // receive a byte as character
     byte b2 = Wire.read();
     byte b3 = Wire.read(); // receive a byte as character
     byte b4 = Wire.read();
     byte b5 = Wire.read(); // receive a byte as character
     byte b6 = Wire.read();
-    //Serial.println(b1);
     throttle = b1;
     throttle = (throttle << 8)|b2;
     rx = b3;
