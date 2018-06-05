@@ -34,7 +34,7 @@ Adafruit_ADS1115 pedals(0x4A);
 // but is useful in a sim and probably is the closest thing we can get on a non-FFB stick. 
 #define PSEUDO_FORCE_TRIM_BUTTON 1
 // this will disable a choosen button and dedicate it to force trim. Top button in Huey, mid button in 407
-#define PSEUDO_FORCE_TRIM_AFFECTS_PEDALS 1 //in a real heli force trim affects both cyclic and pedals, this is a default behavior
+#define PSEUDO_FORCE_TRIM_EFFECTS_PEDALS 1 //in a real heli force trim affects both cyclic and pedals, this is a default behavior
 #define PSEUDO_FORCE_TRIM_RELEASE_MODE "ADAPTIVE" //INSTANT or ADAPTIVE
 // ADAPTIVE will release trim when your lever will be close to the position it is held after the button press
 // INSTANT will release instantly, on press
@@ -507,7 +507,7 @@ void poll_pedals()
   {
     rudder = adjust_sensitivity(rudder,CUSTOM_RUDDER_SENS);
   }
-  if (PSEUDO_FORCE_TRIM_AFFECTS_PEDALS == 1)
+  if (PSEUDO_FORCE_TRIM_EFFECTS_PEDALS == 1)
   {
     if (PSEUDO_FORCE_TRIM_RELEASE_MODE == "ADAPTIVE")
     {
