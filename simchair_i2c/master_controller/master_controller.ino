@@ -90,6 +90,7 @@ bool b8stick_lastButtonState[] = {0,0,0,0,0,0};
 bool dev_b8stick = 0;
 bool dev_cyclic = 0;
 bool dev_simple_collective = 0;
+bool dev_single_engine_collective = 0;
 bool dev_pedals = 0;
 bool dev_cessna_engine_and_prop_controls = 0;
 bool zero = 0;
@@ -118,6 +119,7 @@ void setup()
   setup_b8stick();
   setup_cyclic();
   setup_simple_collective();
+  setup_single_engine_collective();
   setup_pedals();
   setup_cessna_engine_and_prop_controls();
   if (PTT_KEYBOARD_PRESS == 1)
@@ -141,6 +143,10 @@ void loop()
   if (dev_simple_collective == 1)
   {
     poll_simple_collective();    
+  }
+  if (dev_single_engine_collective == 1)
+  {
+    poll_single_engine_collective();    
   }
   if (dev_pedals == 1)
   {
@@ -226,9 +232,21 @@ void setup_simple_collective()
   int error = Wire.endTransmission();
   if(error == 0)
   {
-    simchair.setZAxisRange(0, 961);
-    simchair.setThrottleRange(0, 982);
+    simchair.setZAxisRange(0, 1023);
+    simchair.setThrottleRange(0, 1023);
     dev_simple_collective = 1;
+  }
+}
+
+void setup_single_engine_collective()
+{
+  Wire.beginTransmission(12);
+  int error = Wire.endTransmission();
+  if(error == 0)
+  {
+    simchair.setZAxisRange(0, 1023);
+    simchair.setThrottleRange(0, 1023);
+    dev_single_engine_collective = 1;
   }
 }
 
@@ -553,6 +571,30 @@ void poll_simple_collective()
     uint16_t throttle;
     
     Wire.requestFrom(10, 4);
+    while (Wire.available()) 
+    { 
+      byte b1 = Wire.read(); // receive a byte as character
+      byte b2 = Wire.read();
+      byte b3 = Wire.read(); // receive a byte as character
+      byte b4 = Wire.read();
+  
+      z = b1;
+      z = (z << 8)|b2;
+      throttle = b3;
+      throttle = (throttle << 8)|b4;
+
+    }
+
+    simchair.setZAxis(z);
+    simchair.setThrottle(throttle);
+}
+
+void poll_single_engine_collective()
+{
+    uint16_t z;
+    uint16_t throttle;
+    
+    Wire.requestFrom(12, 4);
     while (Wire.available()) 
     { 
       byte b1 = Wire.read(); // receive a byte as character

@@ -21,23 +21,28 @@ void setup()
 {
   pinMode(10, OUTPUT);           // power up the pot board
   digitalWrite(10, HIGH);
-  Wire.begin(10);                // join i2c bus with address #8
+  Wire.begin(12);                // join i2c bus with address #11
   Wire.onRequest(requestEvent); // register event
-//  Serial.begin(9600);           // start serial for output
+  //Serial.begin(9600);           // start serial for output
 }
 
 void loop() 
 {
-  z = filteredRead(A1,filter_counter_z);
-  rz = filteredRead(A0,filter_counter_rz);
+  z = filteredRead(A0,filter_counter_z);
+  rz = filteredRead(A1,filter_counter_rz);
+  // we have 200 degree turn instead of 300, so a little adjustment is necessary
   // uncomment Serial.print statements and change 2nd and 3rd values to physical min and max
-  // of your lever; change the order of 2 last values to invert an axis
-  z = map(z,0,961,1023,0);
-  rz = map(rz,0,982,0,1023);
+  // of your lever
+
   
-//Serial.print(z); 
-//Serial.print(" ");
-//Serial.println(rz);
+  z = map(z,0,1002,1023,0);
+  rz = map(rz,83,1023,1023,0);
+
+//  Serial.print(z); 
+//  Serial.print(" ");
+//  Serial.println(rz);
+  
+
 }
 
 // function that executes whenever data is received from master
@@ -54,8 +59,7 @@ uint16_t filteredRead (uint16_t input,uint8_t filter_counter)
 {
   uint32_t filter = 0;
   for (uint8_t i=0;i<filter_counter;i++)
-  {
-    
+  {  
       filter+= analogRead(input);
       delay(1); 
   }
