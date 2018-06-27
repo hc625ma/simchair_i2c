@@ -355,7 +355,7 @@ void poll_b8stick()
               {
                 cyclic_sens = CUSTOM_CYCLIC_SENS;
                 rudder_sens = CUSTOM_RUDDER_SENS;
-                if ((force_trim_on == 1) && (SENS_SWITCH_TRIM_EMERGENCY_RELEASE == 1))
+                if (SENS_SWITCH_TRIM_EMERGENCY_RELEASE == 1)
                 {
                   force_trim_on = 0;
                   force_trim_position_set = 0;
@@ -367,7 +367,7 @@ void poll_b8stick()
               {
                 cyclic_sens = 100;
                 rudder_sens = 100;
-                if ((force_trim_on == 1) && (SENS_SWITCH_TRIM_EMERGENCY_RELEASE == 1))
+                if (SENS_SWITCH_TRIM_EMERGENCY_RELEASE == 1)
                 {
                   force_trim_on = 0;
                   force_trim_position_set = 0;
