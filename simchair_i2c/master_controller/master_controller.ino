@@ -14,7 +14,8 @@
 //  false, false, false);  // No accelerator, brake, or steering
 
 Joystick_ simchair(0x20,0x04,32, 1,true, true, true, true, true, false, true, true, false, false, false);
-Joystick_ simchair_aux1(0x21,0x04,32, 0,true, true, true, true, true, true, false, true, false, false, false);
+Joystick_ simchair_aux1(0x21,0x04,32, 1,true, true, true, true, true, true, false, true, false, false, false);
+Joystick_ simchair_aux2(0x22,0x04,32, 1,false, false, false, true, true, false, false, false, false, false, false);
 //Joystick_ simchair(0x20,0x04,64, 0,true, true, true, true, true, true, true, true, true, true, true);
 Adafruit_ADS1115 cyclic;
 Adafruit_ADS1115 pedals(0x4A);
@@ -70,6 +71,16 @@ Adafruit_ADS1115 pedals(0x4A);
 // this should press CTRL + Q
 #define PTT_KEYBOARD_KEY 'q'
 char PTT_KEYBOARD_KEY_MOD = KEY_LEFT_CTRL;
+
+#define AB412_COLL_HEAD_ROTARY_POTS  1 // 0, 1 or 2
+
+#define SW_HOLD_TIMEOUT 100
+
+
+// write joystick button numbers here as they are displayed in joy.cpl in order of increment
+byte sw_mode_button_switches[] = {1,2,9,10,17}; // active when being held
+byte sw_mode_toggle_switches[] = {3,4,5,6,7,8,11,12,13,14,15,16}; // single button press when switch is turned to "on", one more press when switch is turned to "off"; something you can assign to a single key press; e.g. gear extend/retract
+
 //----------------------------------------------------------------------------------------------
 //</CONFIGURATION>
 
@@ -86,6 +97,14 @@ uint16_t force_trim_rudder = 0;
 int cyclic_sens = 100;
 int rudder_sens = 100;
 
+bool ab412_coll_head_lastButtonState[60];
+bool ab412_coll_head_triggerState[60];
+long ab412_coll_head_sw_ts[60];
+byte ab412_coll_head_sw_mode[60];
+bool sw_mode_button_switches_parsed[60];
+bool sw_mode_toggle_switches_parsed[60];
+byte ab412_coll_head_switches_number = 0;
+
 bool b8stick_lastButtonState[] = {0,0,0,0,0,0};
 bool dev_b8stick = 0;
 bool dev_cyclic = 0;
@@ -93,6 +112,9 @@ bool dev_simple_collective = 0;
 bool dev_single_engine_collective = 0;
 bool dev_pedals = 0;
 bool dev_cessna_engine_and_prop_controls = 0;
+bool dev_ab412_coll_head = 0;
+bool SW_MODE_BUTTON = 0;
+bool SW_MODE_TOGGLE = 1;
 bool zero = 0;
 
 //ADS1115 filter variables
@@ -110,10 +132,12 @@ long total_rudder = 0;
 int ADC_RANGE = 0.5 + pow(2,ADS1115_RESOLUTION);
 
 void setup() 
-{
-  delay(5000);
+{ 
+  delay (2000);
+  Serial.begin(9600);
   simchair.begin();
   simchair_aux1.begin();
+  simchair_aux2.begin();
   //detect and configure connected peripherals
   Wire.begin(); 
   setup_b8stick();
@@ -122,6 +146,7 @@ void setup()
   setup_single_engine_collective();
   setup_pedals();
   setup_cessna_engine_and_prop_controls();
+  setup_ab412_coll_head();
   if (PTT_KEYBOARD_PRESS == 1)
   {
     Keyboard.begin();
@@ -155,6 +180,10 @@ void loop()
   if (dev_cessna_engine_and_prop_controls == 1)
   {
     poll_cessna_engine_and_prop_controls();    
+  }
+  if (dev_ab412_coll_head == 1)
+  {
+    poll_ab412_coll_head();    
   }
 }
 
@@ -263,6 +292,82 @@ void setup_cessna_engine_and_prop_controls()
   }
 }
 
+void setup_ab412_coll_head()
+{
+  Wire.beginTransmission(14);
+  int error = Wire.endTransmission();
+  if(error == 0)
+  {
+    simchair_aux2.setXAxisRange(0,255);
+    simchair_aux2.setYAxisRange(0,255);
+    simchair_aux2.setRxAxisRange(0,255);
+    simchair_aux2.setRyAxisRange(0,255);
+    simchair_aux2.setZAxisRange(0,255);
+    simchair_aux2.setRzAxisRange(0,255);
+    dev_ab412_coll_head = 1;
+    for (int i = 0; i < sizeof(ab412_coll_head_triggerState); i++)
+    {
+      ab412_coll_head_triggerState[i] = 0;
+    }
+    byte z = 0;
+    for (int i = 0; i < sizeof (sw_mode_button_switches); i++)
+    {
+      for (int k = z; k <= sw_mode_button_switches[i]; k++)
+      {
+        if (k == (sw_mode_button_switches[i] - 1))
+        {
+          sw_mode_button_switches_parsed[k] = 1;         
+        }
+        else 
+        {
+          sw_mode_button_switches_parsed[k] = 0;
+        }
+      }
+      z = sw_mode_button_switches[i];
+    }
+
+//    for (int p = 0; p < sizeof(sw_mode_button_switches_parsed); p++)
+//    {
+//      Serial.print(p);
+//      Serial.print(" ");
+//      Serial.println(sw_mode_button_switches_parsed[p]);
+//    }
+
+    z = 0;
+    for (int i = 0; i < sizeof (sw_mode_toggle_switches); i++)
+    {
+      for (int k = z; k <= sw_mode_toggle_switches[i]; k++)
+      {
+        if (k == (sw_mode_toggle_switches[i] - 1))
+        {
+          sw_mode_toggle_switches_parsed[k] = 1;         
+        }
+        else 
+        {
+          sw_mode_toggle_switches_parsed[k] = 0;
+        }
+      }
+      z = sw_mode_toggle_switches[i];
+    }
+    
+
+//    for (int p = 0; p < sizeof(sw_mode_button_switches_parsed); p++)
+//    {
+//      Serial.print(p);
+//      Serial.print(" ");
+//      Serial.println(sw_mode_toggle_switches_parsed[p]);
+//    }
+//    if ((sw_mode_toggle_switches[sizeof(sw_mode_toggle_switches) - 1]) < (sw_mode_toggle_switches[sizeof(sw_mode_toggle_switches) - 1]))
+//    {
+//      ab412_coll_head_switches_number = sw_mode_toggle_switches[sizeof(sw_mode_toggle_switches) - 1];
+//    }
+//    else
+//    {
+//      ab412_coll_head_switches_number = sw_mode_button_switches[sizeof(sw_mode_button_switches) - 1];
+//    }
+  }
+}
+
 void poll_b8stick()
 {
   //hot swap support for cyclic grip - a very useful feature
@@ -290,50 +395,7 @@ void poll_b8stick()
     }
     else
     {
-      int16_t hat_val;
-
-      if (ry > 145)
-      {
-        if (rx > 145)
-        {
-          hat_val = 45;
-        }
-        else if (rx < 105)
-        {
-          hat_val = 315;
-        }
-        else
-        {
-          hat_val = 0;
-        }
-      }
-      else if (ry < 105)
-      {
-        if (rx > 160)
-        {
-          hat_val = 135;
-        }
-        else if (rx < 105)
-        {
-          hat_val = 225;
-        }
-        else
-        {
-          hat_val = 180;
-        }
-      }
-      else if (rx > 145)
-      {
-        hat_val = 90;
-      }
-      else if (rx < 105)
-      {
-        hat_val = 270;
-      }
-      else
-      {
-        hat_val = JOYSTICK_HATSWITCH_RELEASE;
-      }
+      int16_t hat_val = parse_hat_sw(rx,ry);
       simchair.setHatSwitch(0,hat_val);
     }
     for (byte i=0; i<6; i++)
@@ -638,5 +700,172 @@ void poll_cessna_engine_and_prop_controls()
     simchair.setThrottle(throttle);
 }
 
+void poll_ab412_coll_head()
+{
+  uint8_t x,y,rx,ry,z,rz,b,s0,s1,s2;
+  
+  Wire.requestFrom(14, 7);
+  while (Wire.available()) 
+  { 
+    byte b1 = Wire.read(); // receive a byte as character
+    byte b2 = Wire.read();
+    byte b3 = Wire.read(); // receive a byte as character
+    byte b4 = Wire.read();
+    byte b5 = Wire.read(); // receive a byte as character
+    byte b6 = Wire.read();
+    byte b7 = Wire.read();
 
+    x = b2;
+    y = b1;
+    rx = b4;
+    ry = b3;
+    z = b5;
+    rz = b6;
+    b = b7;
+  }
+
+  Wire.requestFrom(13, 2);
+  while (Wire.available()) 
+  { 
+    byte b1 = Wire.read(); // receive a byte as character
+    byte b2 = Wire.read();
+    
+    s0 = b1;
+    s1 = b2;
+  }
+  
+  if (AB412_COLL_HEAD_ROTARY_POTS == 0)
+  {
+    z = 0;
+    rz = 0;
+  }
+  else if (AB412_COLL_HEAD_ROTARY_POTS == 1)
+  {
+    rz = 0;
+  }
+
+
+  int16_t hat0_val = parse_hat_sw(x,y);
+
+  simchair_aux2.setHatSwitch(0,hat0_val);
+  
+  int16_t hat1_val = parse_hat_sw(rx,ry);
+  simchair_aux1.setHatSwitch(0,hat1_val);
+  
+  ab412_coll_head_parse_switches(b,0,2);
+  ab412_coll_head_parse_switches(s0,2,0);
+  ab412_coll_head_parse_switches(s1,10,0);
+
+
+
+  simchair_aux2.setRxAxis(z);
+  simchair_aux2.setRyAxis(rz);
+  
+
+}
+
+void ab412_coll_head_parse_switches (int sw, int start_pos, int end_pos)
+{
+  if (end_pos == 0)
+  {
+    end_pos = 8 + start_pos;
+  }
+  for (byte i=start_pos; i<end_pos; i++)
+  {
+    bool v = (sw >> i-start_pos) & 1;
+    if (sw_mode_toggle_switches_parsed[i] == 1)
+    {
+      if (v != ab412_coll_head_lastButtonState[i])
+      {
+        simchair_aux2.setButton(i,v);
+        ab412_coll_head_lastButtonState[i] = v;
+        ab412_coll_head_sw_ts[i] = millis(); 
+  
+      }
+      else if ((v == 1) && (ab412_coll_head_triggerState[i] == 0))
+      {
+        long now = millis();
+        if ((now - ab412_coll_head_sw_ts[i]) > SW_HOLD_TIMEOUT)
+        {
+          simchair_aux2.setButton(i,!v);
+          ab412_coll_head_triggerState[i] = 1;
+        }
+      }
+      else if ((v == 0) && (ab412_coll_head_triggerState[i] == 1))
+      {
+        simchair_aux2.setButton(i,!v);
+        //ab412_coll_head_lastButtonState[i] = !v;
+        ab412_coll_head_sw_ts[i] = millis(); 
+        ab412_coll_head_triggerState[i] = 0; 
+      }
+      else if ((v == 0) && (ab412_coll_head_triggerState[i] == 0))
+      {
+        long now = millis();
+        if ((now - ab412_coll_head_sw_ts[i]) > SW_HOLD_TIMEOUT)
+        {
+          simchair_aux2.setButton(i,v);
+          ab412_coll_head_lastButtonState[i] = v;
+        }
+      }
+    }
+    else if (sw_mode_button_switches_parsed[i] == 1)
+    {
+      if (v != ab412_coll_head_lastButtonState[i])
+      {
+        simchair_aux2.setButton(i,v);
+        ab412_coll_head_lastButtonState[i] = v;
+      }
+    }
+  }
+}
+
+int parse_hat_sw (int x,int y)
+{
+  int hat_val;
+  
+  if (y > 145)
+  {
+    if (x > 145)
+    {
+      hat_val = 45;
+    }
+    else if (x < 105)
+    {
+      hat_val = 315;
+    }
+    else
+    {
+      hat_val = 0;
+    }
+  }
+  else if (y < 105)
+  {
+    if (x > 160)
+    {
+      hat_val = 135;
+    }
+    else if (x < 105)
+    {
+      hat_val = 225;
+    }
+    else
+    {
+      hat_val = 180;
+    }
+  }
+  else if (x > 145)
+  {
+    hat_val = 90;
+  }
+  else if (x < 105)
+  {
+    hat_val = 270;
+  }
+  else
+  {
+    hat_val = JOYSTICK_HATSWITCH_RELEASE;
+  }
+
+  return hat_val;
+}
 
