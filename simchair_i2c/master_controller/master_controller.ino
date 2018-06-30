@@ -97,8 +97,8 @@ byte coll_head_idle_stop_compat_throttle_down_keys[] = {KEY_PAGE_UP,'x'};
 
 // AB412 switch modes
 // write joystick button numbers here as they are displayed in joy.cpl in order of increment
-byte ab412_sw_mode_button_switches[] = {1,2,9,10,17}; // was 7 for DCS // active when being held
-byte ab412_sw_mode_toggle_switches[] = {}; //8 for DCS// 2-way switch mode: single button press when switch is turned to "on", one more press when switch is turned to "off"; something you can assign to a single key press; e.g. gear extend/retract
+byte ab412_sw_mode_button_switches[] = {1,2,5,9,10,17}; // was 7 for DCS // active when being held
+byte ab412_sw_mode_toggle_switches[] = {6};// 2-way switch mode: single button press when switch is turned to "on", one more press when switch is turned to "off"; something you can assign to a single key press; e.g. gear extend/retract
 byte ab412_sw_mode_selector_button_switches[] = {}; //3-WAY SWITCHES ONLY, FIRST BUTTON (WITH LOWER NUMBER) MUST BE GIVEN HERE; REMOVE THE SECOND BUTTON FROM EVERYWHERE ELSE FOR CORRECT OPERATION; when switch is on, button is held; when off, another button is pressed and held;
 byte ab412_sw_mode_selector_switches[] = {3,5,11,13,15}; //same as above, but buttons are pressed and released - e.g. landing light extend / hold / retract
 
@@ -730,7 +730,7 @@ uint16_t ab412_coll_head_idle_stop_compat_dcs (uint16_t throttle0, uint16_t thro
         if (diff < - COLL_HEAD_IDLE_STOP_COMPAT_TRESHOLD)
         {
           Keyboard.press(coll_head_idle_stop_compat_throttle_down_keys[i]);
-          delay(200);
+          delay(300);
           Keyboard.releaseAll();
         }
       }
@@ -740,7 +740,7 @@ uint16_t ab412_coll_head_idle_stop_compat_dcs (uint16_t throttle0, uint16_t thro
         if (diff > COLL_HEAD_IDLE_STOP_COMPAT_TRESHOLD)
         {
           Keyboard.press(coll_head_idle_stop_compat_throttle_up_keys[i]);
-          delay(100);
+          delay(300);
           Keyboard.releaseAll();
         }
         last_throttle_setting[i] = throttle[i];
