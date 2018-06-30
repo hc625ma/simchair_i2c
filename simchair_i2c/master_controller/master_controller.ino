@@ -15,8 +15,8 @@
 
 Joystick_ simchair(0x20, 0x04, 32, 1, true, true, true, true, true, false, true, true, false, false, false);
 Joystick_ simchair_aux1(0x21, 0x04, 32, 1, true, true, true, true, true, true, false, true, false, false, false);
-Joystick_ simchair_aux2(0x22, 0x04, 32, 1, false, false, false, true, true, false, false, false, false, false, false);
-//Joystick_ simchair(0x20,0x04,64, 0,true, true, true, true, true, true, true, true, true, true, true);
+Joystick_ simchair_aux2(0x22, 0x04, 96, 1, false, false, false, true, true, false, false, false, false, false, false);
+
 Adafruit_ADS1115 cyclic;
 Adafruit_ADS1115 pedals(0x4A);
 
@@ -72,16 +72,33 @@ Adafruit_ADS1115 pedals(0x4A);
 #define PTT_KEYBOARD_KEY 'q'
 char PTT_KEYBOARD_KEY_MOD = KEY_LEFT_CTRL;
 
+//AB412 collective head
 #define AB412_COLL_HEAD_ROTARY_POTS  1 // 0, 1 or 2
 #define AB412_COLL_HEAD_LEFT_HAT_DIRECTIONS 4
 #define AB412_COLL_HEAD_RIGHT_HAT_DIRECTIONS 8
 
-#define SW_HOLD_TIMEOUT 100
+#define AB412_COLL_HEAD_SW_HOLD_TIMEOUT 200
+
+
+#define AB412_COLL_HEAD_MODE_SWITCH 7 // 3-way fixed switch only; first (lower number) switch button must be defined there; remove it and next button from everywhere else; set to 0 to disable MODE SWITCH
+
+//for sims that do not support axis movement below idle stop, sends the throttle up/down key when holding idle stop and rotating throttle simultaneously
+//not 100% realistic, yet better than nothing
+#define AB412_COLL_HEAD_IDLE_STOP_COMPAT_MODE 1 // ASSIGN IDLE STOP IN_GAME WHILE IN MODE 0 (MODE SWITCH CENTERED)!
+#define AB412_COLL_HEAD_IDLE_STOP_COMPAT_PROFILE "DCS_HUEY" //the only option for now
+
+byte ab412_coll_head_idle_stop_buttons[] = {17}; // put 1 or 2 buttons here as seen in joy.cpl; these keys MUST be in the ab412_sw_mode_button_switches[] array below
+byte coll_head_idle_stop_compat_throttle_up_keys[] = {KEY_PAGE_DOWN,'z'};
+byte coll_head_idle_stop_compat_throttle_down_keys[] = {KEY_PAGE_UP,'x'};
+
+#define COLL_HEAD_IDLE_STOP_COMPAT_TRESHOLD 5 //
+#define SINGLE_ENGINE_COLLECTIVE_IDLE_STOP_AXIS_VAL 70 //find it out with uncommenting Serial.print(throttle) in poll_single_engine_collective sub, see below
+
 
 // AB412 switch modes
 // write joystick button numbers here as they are displayed in joy.cpl in order of increment
-byte ab412_sw_mode_button_switches[] = {1, 2,7,9, 10, 17}; // active when being held
-byte ab412_sw_mode_toggle_switches[] = {8}; // 2-way switch mode: single button press when switch is turned to "on", one more press when switch is turned to "off"; something you can assign to a single key press; e.g. gear extend/retract
+byte ab412_sw_mode_button_switches[] = {1,2,9,10,17}; // was 7 for DCS // active when being held
+byte ab412_sw_mode_toggle_switches[] = {}; //8 for DCS// 2-way switch mode: single button press when switch is turned to "on", one more press when switch is turned to "off"; something you can assign to a single key press; e.g. gear extend/retract
 byte ab412_sw_mode_selector_button_switches[] = {}; //3-WAY SWITCHES ONLY, FIRST BUTTON (WITH LOWER NUMBER) MUST BE GIVEN HERE; REMOVE THE SECOND BUTTON FROM EVERYWHERE ELSE FOR CORRECT OPERATION; when switch is on, button is held; when off, another button is pressed and held;
 byte ab412_sw_mode_selector_switches[] = {3,5,11,13,15}; //same as above, but buttons are pressed and released - e.g. landing light extend / hold / retract
 
@@ -109,6 +126,11 @@ bool ab412_sw_mode_button_switches_parsed[60];
 bool ab412_sw_mode_toggle_switches_parsed[60];
 bool ab412_sw_mode_selector_button_switches_parsed[60];
 bool ab412_sw_mode_selector_switches_parsed[60];
+byte ab412_mode_sw_position = 0;
+bool mode_sw_pos_0 = 0; // buffer that stores the current value of a 1st position in a mode switch
+uint16_t last_throttle_setting[] = {0,0};
+bool idle_stop_pressed[] = {0,0};
+bool throttle_idle_cutoff[] = {1,1}; //we presume engines are off on startup
 
 
 bool b8stick_lastButtonState[] = {0, 0, 0, 0, 0, 0};
@@ -280,7 +302,7 @@ void setup_single_engine_collective()
   if (error == 0)
   {
     simchair.setZAxisRange(0, 1023);
-    simchair.setThrottleRange(0, 1023);
+    simchair.setThrottleRange(SINGLE_ENGINE_COLLECTIVE_IDLE_STOP_AXIS_VAL, 1023);
     dev_single_engine_collective = 1;
   }
 }
@@ -655,13 +677,76 @@ void poll_single_engine_collective()
     z = (z << 8) | b2;
     throttle = b3;
     throttle = (throttle << 8) | b4;
-
   }
-
+  // uncomment the next line and turn your throttle to idle stop position to see SINGLE_ENGINE_COLLECTIVE_IDLE_STOP_AXIS_VAL value 
+  //Serial.println(throttle);
+  if ((AB412_COLL_HEAD_IDLE_STOP_COMPAT_MODE == 1) && (ab412_mode_sw_position == 0))
+  {
+    if (AB412_COLL_HEAD_IDLE_STOP_COMPAT_PROFILE == "DCS_HUEY")
+    {
+      ab412_coll_head_idle_stop_compat_dcs (throttle,0,SINGLE_ENGINE_COLLECTIVE_IDLE_STOP_AXIS_VAL,0);
+      last_throttle_setting[0] = throttle;
+      if (throttle < SINGLE_ENGINE_COLLECTIVE_IDLE_STOP_AXIS_VAL)
+      {
+        throttle = SINGLE_ENGINE_COLLECTIVE_IDLE_STOP_AXIS_VAL;
+      }
+      else
+      {
+        throttle_idle_cutoff[0] = 0; 
+      }
+      if ((idle_stop_pressed[0] != 1) && (throttle_idle_cutoff[0] == 0))
+      {
+        simchair.setThrottle(throttle);
+      }
+      else if (idle_stop_pressed[0] == 1)
+      {
+        throttle_idle_cutoff[0] = 1; 
+      }   
+    }
+    else
+    {
+      //other profiles
+      simchair.setThrottle(throttle);
+    }
+  }
+  else
+  {
+    simchair.setThrottle(throttle);
+  } 
   simchair.setZAxis(z);
-  simchair.setThrottle(throttle);
+  
 }
 
+
+uint16_t ab412_coll_head_idle_stop_compat_dcs (uint16_t throttle0, uint16_t throttle1, uint16_t idle_val0, uint16_t idle_val1)
+{
+  uint16_t throttle[] = {throttle0,throttle1};
+  uint16_t idle_val[] = {idle_val0,idle_val1};
+  for (byte i = 0; i < sizeof(ab412_coll_head_idle_stop_buttons);i++)
+    {
+      if ((throttle[i] < idle_val[i]) && (throttle_idle_cutoff[i] == 1))
+      {
+        int diff = last_throttle_setting[i] - throttle[i];
+        if (diff < - COLL_HEAD_IDLE_STOP_COMPAT_TRESHOLD)
+        {
+          Keyboard.press(coll_head_idle_stop_compat_throttle_down_keys[i]);
+          delay(200);
+          Keyboard.releaseAll();
+        }
+      }
+      if (idle_stop_pressed[i] == 1)
+      {
+        int diff = last_throttle_setting[i] - throttle[i];
+        if (diff > COLL_HEAD_IDLE_STOP_COMPAT_TRESHOLD)
+        {
+          Keyboard.press(coll_head_idle_stop_compat_throttle_up_keys[i]);
+          delay(100);
+          Keyboard.releaseAll();
+        }
+        last_throttle_setting[i] = throttle[i];
+      }
+    }
+}
 void poll_cessna_engine_and_prop_controls()
 {
   uint16_t rx, ry, throttle;
@@ -760,14 +845,52 @@ void ab412_coll_head_parse_switches (int sw, int start_pos, int end_pos)
   for (byte i = start_pos; i < end_pos; i++)
   {
     bool v = (sw >> i - start_pos) & 1;
+ //   if (AB412_COLL_HEAD_MODE_SWITCH_ENABLED == 1)
+    //{
+      if (i == AB412_COLL_HEAD_MODE_SWITCH - 1)
+      {
+       // Serial.println("BANG");
+        if (v == 1)
+        {
+          ab412_mode_sw_position = 1;
+          mode_sw_pos_0 = 1;
+        }
+        else
+        {
+          mode_sw_pos_0 = 0;
+        }
+      }
+      else if (i == AB412_COLL_HEAD_MODE_SWITCH)
+      {
+        if (v == 1)
+        {
+          ab412_mode_sw_position = 2;
+        }
+        else if (v == mode_sw_pos_0)
+        {
+          ab412_mode_sw_position = 0;
+        }
+      }
+    //}
     if (ab412_sw_mode_toggle_switches_parsed[i] == 1)
     {
       if (v != ab412_coll_head_lastButtonState[i])
-      {     
+      { 
+        if (AB412_COLL_HEAD_IDLE_STOP_COMPAT_MODE == 1)
+        {
+          for (byte j = 0; j < sizeof(ab412_coll_head_idle_stop_buttons); j++)
+          {
+            if (i == ab412_coll_head_idle_stop_buttons[j] - 1)
+            {
+              idle_stop_pressed[j] = v;           
+            }
+          }
+        }    
         long now = millis();
-        if ((now - ab412_coll_head_sw_ts[i]) > SW_HOLD_TIMEOUT)
+        if ((now - ab412_coll_head_sw_ts[i]) > AB412_COLL_HEAD_SW_HOLD_TIMEOUT)
         {
           simchair_aux2.setButton(i, v);
+          //set_button_mode_aware(i,v);
           ab412_coll_head_lastButtonState[i] = v;
           ab412_coll_head_sw_ts[i] = millis();
         }        
@@ -775,9 +898,10 @@ void ab412_coll_head_parse_switches (int sw, int start_pos, int end_pos)
       else if ((v == 1) && (ab412_coll_head_triggerState[i] == 0))
       {
         long now = millis();
-        if ((now - ab412_coll_head_sw_ts[i]) > SW_HOLD_TIMEOUT)
+        if ((now - ab412_coll_head_sw_ts[i]) > AB412_COLL_HEAD_SW_HOLD_TIMEOUT)
         {
           simchair_aux2.setButton(i, !v);
+          //set_button_mode_aware(i,!v);
           ab412_coll_head_triggerState[i] = 1;
         }
       }
@@ -785,6 +909,7 @@ void ab412_coll_head_parse_switches (int sw, int start_pos, int end_pos)
       {
         long now = millis();
         simchair_aux2.setButton(i, !v);
+        //set_button_mode_aware(i,!v);
         ab412_coll_head_triggerState[i] = 0;
         ab412_coll_head_sw_ts[i] = millis();
         ab412_coll_head_lastButtonState[i] = !v;
@@ -794,7 +919,18 @@ void ab412_coll_head_parse_switches (int sw, int start_pos, int end_pos)
     {
       if (v != ab412_coll_head_lastButtonState[i])
       {
-        simchair_aux2.setButton(i, v);
+        if (AB412_COLL_HEAD_IDLE_STOP_COMPAT_MODE == 1)
+        {
+          for (byte j = 0; j < sizeof(ab412_coll_head_idle_stop_buttons); j++)
+          {
+            if (i == ab412_coll_head_idle_stop_buttons[j] - 1)
+            {
+              idle_stop_pressed[j] = v;  
+            }
+          }
+        }
+        //simchair_aux2.setButton(i, v);
+        set_button_mode_aware(i,v);
         ab412_coll_head_lastButtonState[i] = v;
       }
     }
@@ -802,9 +938,11 @@ void ab412_coll_head_parse_switches (int sw, int start_pos, int end_pos)
     {
       if (v != ab412_coll_head_lastButtonState[i])
       {
-        simchair_aux2.setButton(i, v);
+        //simchair_aux2.setButton(i, v);
+        set_button_mode_aware(i,v);
         ab412_coll_head_lastButtonState[i] = v;
-        simchair_aux2.setButton(32 - i, !v);
+        //simchair_aux2.setButton(32 - i, !v);
+        set_button_mode_aware(32 - i, !v);
         ab412_coll_head_lastButtonState[32 - i] = !v;
         ab412_coll_head_triggerState[32 - i] = 0;
       }
@@ -813,9 +951,11 @@ void ab412_coll_head_parse_switches (int sw, int start_pos, int end_pos)
     {
       if (v != ab412_coll_head_lastButtonState[i])
       {
-        simchair_aux2.setButton(i, v);
+        //simchair_aux2.setButton(i, v);
+        set_button_mode_aware(i,v);
         ab412_coll_head_lastButtonState[i] = v;
-        simchair_aux2.setButton(32 - i + 1, !v);
+        //simchair_aux2.setButton(32 - i + 1, !v);
+        set_button_mode_aware(32 - i + 1, !v);
         ab412_coll_head_lastButtonState[32 - i + 1] = !v;
         ab412_coll_head_triggerState[32 - i + 1] = 0;
       }
@@ -826,8 +966,10 @@ void ab412_coll_head_parse_switches (int sw, int start_pos, int end_pos)
       {
         //Serial.println("BANG");
         simchair_aux2.setButton(i, v);
+        //set_button_mode_aware(i, v);
         ab412_coll_head_lastButtonState[i] = v;
         simchair_aux2.setButton(32 - i, !v);
+        //set_button_mode_aware(32 - i, !v);
         ab412_coll_head_lastButtonState[32 - i] = !v;
         //ab412_coll_head_triggerState[32 - i] = 0;
         ab412_coll_head_sw_ts[i] = millis();
@@ -836,22 +978,25 @@ void ab412_coll_head_parse_switches (int sw, int start_pos, int end_pos)
       else if ((v == 1) && (ab412_coll_head_triggerState[i] == 0))
       {
         long now = millis();
-        if ((now - ab412_coll_head_sw_ts[i]) > SW_HOLD_TIMEOUT)
+        if ((now - ab412_coll_head_sw_ts[i]) > AB412_COLL_HEAD_SW_HOLD_TIMEOUT)
         {
           simchair_aux2.setButton(i, !v);
+          //set_button_mode_aware(i, !v);
           ab412_coll_head_triggerState[i] = 1;
         }
       }
       else if ((v == 0) && (ab412_coll_head_triggerState[i] == 1))
       {
         long now = millis();
-        if ((now - ab412_coll_head_sw_ts[i]) > SW_HOLD_TIMEOUT)
+        if ((now - ab412_coll_head_sw_ts[i]) > AB412_COLL_HEAD_SW_HOLD_TIMEOUT)
         {
           simchair_aux2.setButton(i, v);
+          //set_button_mode_aware(i,v);
           ab412_coll_head_lastButtonState[i] = v;
           ab412_coll_head_triggerState[i] = 0;
 
           simchair_aux2.setButton(32 - i, v);
+          //set_button_mode_aware(32 - i, v);
           ab412_coll_head_lastButtonState[32 - i] = v;
           ab412_coll_head_triggerState[32 - i] = 0;
         }
@@ -863,8 +1008,10 @@ void ab412_coll_head_parse_switches (int sw, int start_pos, int end_pos)
       if (v != ab412_coll_head_lastButtonState[i])
       {
         simchair_aux2.setButton(i, v);
+        //set_button_mode_aware(i, v);
         ab412_coll_head_lastButtonState[i] = v;
         simchair_aux2.setButton(32 - i + 1, !v);
+        //set_button_mode_aware(32 - i + 1,!v);
         ab412_coll_head_lastButtonState[32 - i + 1] = !v;
         ab412_coll_head_sw_ts[i] = millis();
         ab412_coll_head_sw_ts[32 - i + 1] = millis();
@@ -872,28 +1019,48 @@ void ab412_coll_head_parse_switches (int sw, int start_pos, int end_pos)
       else if ((v == 1) && (ab412_coll_head_triggerState[i] == 0))
       {
         long now = millis();
-        if ((now - ab412_coll_head_sw_ts[i]) > SW_HOLD_TIMEOUT)
+        if ((now - ab412_coll_head_sw_ts[i]) > AB412_COLL_HEAD_SW_HOLD_TIMEOUT)
         {
           simchair_aux2.setButton(i, !v);
+          //set_button_mode_aware(i, !v);
           ab412_coll_head_triggerState[i] = 1;
         }
       }
       else if ((v == 0) && (ab412_coll_head_triggerState[i] == 1))
       {
         long now = millis();
-        if ((now - ab412_coll_head_sw_ts[i]) > SW_HOLD_TIMEOUT)
+        if ((now - ab412_coll_head_sw_ts[i]) > AB412_COLL_HEAD_SW_HOLD_TIMEOUT)
         {
           simchair_aux2.setButton(i, v);
+          //set_button_mode_aware(i, v);
           ab412_coll_head_lastButtonState[i] = v;
           ab412_coll_head_triggerState[i] = 0;
 
           simchair_aux2.setButton(32 - i + 1, v);
+          //set_button_mode_aware(32 - i + 1, v);
           ab412_coll_head_lastButtonState[32 - i + 1] = v;
           ab412_coll_head_triggerState[32 - i + 1] = 0;
         }
       }
     }
   }
+}
+
+void set_button_mode_aware (int i, int v)
+{
+  if (ab412_mode_sw_position == 0)
+  {
+    simchair_aux2.setButton(i, v);
+  }
+  else if (ab412_mode_sw_position == 1)
+  {
+    simchair_aux2.setButton(32 + i, v);
+  }
+  else if (ab412_mode_sw_position == 2)
+  {
+    simchair_aux2.setButton(64 + i, v);
+  }
+
 }
 
 int parse_hat_sw (int x, int y, byte dirs)
