@@ -127,6 +127,7 @@ bool ab412_sw_mode_toggle_switches_parsed[60];
 bool ab412_sw_mode_selector_button_switches_parsed[60];
 bool ab412_sw_mode_selector_switches_parsed[60];
 byte ab412_mode_sw_position = 0;
+uint16_t min_throttle_val[] = {0,0};
 bool mode_sw_pos_0 = 0; // buffer that stores the current value of a 1st position in a mode switch
 uint16_t last_throttle_setting[] = {0,0};
 bool idle_stop_pressed[] = {0,0};
@@ -684,7 +685,12 @@ void poll_single_engine_collective()
   {
     if (AB412_COLL_HEAD_IDLE_STOP_COMPAT_PROFILE == "DCS_HUEY")
     {
-      simchair.setThrottleRange(SINGLE_ENGINE_COLLECTIVE_IDLE_STOP_AXIS_VAL, 1023);
+      if (min_throttle_val[0] != SINGLE_ENGINE_COLLECTIVE_IDLE_STOP_AXIS_VAL)
+      {
+         simchair.setThrottleRange(SINGLE_ENGINE_COLLECTIVE_IDLE_STOP_AXIS_VAL, 1023);
+         min_throttle_val[0] = SINGLE_ENGINE_COLLECTIVE_IDLE_STOP_AXIS_VAL;
+      }
+     
       ab412_coll_head_idle_stop_compat_dcs (throttle,0,SINGLE_ENGINE_COLLECTIVE_IDLE_STOP_AXIS_VAL,0);
       last_throttle_setting[0] = throttle;
       if (throttle < SINGLE_ENGINE_COLLECTIVE_IDLE_STOP_AXIS_VAL)
@@ -712,7 +718,11 @@ void poll_single_engine_collective()
   }
   else
   {
-    simchair.setThrottleRange(0, 1023);
+    if (min_throttle_val[0] != 0)
+    {
+      simchair.setThrottleRange(0, 1023);
+      min_throttle_val[0] = 0;
+    }
     simchair.setThrottle(throttle);
   } 
   simchair.setZAxis(z);
