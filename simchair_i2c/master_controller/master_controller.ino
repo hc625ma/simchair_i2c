@@ -302,7 +302,7 @@ void setup_single_engine_collective()
   if (error == 0)
   {
     simchair.setZAxisRange(0, 1023);
-    simchair.setThrottleRange(SINGLE_ENGINE_COLLECTIVE_IDLE_STOP_AXIS_VAL, 1023);
+    simchair.setThrottleRange(0,1023);//SINGLE_ENGINE_COLLECTIVE_IDLE_STOP_AXIS_VAL, 1023);
     dev_single_engine_collective = 1;
   }
 }
@@ -684,6 +684,7 @@ void poll_single_engine_collective()
   {
     if (AB412_COLL_HEAD_IDLE_STOP_COMPAT_PROFILE == "DCS_HUEY")
     {
+      simchair.setThrottleRange(SINGLE_ENGINE_COLLECTIVE_IDLE_STOP_AXIS_VAL, 1023);
       ab412_coll_head_idle_stop_compat_dcs (throttle,0,SINGLE_ENGINE_COLLECTIVE_IDLE_STOP_AXIS_VAL,0);
       last_throttle_setting[0] = throttle;
       if (throttle < SINGLE_ENGINE_COLLECTIVE_IDLE_STOP_AXIS_VAL)
@@ -711,6 +712,7 @@ void poll_single_engine_collective()
   }
   else
   {
+    simchair.setThrottleRange(0, 1023);
     simchair.setThrottle(throttle);
   } 
   simchair.setZAxis(z);
