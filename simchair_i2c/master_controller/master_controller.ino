@@ -83,7 +83,7 @@ char PTT_KEYBOARD_KEY_MOD = KEY_LEFT_CTRL;
 //#define HUEY_COLL_HEAD_SW_HOLD_TIMEOUT 200
 
 #define COLLECTIVE_HOLD_ENABLED 1 // this will hold your collective in place until you press the button again and return the lever to the initial position
-#define HUEY_HEAD_COLLECTIVE_HOLD_BUTTON 2
+#define HUEY_HEAD_COLLECTIVE_HOLD_BUTTON 3
 #define AB412_HEAD_COLLECTIVE_HOLD_BUTTON 2
 
 #define AB412_COLL_HEAD_MODE_SWITCH 7 // 3-way fixed switch only; first (lower number) switch button must be defined there; remove it and next button from everywhere else; set to 0 to disable MODE SWITCH
@@ -111,9 +111,9 @@ byte ab412_sw_mode_toggle_switches[] = {6};// 2-way switch mode: single button p
 byte ab412_sw_mode_selector_button_switches[] = {}; //3-WAY SWITCHES ONLY, FIRST BUTTON (WITH LOWER NUMBER) MUST BE GIVEN HERE; REMOVE THE SECOND BUTTON FROM EVERYWHERE ELSE FOR CORRECT OPERATION; when switch is on, button is held; when off, another button is pressed and held;
 byte ab412_sw_mode_selector_switches[] = {3,5,11,13,15}; //same as above, but buttons are pressed and released - e.g. landing light extend / hold / retract
 
-byte huey_sw_mode_button_switches[] = {1,2,3,4,5,7,8,9,10,11,12,13};// active when being held
+byte huey_sw_mode_button_switches[] = {3,4,5,7,8,9,12,13};// active when being held
 byte huey_sw_mode_toggle_switches[] = {6};// 2-way switch mode: single button press when switch is turned to "on", one more press when switch is turned to "off"; something you can assign to a single key press; e.g. gear extend/retract
-byte huey_sw_mode_selector_button_switches[] = {}; //3-WAY SWITCHES ONLY, FIRST BUTTON (WITH LOWER NUMBER) MUST BE GIVEN HERE; REMOVE THE SECOND BUTTON FROM EVERYWHERE ELSE FOR CORRECT OPERATION; when switch is on, button is held; when off, another button is pressed and held;
+byte huey_sw_mode_selector_button_switches[] = {1,10}; //3-WAY SWITCHES ONLY, FIRST BUTTON (WITH LOWER NUMBER) MUST BE GIVEN HERE; REMOVE THE SECOND BUTTON FROM EVERYWHERE ELSE FOR CORRECT OPERATION; when switch is on, button is held; when off, another button is pressed and held;
 byte huey_sw_mode_selector_switches[] = {}; //same as above, but buttons are pressed and released - e.g. landing light extend / hold / retract
 
 
@@ -1298,10 +1298,10 @@ void coll_head_parse_switches (int sw, int start_pos, int end_pos)
         //simchair_aux2.setButton(i, v);
         set_button_mode_aware(i,v);
         coll_head_lastButtonState[i] = v;
-        //simchair_aux2.setButton(32 - i, !v);
-        set_button_mode_aware(32 - i, !v);
-        coll_head_lastButtonState[32 - i] = !v;
-        coll_head_triggerState[32 - i] = 0;
+        //simchair_aux2.setButton(33 - i, !v);
+        set_button_mode_aware(31 - i, !v);
+        coll_head_lastButtonState[33 - i] = !v;
+        coll_head_triggerState[31 - i] = 0;
       }
     }
     else if (coll_head_sw_mode_selector_button_switches_parsed[i - 1] == 1)
@@ -1312,9 +1312,9 @@ void coll_head_parse_switches (int sw, int start_pos, int end_pos)
         set_button_mode_aware(i,v);
         coll_head_lastButtonState[i] = v;
         //simchair_aux2.setButton(32 - i + 1, !v);
-        set_button_mode_aware(32 - i + 1, !v);
-        coll_head_lastButtonState[32 - i + 1] = !v;
-        coll_head_triggerState[32 - i + 1] = 0;
+        set_button_mode_aware(31 - i + 1, !v);
+        coll_head_lastButtonState[31 - i + 1] = !v;
+        coll_head_triggerState[31 - i + 1] = 0;
       }
     }
     else if (coll_head_sw_mode_selector_switches_parsed[i] == 1)
@@ -1325,12 +1325,12 @@ void coll_head_parse_switches (int sw, int start_pos, int end_pos)
         simchair_aux2.setButton(i, v);
         //set_button_mode_aware(i, v);
         coll_head_lastButtonState[i] = v;
-        simchair_aux2.setButton(32 - i, !v);
+        simchair_aux2.setButton(31 - i, !v);
         //set_button_mode_aware(32 - i, !v);
-        coll_head_lastButtonState[32 - i] = !v;
+        coll_head_lastButtonState[31 - i] = !v;
         //ab412_coll_head_triggerState[32 - i] = 0;
         coll_head_sw_ts[i] = millis();
-        coll_head_sw_ts[32 - i] = millis();
+        coll_head_sw_ts[31 - i] = millis();
       }
       else if ((v == 1) && (coll_head_triggerState[i] == 0))
       {
@@ -1352,10 +1352,10 @@ void coll_head_parse_switches (int sw, int start_pos, int end_pos)
           coll_head_lastButtonState[i] = v;
           coll_head_triggerState[i] = 0;
 
-          simchair_aux2.setButton(32 - i, v);
+          simchair_aux2.setButton(31 - i, v);
           //set_button_mode_aware(32 - i, v);
-          coll_head_lastButtonState[32 - i] = v;
-          coll_head_triggerState[32 - i] = 0;
+          coll_head_lastButtonState[31 - i] = v;
+          coll_head_triggerState[31 - i] = 0;
         }
       }
 
@@ -1367,11 +1367,11 @@ void coll_head_parse_switches (int sw, int start_pos, int end_pos)
         simchair_aux2.setButton(i, v);
         //set_button_mode_aware(i, v);
         coll_head_lastButtonState[i] = v;
-        simchair_aux2.setButton(32 - i + 1, !v);
+        simchair_aux2.setButton(31 - i + 1, !v);
         //set_button_mode_aware(32 - i + 1,!v);
-        coll_head_lastButtonState[32 - i + 1] = !v;
+        coll_head_lastButtonState[31 - i + 1] = !v;
         coll_head_sw_ts[i] = millis();
-        coll_head_sw_ts[32 - i + 1] = millis();
+        coll_head_sw_ts[31 - i + 1] = millis();
       }
       else if ((v == 1) && (coll_head_triggerState[i] == 0))
       {
@@ -1393,10 +1393,10 @@ void coll_head_parse_switches (int sw, int start_pos, int end_pos)
           coll_head_lastButtonState[i] = v;
           coll_head_triggerState[i] = 0;
 
-          simchair_aux2.setButton(32 - i + 1, v);
+          simchair_aux2.setButton(31 - i + 1, v);
           //set_button_mode_aware(32 - i + 1, v);
-          coll_head_lastButtonState[32 - i + 1] = v;
-          coll_head_triggerState[32 - i + 1] = 0;
+          coll_head_lastButtonState[31 - i + 1] = v;
+          coll_head_triggerState[31 - i + 1] = 0;
         }
       }
     }
@@ -1411,11 +1411,11 @@ void set_button_mode_aware (int i, int v)
   }
   else if (coll_head_mode_sw_position == 1)
   {
-    simchair_aux2.setButton(32 + i, v);
+    simchair_aux2.setButton(31 + i, v);
   }
   else if (coll_head_mode_sw_position == 2)
   {
-    simchair_aux2.setButton(64 + i, v);
+    simchair_aux2.setButton(63 + i, v);
   }
 
 }
