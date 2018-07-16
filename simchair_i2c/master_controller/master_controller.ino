@@ -111,7 +111,7 @@ byte ab412_sw_mode_toggle_switches[] = {6};// 2-way switch mode: single button p
 byte ab412_sw_mode_selector_button_switches[] = {}; //3-WAY SWITCHES ONLY, FIRST BUTTON (WITH LOWER NUMBER) MUST BE GIVEN HERE; REMOVE THE SECOND BUTTON FROM EVERYWHERE ELSE FOR CORRECT OPERATION; when switch is on, button is held; when off, another button is pressed and held;
 byte ab412_sw_mode_selector_switches[] = {3,5,11,13,15}; //same as above, but buttons are pressed and released - e.g. landing light extend / hold / retract
 
-byte huey_sw_mode_button_switches[] = {3,4,5,7,8,9,12,13};// active when being held
+byte huey_sw_mode_button_switches[] = {7,8,9,12,13};// active when being held
 byte huey_sw_mode_toggle_switches[] = {6};// 2-way switch mode: single button press when switch is turned to "on", one more press when switch is turned to "off"; something you can assign to a single key press; e.g. gear extend/retract
 byte huey_sw_mode_selector_button_switches[] = {1,10}; //3-WAY SWITCHES ONLY, FIRST BUTTON (WITH LOWER NUMBER) MUST BE GIVEN HERE; REMOVE THE SECOND BUTTON FROM EVERYWHERE ELSE FOR CORRECT OPERATION; when switch is on, button is held; when off, another button is pressed and held;
 byte huey_sw_mode_selector_switches[] = {}; //same as above, but buttons are pressed and released - e.g. landing light extend / hold / retract
@@ -1411,11 +1411,11 @@ void set_button_mode_aware (int i, int v)
   }
   else if (coll_head_mode_sw_position == 1)
   {
-    simchair_aux2.setButton(31 + i, v);
+    simchair_aux2.setButton(32 + i, v);
   }
   else if (coll_head_mode_sw_position == 2)
   {
-    simchair_aux2.setButton(63 + i, v);
+    simchair_aux2.setButton(64 + i, v);
   }
 
 }
