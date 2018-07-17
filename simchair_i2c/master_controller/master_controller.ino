@@ -51,9 +51,10 @@ Adafruit_ADS1115 pedals(0x4A);
 #define SENS_SWITCH_BUTTON 0 //0 is the first button
 
 #define B8_HAT_SWITCH_MODE "ATT_TRIM" //"ATT_TRIM" or "HAT", it will adjust the position of the trimmed cyclic with hat(Bell 407-style)
-#define ATT_TRIM_STEP 0.5 //IN PERCENTS OF AXIS LENGHT
+#define ATT_TRIM_STEP_Y 0.02 //IN PERCENTS OF AXIS LENGHT
+#define ATT_TRIM_STEP_X 0.05 //IN PERCENTS OF AXIS LENGHT
 #define INVERT_HAT_TRIM_X 0
-#define INVERT_HAT_TRIM_Y 0
+#define INVERT_HAT_TRIM_Y 1
 
 // sens. switch behavior available options: "FORCE_TRIM" or "TOGGLE"
 // FORCE_TRIM will reduce sensitivity to CYCLIC_SENS and RUDDER_SENS
@@ -1514,17 +1515,18 @@ int parse_hat_trim (int x, int y, bool invert_x, bool invert_y)
   if (force_trim_position_set == 1)
   {
     int one_percent_range = ADC_RANGE / 100;
-    int adj_step = one_percent_range * ATT_TRIM_STEP;
+    int adj_step_x = one_percent_range * ATT_TRIM_STEP_X;
+    int adj_step_y = one_percent_range * ATT_TRIM_STEP_Y;
     if (y > 145)
     {
       //hat up
       if (invert_y == 0)
       {
-        force_trim_y = force_trim_y + adj_step;
+        force_trim_y = force_trim_y + adj_step_y;
       }
       else
       {
-        force_trim_y = force_trim_y - adj_step;
+        force_trim_y = force_trim_y - adj_step_y;
       }
     }
     else if (y < 105)
@@ -1532,11 +1534,11 @@ int parse_hat_trim (int x, int y, bool invert_x, bool invert_y)
       //hat down
       if (invert_y == 0)
       {
-        force_trim_y = force_trim_y - adj_step;
+        force_trim_y = force_trim_y - adj_step_y;
       }
       else
       {
-        force_trim_y = force_trim_y + adj_step;
+        force_trim_y = force_trim_y + adj_step_y;
       }
     }
     else if (x > 145)
@@ -1544,11 +1546,11 @@ int parse_hat_trim (int x, int y, bool invert_x, bool invert_y)
       //hat right
       if (invert_x == 0)
       {
-        force_trim_x = force_trim_x + adj_step;
+        force_trim_x = force_trim_x + adj_step_x;
       }
       else
       {
-        force_trim_x = force_trim_x - adj_step;
+        force_trim_x = force_trim_x - adj_step_x;
       }
     }
     else if (x < 105)
@@ -1556,11 +1558,11 @@ int parse_hat_trim (int x, int y, bool invert_x, bool invert_y)
       //hat left
       if (invert_x == 0)
       {
-        force_trim_x = force_trim_x - adj_step;
+        force_trim_x = force_trim_x - adj_step_x;
       }
       else
       {
-        force_trim_x = force_trim_x + adj_step;
+        force_trim_x = force_trim_x + adj_step_x;
       }
     }
 //
