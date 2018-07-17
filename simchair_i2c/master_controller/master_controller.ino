@@ -50,6 +50,11 @@ Adafruit_ADS1115 pedals(0x4A);
 #define SENS_SWITCH_ENABLED 1
 #define SENS_SWITCH_BUTTON 0 //0 is the first button
 
+#define B8_HAT_SWITCH_MODE "ATT_TRIM" //"ATT_TRIM" or "HAT", it will adjust the position of the trimmed cyclic with hat(Bell 407-style)
+#define ATT_TRIM_STEP 0.5 //IN PERCENTS OF AXIS LENGHT
+#define INVERT_HAT_TRIM_X 0
+#define INVERT_HAT_TRIM_Y 0
+
 // sens. switch behavior available options: "FORCE_TRIM" or "TOGGLE"
 // FORCE_TRIM will reduce sensitivity to CYCLIC_SENS and RUDDER_SENS
 // while SENSITIVITY_SWITCH_BUTTON is pressed, "TOGGLE" will act
@@ -487,8 +492,16 @@ void poll_b8stick()
     }
     else
     {
-      int16_t hat_val = parse_hat_sw(rx, ry, 8);
-      simchair.setHatSwitch(0, hat_val);
+      if (B8_HAT_SWITCH_MODE == "HAT")
+      {
+        int16_t hat_val = parse_hat_sw(rx, ry, 8);
+        simchair.setHatSwitch(0, hat_val);
+      }
+      else
+      {
+        int16_t hat_val = parse_hat_trim(rx, ry, INVERT_HAT_TRIM_X, INVERT_HAT_TRIM_Y);
+      }
+      
     }
     for (byte i = 0; i < 6; i++)
     {
@@ -1492,5 +1505,74 @@ int parse_hat_sw (int x, int y, byte dirs)
     }
   }
   return hat_val;
+}
+
+int parse_hat_trim (int x, int y, bool invert_x, bool invert_y)
+{
+  int hat_val;
+
+  if (force_trim_position_set == 1)
+  {
+    int one_percent_range = ADC_RANGE / 100;
+    int adj_step = one_percent_range * ATT_TRIM_STEP;
+    if (y > 145)
+    {
+      //hat up
+      if (invert_y == 0)
+      {
+        force_trim_y = force_trim_y + adj_step;
+      }
+      else
+      {
+        force_trim_y = force_trim_y - adj_step;
+      }
+    }
+    else if (y < 105)
+    {
+      //hat down
+      if (invert_y == 0)
+      {
+        force_trim_y = force_trim_y - adj_step;
+      }
+      else
+      {
+        force_trim_y = force_trim_y + adj_step;
+      }
+    }
+    else if (x > 145)
+    {
+      //hat right
+      if (invert_x == 0)
+      {
+        force_trim_x = force_trim_x + adj_step;
+      }
+      else
+      {
+        force_trim_x = force_trim_x - adj_step;
+      }
+    }
+    else if (x < 105)
+    {
+      //hat left
+      if (invert_x == 0)
+      {
+        force_trim_x = force_trim_x - adj_step;
+      }
+      else
+      {
+        force_trim_x = force_trim_x + adj_step;
+      }
+    }
+//
+//          Serial.print(force_trim_x);
+//      Serial.print(" ");
+//      Serial.println(force_trim_y);
+      simchair.setXAxis(force_trim_x);
+      simchair.setYAxis(force_trim_y);
+  }
+
+    
+
+ 
 }
 
