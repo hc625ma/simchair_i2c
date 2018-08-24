@@ -67,6 +67,7 @@ Adafruit_ADS1115 pedals(0x4A);
 // set to 100 for full axis range
 #define CUSTOM_CYCLIC_SENS 80
 #define CUSTOM_RUDDER_SENS 80
+#define INVERT_RUDDER 1
 
 #define XY_FILTERING_ENABLED 0
 #define RUDDER_FILTERING_ENABLED 0
@@ -79,7 +80,7 @@ Adafruit_ADS1115 pedals(0x4A);
 char PTT_KEYBOARD_KEY_MOD = KEY_LEFT_CTRL;
 
 //AB412 collective head
-#define AB412_COLL_HEAD_ROTARY_POTS  1 // 0, 1 or 2
+#define AB412_COLL_HEAD_ROTARY_POTS  2 // 0, 1 or 2
 #define AB412_COLL_HEAD_LEFT_HAT_DIRECTIONS 4
 #define AB412_COLL_HEAD_RIGHT_HAT_DIRECTIONS 8
 
@@ -92,7 +93,7 @@ char PTT_KEYBOARD_KEY_MOD = KEY_LEFT_CTRL;
 #define HUEY_HEAD_COLLECTIVE_HOLD_BUTTON 3
 #define AB412_HEAD_COLLECTIVE_HOLD_BUTTON 2
 
-#define AB412_COLL_HEAD_MODE_SWITCH 7 // 3-way fixed switch only; first (lower number) switch button must be defined there; remove it and next button from everywhere else; set to 0 to disable MODE SWITCH
+#define AB412_COLL_HEAD_MODE_SWITCH 18 // 3-way fixed switch only; first (lower number) switch button must be defined there; remove it and next button from everywhere else; set to 0 to disable MODE SWITCH
 #define HUEY_COLL_HEAD_MODE_SWITCH 4
 
 //for sims that do not support axis movement below idle stop, sends the throttle up/down key when holding idle stop and rotating throttle simultaneously
@@ -112,7 +113,7 @@ byte coll_head_idle_stop_compat_throttle_down_keys[] = {KEY_PAGE_UP,'x'};
 
 // AB412 switch modes
 // write joystick button numbers here as they are displayed in joy.cpl in order of increment
-byte ab412_sw_mode_button_switches[] = {1,2,5,9,10,17};// active when being held
+byte ab412_sw_mode_button_switches[] = {1,2,5,7,8,9,10,17};// active when being held
 byte ab412_sw_mode_toggle_switches[] = {6};// 2-way switch mode: single button press when switch is turned to "on", one more press when switch is turned to "off"; something you can assign to a single key press; e.g. gear extend/retract
 byte ab412_sw_mode_selector_button_switches[] = {}; //3-WAY SWITCHES ONLY, FIRST BUTTON (WITH LOWER NUMBER) MUST BE GIVEN HERE; REMOVE THE SECOND BUTTON FROM EVERYWHERE ELSE FOR CORRECT OPERATION; when switch is on, button is held; when off, another button is pressed and held;
 byte ab412_sw_mode_selector_switches[] = {3,5,11,13,15}; //same as above, but buttons are pressed and released - e.g. landing light extend / hold / retract
@@ -318,7 +319,14 @@ void setup_pedals()
     {
       buf_rudder[thisReading] = 0;
     }
-    simchair.setRudderRange(0, ADC_RANGE);
+    if (INVERT_RUDDER == 1)
+    {
+      simchair.setRudderRange(ADC_RANGE, 0);
+    }
+    else
+    {
+      simchair.setRudderRange(0, ADC_RANGE);
+    }
     dev_pedals = 1;
     pedals.begin();
     pedals.setGain(GAIN_ONE);
@@ -1028,14 +1036,16 @@ void poll_ab412_coll_head()
   }
 
 
-  Wire.requestFrom(13, 2);
+  Wire.requestFrom(13, 3);
   while (Wire.available())
   {
     byte b1 = Wire.read(); // receive a byte as character
     byte b2 = Wire.read();
+    byte b3 = Wire.read();
 
     s0 = b1;
     s1 = b2;
+    s2 = b3;
   }
 
   if (AB412_COLL_HEAD_ROTARY_POTS == 0)
@@ -1059,6 +1069,7 @@ void poll_ab412_coll_head()
   coll_head_parse_switches(b, 0, 2);
   coll_head_parse_switches(s0, 2, 0);
   coll_head_parse_switches(s1, 10, 0);
+  coll_head_parse_switches(s2, 18, 0);
 
 
 

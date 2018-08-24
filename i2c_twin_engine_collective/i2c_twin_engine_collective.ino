@@ -23,17 +23,18 @@ void loop()
   // uncomment Serial.print statements and change 2nd and 3rd values to physical min and max
   // of your lever
 
-  
+// comment this to calibrate cyclic, then uncomment Serial.prints below and enter min and max values as 2 and 3 numbers
+// you can swap 2 last numbers to invert the axis if needed
   z = map(z,0,1002,1023,0);
-  rz = map(rz,0,941,1023,0);
-  ry = map(ry,0,941,1023,0);
+  rz = map(rz,125,1023,1023,0);
+  ry = map(ry,114,1023,1023,0);
 //
 //  Serial.print(z); 
 //  Serial.print(" ");
 //  Serial.print(rz);
 //  Serial.print(" ");
 //  Serial.println(ry);
-  
+//  
 
 }
 

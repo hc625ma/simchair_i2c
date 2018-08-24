@@ -7,7 +7,8 @@
 uint16_t x,y;
 uint8_t b = 0b00000000; //digital pins 0 to 7; x ^= (1 << n); - toggles nth bit of x.  all other bits left alone.
 uint8_t b1 = 0b00000000; //digital pins 8 to 15
-byte pins = 14;
+uint8_t b2 = 0b00000000; //digital pins 15 to 23
+byte pins = 16;
 
 
 byte data[2];
@@ -36,9 +37,13 @@ void loop()
      {
         b |= (1 << i);       // forces ith bit of b to be 1.  all other bits left alone.
      }
-     else
+     else if ( (i >= 8) && (i < 16))
      {
         b1 |= (1 <<  (i - 8));
+     }
+     else if (i >= 15)
+     {
+        b2 |= (1 <<  (i - 16));
      }
     }
     else
@@ -47,9 +52,13 @@ void loop()
       {
         b &= ~(1 << i);      // forces ith bit of b to be 0.  all other bits left alone.
       }
-      else
+      else if ( (i >= 8) && (i < 16))
       {
         b1 &= ~(1 << (i - 8));
+      }
+      else if (i >= 16)
+      {
+        b2 &= ~(1 <<  (i - 16));
       }
     }
     
@@ -57,8 +66,9 @@ void loop()
 //    printBits(b);
 //    Serial.print(" ");
 //    printBits(b1);
+//    Serial.print(" ");
+//    printBits(b2);
 //    Serial.println();
-    
  }
   
 }
@@ -66,7 +76,8 @@ void loop()
 void requestEvent() {
   data[0] = b;
   data[1] = b1;
-  Wire.write(data,2);
+  data[2] = b2;
+  Wire.write(data,3);
 }
 
 void printBits(byte myByte){
