@@ -83,6 +83,10 @@ char PTT_KEYBOARD_KEY_MOD = KEY_LEFT_CTRL;
 #define AB412_COLL_HEAD_ROTARY_POTS  2 // 0, 1 or 2
 #define AB412_COLL_HEAD_LEFT_HAT_DIRECTIONS 4
 #define AB412_COLL_HEAD_RIGHT_HAT_DIRECTIONS 8
+#define AB412_IDLE1_SW_KEY  'y'
+#define AB412_IDLE2_SW_KEY  'u'
+#define AB412_STARTER1_SW_KEY  'i'
+#define AB412_STARTER2_SW_KEY  'o'
 
 #define HUEY_COLL_HEAD_HAT_DIRECTIONS 4
 
@@ -99,24 +103,27 @@ char PTT_KEYBOARD_KEY_MOD = KEY_LEFT_CTRL;
 //for sims that do not support axis movement below idle stop, sends the throttle up/down key when holding idle stop and rotating throttle simultaneously
 //not 100% realistic, yet better than nothing
 #define COLL_HEAD_IDLE_STOP_COMPAT_MODE 1 // ASSIGN IDLE STOP IN_GAME WHILE IN MODE 0 (MODE SWITCH CENTERED)!
-#define COLL_HEAD_IDLE_STOP_COMPAT_PROFILE "DCS_HUEY" //the only option for now
+#define COLL_HEAD_IDLE_STOP_COMPAT_PROFILE "DCS_HUEY" //DCS_HUEY or XTRIDENT412
+#define COLL_HEAD_IDLE_STOP_COMPAT_PROFILE_XTRIDENT412 1
 
 byte huey_coll_head_idle_stop_buttons[] = {12};
-byte ab412_coll_head_idle_stop_buttons[] = {17}; // put 1 or 2 buttons here as seen in joy.cpl; these keys MUST be in the ab412_sw_mode_button_switches[] array below
+byte ab412_coll_head_idle_stop_buttons[] = {9,10}; // put 1 or 2 buttons here as seen in joy.cpl; these keys MUST be in the ab412_sw_mode_button_switches[] array below
+byte ab412_coll_head_starter_buttons[] = {11,12};
 byte coll_head_idle_stop_compat_throttle_up_keys[] = {KEY_PAGE_DOWN,'z'};
 byte coll_head_idle_stop_compat_throttle_down_keys[] = {KEY_PAGE_UP,'x'};
 
 #define COLL_HEAD_IDLE_STOP_COMPAT_TRESHOLD 5 //
 #define SINGLE_ENGINE_COLLECTIVE_IDLE_STOP_AXIS_VAL 70 //find it out with uncommenting Serial.print(throttle) in poll_single_engine_collective sub, see below
-#define TWIN_ENGINE_COLLECTIVE_IDLE_STOP_AXIS_VAL 50
+#define TWIN_ENGINE_COLLECTIVE_IDLE_STOP_THROTTLE1_VAL 50
+#define TWIN_ENGINE_COLLECTIVE_IDLE_STOP_THROTTLE2_VAL 50
 
 
 // AB412 switch modes
 // write joystick button numbers here as they are displayed in joy.cpl in order of increment
-byte ab412_sw_mode_button_switches[] = {1,2,5,7,8,9,10,17};// active when being held
+byte ab412_sw_mode_button_switches[] = {1,2,5,7,8,9,10,11,12,17};// active when being held
 byte ab412_sw_mode_toggle_switches[] = {6};// 2-way switch mode: single button press when switch is turned to "on", one more press when switch is turned to "off"; something you can assign to a single key press; e.g. gear extend/retract
 byte ab412_sw_mode_selector_button_switches[] = {}; //3-WAY SWITCHES ONLY, FIRST BUTTON (WITH LOWER NUMBER) MUST BE GIVEN HERE; REMOVE THE SECOND BUTTON FROM EVERYWHERE ELSE FOR CORRECT OPERATION; when switch is on, button is held; when off, another button is pressed and held;
-byte ab412_sw_mode_selector_switches[] = {3,5,11,13,15}; //same as above, but buttons are pressed and released - e.g. landing light extend / hold / retract
+byte ab412_sw_mode_selector_switches[] = {3,5,13,15}; //same as above, but buttons are pressed and released - e.g. landing light extend / hold / retract
 
 byte huey_sw_mode_button_switches[] = {7,8,9,12,13};// active when being held
 byte huey_sw_mode_toggle_switches[] = {6};// 2-way switch mode: single button press when switch is turned to "on", one more press when switch is turned to "off"; something you can assign to a single key press; e.g. gear extend/retract
@@ -209,7 +216,7 @@ void setup()
   setup_cessna_engine_and_prop_controls();
   setup_ab412_coll_head();
   setup_huey_coll_head();
-  if (PTT_KEYBOARD_PRESS == 1)
+  if ((PTT_KEYBOARD_PRESS == 1) || (COLL_HEAD_IDLE_STOP_COMPAT_PROFILE_XTRIDENT412 == 1))
   {
     Keyboard.begin();
   }
@@ -887,17 +894,17 @@ void poll_twin_engine_collective()
   {
     if (COLL_HEAD_IDLE_STOP_COMPAT_PROFILE == "DCS_HUEY")
     {
-      if (min_throttle_val[0] != TWIN_ENGINE_COLLECTIVE_IDLE_STOP_AXIS_VAL)
+      if (min_throttle_val[0] != TWIN_ENGINE_COLLECTIVE_IDLE_STOP_THROTTLE1_VAL)
       {
-         simchair.setThrottleRange(TWIN_ENGINE_COLLECTIVE_IDLE_STOP_AXIS_VAL, 1023);
-         min_throttle_val[0] = TWIN_ENGINE_COLLECTIVE_IDLE_STOP_AXIS_VAL;
+         simchair.setThrottleRange(TWIN_ENGINE_COLLECTIVE_IDLE_STOP_THROTTLE1_VAL, 1023);
+         min_throttle_val[0] = TWIN_ENGINE_COLLECTIVE_IDLE_STOP_THROTTLE1_VAL;
       }
      
-      coll_head_idle_stop_compat_dcs (throttle,0,SINGLE_ENGINE_COLLECTIVE_IDLE_STOP_AXIS_VAL,0);
+      coll_head_idle_stop_compat_dcs (throttle,0,TWIN_ENGINE_COLLECTIVE_IDLE_STOP_THROTTLE1_VAL,0);
       last_throttle_setting[0] = throttle;
-      if (throttle < TWIN_ENGINE_COLLECTIVE_IDLE_STOP_AXIS_VAL)
+      if (throttle < TWIN_ENGINE_COLLECTIVE_IDLE_STOP_THROTTLE1_VAL)
       {
-        throttle = TWIN_ENGINE_COLLECTIVE_IDLE_STOP_AXIS_VAL;
+        throttle = TWIN_ENGINE_COLLECTIVE_IDLE_STOP_THROTTLE1_VAL;
       }
       else
       {
@@ -1145,6 +1152,53 @@ void coll_head_parse_switches (int sw, int start_pos, int end_pos)
             mode_sw_pos_0 = 0;
           }
         }
+        
+        else if (i == (ab412_coll_head_starter_buttons[0]-1))
+        {
+          if (COLL_HEAD_IDLE_STOP_COMPAT_PROFILE_XTRIDENT412 == 1)
+          {
+              if (v != coll_head_lastButtonState[i])
+              {
+                Keyboard.write(AB412_STARTER2_SW_KEY);
+                coll_head_lastButtonState[i] = v;
+              }
+          }
+        }
+        else if (i == (ab412_coll_head_starter_buttons[1]-1))
+        {
+          if (COLL_HEAD_IDLE_STOP_COMPAT_PROFILE_XTRIDENT412 == 1)
+          {
+              if (v != coll_head_lastButtonState[i])
+              {
+                Keyboard.write(AB412_STARTER1_SW_KEY);
+                coll_head_lastButtonState[i] = v;
+              }
+          }
+        }
+        else if (i == (ab412_coll_head_idle_stop_buttons[0]-1))
+        {
+          if (COLL_HEAD_IDLE_STOP_COMPAT_PROFILE_XTRIDENT412 == 1)
+          {
+              if (v != coll_head_lastButtonState[i])
+              {
+                Keyboard.write(AB412_IDLE1_SW_KEY);
+                coll_head_lastButtonState[i] = v;
+              }
+          }
+        }
+        else if (i == (ab412_coll_head_idle_stop_buttons[1]-1))
+        {
+          //Serial.println("BOOM!");
+          if (COLL_HEAD_IDLE_STOP_COMPAT_PROFILE_XTRIDENT412 == 1)
+          {
+              if (v != coll_head_lastButtonState[i])
+              {
+                //Serial.println("BOOM!");
+                Keyboard.write(AB412_IDLE2_SW_KEY);
+                coll_head_lastButtonState[i] = v;
+              }
+          }
+        }
         else if (i == AB412_COLL_HEAD_MODE_SWITCH)
         {
           if (v == 1)
@@ -1214,10 +1268,12 @@ void coll_head_parse_switches (int sw, int start_pos, int end_pos)
                   if (collective_hold_active == 0)
                   {
                     collective_hold_active = 1;
+                    coll_head_lastButtonState[i] = v;// added
                   }
                   else if (collective_hold_active == 1)
                   {
                     collective_hold_active = 0;
+                    coll_head_lastButtonState[i] = v; //added
                   }
                 }
               }
