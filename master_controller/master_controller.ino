@@ -120,14 +120,16 @@ byte coll_head_idle_stop_compat_throttle_down_keys[] = {KEY_PAGE_UP,'x'};
 
 // AB412 switch modes
 // write joystick button numbers here as they are displayed in joy.cpl in order of increment
-byte ab412_sw_mode_button_switches[] = {1,2,5,7,8,9,10,11,12,17};// active when being held
-byte ab412_sw_mode_toggle_switches[] = {6};// 2-way switch mode: single button press when switch is turned to "on", one more press when switch is turned to "off"; something you can assign to a single key press; e.g. gear extend/retract
-byte ab412_sw_mode_selector_button_switches[] = {}; //3-WAY SWITCHES ONLY, FIRST BUTTON (WITH LOWER NUMBER) MUST BE GIVEN HERE; REMOVE THE SECOND BUTTON FROM EVERYWHERE ELSE FOR CORRECT OPERATION; when switch is on, button is held; when off, another button is pressed and held;
-byte ab412_sw_mode_selector_switches[] = {3,5,13,15}; //same as above, but buttons are pressed and released - e.g. landing light extend / hold / retract
+byte ab412_sw_mode_button_switches[] = {1,2,9,10,11,12,13,14,17};//e.g. {1,2,9,10,11,12,13,14,17};// active when being held
+byte ab412_sw_mode_toggle_switches[] = {};//e.g. {3,4,5,6,7,8,15,16};// 2-way switch mode: single button press when switch is turned to "on", one more press when switch is turned to "off"; something you can assign to a single key press; e.g. gear extend/retract
+byte ab412_sw_mode_selector_button_switches[] = {}; //e.g. {3,5,7,15}; //3-WAY SWITCHES ONLY, FIRST BUTTON (WITH LOWER NUMBER) MUST BE GIVEN HERE; REMOVE THE SECOND BUTTON FROM EVERYWHERE ELSE FOR CORRECT OPERATION; when switch is on, button is held; when off, another button is pressed and held;
+byte ab412_sw_mode_selector_switches[] = {3,5,7,15};//e.g. {3,5,7,15}; //same as above, but buttons are pressed and released - e.g. landing light extend / hold / retract
 
 byte huey_sw_mode_button_switches[] = {7,8,9,12,13};// active when being held
 byte huey_sw_mode_toggle_switches[] = {6};// 2-way switch mode: single button press when switch is turned to "on", one more press when switch is turned to "off"; something you can assign to a single key press; e.g. gear extend/retract
-byte huey_sw_mode_selector_button_switches[] = {1,10}; //3-WAY SWITCHES ONLY, FIRST BUTTON (WITH LOWER NUMBER) MUST BE GIVEN HERE; REMOVE THE SECOND BUTTON FROM EVERYWHERE ELSE FOR CORRECT OPERATION; when switch is on, button is held; when off, another button is pressed and held;
+byte huey_sw_mode_selector_button_switches[] = {1,10}; //3-WAY SWITCHES ONLY, FIRST BUTTON (WITH LOWER NUMBER) MUST BE GIVEN HERE; REMOVE THE SECOND BUTTON FROM EVERYWHERE ELSE FOR CORRECT OPERATION; when switch is on, button is held; when off, 
+//another button is pressed and held; THIS MODE SUPPORTS MODE SWITCH! for normal operation, return all switches to center when switching mode, otherwise they will hold button pressed until it will be pressed again in the same mode. This may or may not be
+//what you expect, so be warned.
 byte huey_sw_mode_selector_switches[] = {}; //same as above, but buttons are pressed and released - e.g. landing light extend / hold / retract
 
 
@@ -152,10 +154,10 @@ bool coll_head_lastButtonState[60];
 bool coll_head_triggerState[60];
 long coll_head_sw_ts[60];
 byte coll_head_sw_mode[60];
-bool coll_head_sw_mode_button_switches_parsed[60];
-bool coll_head_sw_mode_toggle_switches_parsed[60];
-bool coll_head_sw_mode_selector_button_switches_parsed[60];
-bool coll_head_sw_mode_selector_switches_parsed[60];
+bool coll_head_sw_mode_button_switches_parsed[40];
+bool coll_head_sw_mode_toggle_switches_parsed[40];
+bool coll_head_sw_mode_selector_button_switches_parsed[40];
+bool coll_head_sw_mode_selector_switches_parsed[40];
 byte coll_head_mode_sw_position = 0;
 bool collective_hold_active = 0;
 uint16_t collective_hold_position = 0;
@@ -430,18 +432,19 @@ void setup_ab412_coll_head()
     parse_sw_array(ab412_sw_mode_toggle_switches, sizeof(ab412_sw_mode_toggle_switches), coll_head_sw_mode_toggle_switches_parsed);
     parse_sw_array(ab412_sw_mode_selector_button_switches, sizeof(ab412_sw_mode_selector_button_switches), coll_head_sw_mode_selector_button_switches_parsed);
     parse_sw_array(ab412_sw_mode_selector_switches, sizeof(ab412_sw_mode_selector_switches), coll_head_sw_mode_selector_switches_parsed);
+    
 
     for (int i = 0; i < sizeof(ab412_sw_mode_selector_button_switches); i++)
     {
       coll_head_lastButtonState[ab412_sw_mode_selector_button_switches[i]] = 1;
     }
 
-    //      for (int p = 0; p < sizeof(ab412_sw_mode_selector_button_switches_parsed); p++)
-    //    {
-    //      Serial.print(p);
-    //      Serial.print(" ");
-    //      Serial.println(ab412_sw_mode_selector_button_switches_parsed[p]);
-    //    }
+//        for (int p = 0; p < sizeof(coll_head_sw_mode_button_switches_parsed); p++)
+//        {
+//          Serial.print(p);
+//          Serial.print(" ");
+//          Serial.println(coll_head_sw_mode_button_switches_parsed[p]);
+//        }
 
   }
 }
@@ -1152,66 +1155,68 @@ void coll_head_parse_switches (int sw, int start_pos, int end_pos)
             mode_sw_pos_0 = 0;
           }
         }
-        
-        else if (i == (ab412_coll_head_starter_buttons[0]-1))
-        {
-          if (COLL_HEAD_IDLE_STOP_COMPAT_PROFILE_XTRIDENT412 == 1)
+
+          else if (i == (ab412_coll_head_starter_buttons[0]-1))
           {
-              if (v != coll_head_lastButtonState[i])
-              {
-                Keyboard.write(AB412_STARTER2_SW_KEY);
-                coll_head_lastButtonState[i] = v;
-              }
+            if ((COLL_HEAD_IDLE_STOP_COMPAT_PROFILE_XTRIDENT412 == 1) && ((coll_head_mode_sw_position == 0) || (AB412_COLL_HEAD_MODE_SWITCH == 0)))
+            {
+                if (v != coll_head_lastButtonState[i])
+                {
+                  Keyboard.write(AB412_STARTER2_SW_KEY);
+                  coll_head_lastButtonState[i] = v;
+                }
+            }
           }
-        }
-        else if (i == (ab412_coll_head_starter_buttons[1]-1))
-        {
-          if (COLL_HEAD_IDLE_STOP_COMPAT_PROFILE_XTRIDENT412 == 1)
+          else if (i == (ab412_coll_head_starter_buttons[1]-1))
           {
-              if (v != coll_head_lastButtonState[i])
-              {
-                Keyboard.write(AB412_STARTER1_SW_KEY);
-                coll_head_lastButtonState[i] = v;
-              }
+            if ((COLL_HEAD_IDLE_STOP_COMPAT_PROFILE_XTRIDENT412 == 1) && ((coll_head_mode_sw_position == 0) || (AB412_COLL_HEAD_MODE_SWITCH == 0)))
+            {
+                if (v != coll_head_lastButtonState[i])
+                {
+                  Keyboard.write(AB412_STARTER1_SW_KEY);
+                  coll_head_lastButtonState[i] = v;
+                }
+            }
           }
-        }
-        else if (i == (ab412_coll_head_idle_stop_buttons[0]-1))
-        {
-          if (COLL_HEAD_IDLE_STOP_COMPAT_PROFILE_XTRIDENT412 == 1)
+          else if (i == (ab412_coll_head_idle_stop_buttons[0]-1))
           {
-              if (v != coll_head_lastButtonState[i])
-              {
-                Keyboard.write(AB412_IDLE1_SW_KEY);
-                coll_head_lastButtonState[i] = v;
-              }
+            if ((COLL_HEAD_IDLE_STOP_COMPAT_PROFILE_XTRIDENT412 == 1) && ((coll_head_mode_sw_position == 0) || (AB412_COLL_HEAD_MODE_SWITCH == 0)))
+            {
+                if (v != coll_head_lastButtonState[i])
+                {
+                  Keyboard.write(AB412_IDLE1_SW_KEY);
+                  coll_head_lastButtonState[i] = v;
+                }
+            }
           }
-        }
-        else if (i == (ab412_coll_head_idle_stop_buttons[1]-1))
-        {
-          //Serial.println("BOOM!");
-          if (COLL_HEAD_IDLE_STOP_COMPAT_PROFILE_XTRIDENT412 == 1)
+          else if (i == (ab412_coll_head_idle_stop_buttons[1]-1))
           {
-              if (v != coll_head_lastButtonState[i])
-              {
-                //Serial.println("BOOM!");
-                Keyboard.write(AB412_IDLE2_SW_KEY);
-                coll_head_lastButtonState[i] = v;
-              }
+            //Serial.println("BOOM!");
+            if ((COLL_HEAD_IDLE_STOP_COMPAT_PROFILE_XTRIDENT412 == 1) && ((coll_head_mode_sw_position == 0) || (AB412_COLL_HEAD_MODE_SWITCH == 0)))
+            {
+                if (v != coll_head_lastButtonState[i])
+                {
+                  //Serial.println("BOOM!");
+                  Keyboard.write(AB412_IDLE2_SW_KEY);
+                  coll_head_lastButtonState[i] = v;
+                }
+            }
           }
-        }
-        else if (i == AB412_COLL_HEAD_MODE_SWITCH)
-        {
-          if (v == 1)
+          
+          else if (i == AB412_COLL_HEAD_MODE_SWITCH)
           {
-            coll_head_mode_sw_position = 2;
+            if (v == 1)
+            {
+              coll_head_mode_sw_position = 2;
+            }
+            else if (v == mode_sw_pos_0)
+            {
+              coll_head_mode_sw_position = 0;
+            }
           }
-          else if (v == mode_sw_pos_0)
-          {
-            coll_head_mode_sw_position = 0;
-          }
-        }
-        if (COLLECTIVE_HOLD_ENABLED == 1)
-        {                      
+
+         if ((COLLECTIVE_HOLD_ENABLED == 1) && ((coll_head_mode_sw_position == 0) || (AB412_COLL_HEAD_MODE_SWITCH == 0)))
+         {                      
             if ((i == AB412_HEAD_COLLECTIVE_HOLD_BUTTON - 1) )
             {
               if (v != coll_head_lastButtonState[i])
@@ -1229,7 +1234,8 @@ void coll_head_parse_switches (int sw, int start_pos, int end_pos)
                 }
               }
             }
-        }
+          }
+        
       }
       else if (dev_huey_coll_head == 1)
       {
@@ -1257,7 +1263,7 @@ void coll_head_parse_switches (int sw, int start_pos, int end_pos)
             coll_head_mode_sw_position = 0;
           }
         }
-        if (COLLECTIVE_HOLD_ENABLED == 1)
+        if ((COLLECTIVE_HOLD_ENABLED == 1) && ((coll_head_mode_sw_position == 0) || (HUEY_COLL_HEAD_MODE_SWITCH == 0)))
         {                      
             if ((i == HUEY_HEAD_COLLECTIVE_HOLD_BUTTON - 1) )
             {
@@ -1377,115 +1383,119 @@ void coll_head_parse_switches (int sw, int start_pos, int end_pos)
         coll_head_lastButtonState[i] = v;
       }
     }
+//    if (coll_head_mode_sw_position == 0)
+//    {
     else if (coll_head_sw_mode_selector_button_switches_parsed[i] == 1)
-    {
-      if (v != coll_head_lastButtonState[i])
-      {
-        //simchair_aux2.setButton(i, v);
-        set_button_mode_aware(i,v);
-        coll_head_lastButtonState[i] = v;
-        //simchair_aux2.setButton(33 - i, !v);
-        set_button_mode_aware(31 - i, !v);
-        coll_head_lastButtonState[33 - i] = !v;
-        coll_head_triggerState[31 - i] = 0;
-      }
-    }
-    else if (coll_head_sw_mode_selector_button_switches_parsed[i - 1] == 1)
-    {
-      if (v != coll_head_lastButtonState[i])
-      {
-        //simchair_aux2.setButton(i, v);
-        set_button_mode_aware(i,v);
-        coll_head_lastButtonState[i] = v;
-        //simchair_aux2.setButton(32 - i + 1, !v);
-        set_button_mode_aware(31 - i + 1, !v);
-        coll_head_lastButtonState[31 - i + 1] = !v;
-        coll_head_triggerState[31 - i + 1] = 0;
-      }
-    }
-    else if (coll_head_sw_mode_selector_switches_parsed[i] == 1)
-    {
-      if (v != coll_head_lastButtonState[i])
-      {
-        //Serial.println("BANG");
-        simchair_aux2.setButton(i, v);
-        //set_button_mode_aware(i, v);
-        coll_head_lastButtonState[i] = v;
-        simchair_aux2.setButton(31 - i, !v);
-        //set_button_mode_aware(32 - i, !v);
-        coll_head_lastButtonState[31 - i] = !v;
-        //ab412_coll_head_triggerState[32 - i] = 0;
-        coll_head_sw_ts[i] = millis();
-        coll_head_sw_ts[31 - i] = millis();
-      }
-      else if ((v == 1) && (coll_head_triggerState[i] == 0))
-      {
-        long now = millis();
-        if ((now - coll_head_sw_ts[i]) > COLL_HEAD_SW_HOLD_TIMEOUT)
+      //if (coll_head_sw_mode_selector_button_switches_parsed[i] == 1)
+      {          
+        if (v != coll_head_lastButtonState[i])
         {
-          simchair_aux2.setButton(i, !v);
-          //set_button_mode_aware(i, !v);
-          coll_head_triggerState[i] = 1;
-        }
-      }
-      else if ((v == 0) && (coll_head_triggerState[i] == 1))
-      {
-        long now = millis();
-        if ((now - coll_head_sw_ts[i]) > COLL_HEAD_SW_HOLD_TIMEOUT)
-        {
-          simchair_aux2.setButton(i, v);
-          //set_button_mode_aware(i,v);
+          //simchair_aux2.setButton(i, v);
+          set_button_mode_aware(i,v);
           coll_head_lastButtonState[i] = v;
-          coll_head_triggerState[i] = 0;
-
-          simchair_aux2.setButton(31 - i, v);
-          //set_button_mode_aware(32 - i, v);
-          coll_head_lastButtonState[31 - i] = v;
+          //simchair_aux2.setButton(33 - i, !v);
+          set_button_mode_aware(31 - i, !v);
+          //coll_head_lastButtonState[33 - i] = !v;
           coll_head_triggerState[31 - i] = 0;
         }
       }
-
-    }
-    else if (coll_head_sw_mode_selector_switches_parsed[i - 1] == 1)
-    {
-      if (v != coll_head_lastButtonState[i])
-      {
-        simchair_aux2.setButton(i, v);
-        //set_button_mode_aware(i, v);
-        coll_head_lastButtonState[i] = v;
-        simchair_aux2.setButton(31 - i + 1, !v);
-        //set_button_mode_aware(32 - i + 1,!v);
-        coll_head_lastButtonState[31 - i + 1] = !v;
-        coll_head_sw_ts[i] = millis();
-        coll_head_sw_ts[31 - i + 1] = millis();
-      }
-      else if ((v == 1) && (coll_head_triggerState[i] == 0))
-      {
-        long now = millis();
-        if ((now - coll_head_sw_ts[i]) > COLL_HEAD_SW_HOLD_TIMEOUT)
+      else if (coll_head_sw_mode_selector_button_switches_parsed[i - 1] == 1)
+      {      
+        if (v != coll_head_lastButtonState[i])
         {
-          simchair_aux2.setButton(i, !v);
-          //set_button_mode_aware(i, !v);
-          coll_head_triggerState[i] = 1;
+          //simchair_aux2.setButton(i, v);
+          set_button_mode_aware(i,v);
+          coll_head_lastButtonState[i] = v;
+          //simchair_aux2.setButton(32 - i + 1, !v);
+          set_button_mode_aware(31 - i + 1, !v);
+          coll_head_lastButtonState[31 - i + 1] = !v;
+          coll_head_triggerState[31 - i + 1] = 0;
         }
       }
-      else if ((v == 0) && (coll_head_triggerState[i] == 1))
+      else if (coll_head_sw_mode_selector_switches_parsed[i] == 1)
       {
-        long now = millis();
-        if ((now - coll_head_sw_ts[i]) > COLL_HEAD_SW_HOLD_TIMEOUT)
+        if (v != coll_head_lastButtonState[i])
+        {
+          //Serial.println("BANG");
+          simchair_aux2.setButton(i, v);
+          //set_button_mode_aware(i, v);
+          coll_head_lastButtonState[i] = v;
+          simchair_aux2.setButton(31 - i, !v);
+          //set_button_mode_aware(32 - i, !v);
+          coll_head_lastButtonState[31 - i] = !v;
+          //ab412_coll_head_triggerState[32 - i] = 0;
+          coll_head_sw_ts[i] = millis();
+          coll_head_sw_ts[31 - i] = millis();
+        }
+        else if ((v == 1) && (coll_head_triggerState[i] == 0))
+        {
+          long now = millis();
+          if ((now - coll_head_sw_ts[i]) > COLL_HEAD_SW_HOLD_TIMEOUT)
+          {
+            simchair_aux2.setButton(i, !v);
+            //set_button_mode_aware(i, !v);
+            coll_head_triggerState[i] = 1;
+          }
+        }
+        else if ((v == 0) && (coll_head_triggerState[i] == 1))
+        {
+          long now = millis();
+          if ((now - coll_head_sw_ts[i]) > COLL_HEAD_SW_HOLD_TIMEOUT)
+          {
+            simchair_aux2.setButton(i, v);
+            //set_button_mode_aware(i,v);
+            coll_head_lastButtonState[i] = v;
+            coll_head_triggerState[i] = 0;
+  
+            simchair_aux2.setButton(31 - i, v);
+            //set_button_mode_aware(32 - i, v);
+            coll_head_lastButtonState[31 - i] = v;
+            coll_head_triggerState[31 - i] = 0;
+          }
+        }
+  
+      }
+      else if (coll_head_sw_mode_selector_switches_parsed[i - 1] == 1)
+      {
+        if (v != coll_head_lastButtonState[i])
         {
           simchair_aux2.setButton(i, v);
           //set_button_mode_aware(i, v);
           coll_head_lastButtonState[i] = v;
-          coll_head_triggerState[i] = 0;
-
-          simchair_aux2.setButton(31 - i + 1, v);
-          //set_button_mode_aware(32 - i + 1, v);
-          coll_head_lastButtonState[31 - i + 1] = v;
-          coll_head_triggerState[31 - i + 1] = 0;
+          simchair_aux2.setButton(31 - i + 1, !v);
+          //set_button_mode_aware(32 - i + 1,!v);
+          coll_head_lastButtonState[31 - i + 1] = !v;
+          coll_head_sw_ts[i] = millis();
+          coll_head_sw_ts[31 - i + 1] = millis();
+        }
+        else if ((v == 1) && (coll_head_triggerState[i] == 0))
+        {
+          long now = millis();
+          if ((now - coll_head_sw_ts[i]) > COLL_HEAD_SW_HOLD_TIMEOUT)
+          {
+            simchair_aux2.setButton(i, !v);
+            //set_button_mode_aware(i, !v);
+            coll_head_triggerState[i] = 1;
+          }
+        }
+        else if ((v == 0) && (coll_head_triggerState[i] == 1))
+        {
+          long now = millis();
+          if ((now - coll_head_sw_ts[i]) > COLL_HEAD_SW_HOLD_TIMEOUT)
+          {
+            simchair_aux2.setButton(i, v);
+            //set_button_mode_aware(i, v);
+            coll_head_lastButtonState[i] = v;
+            coll_head_triggerState[i] = 0;
+  
+            simchair_aux2.setButton(31 - i + 1, v);
+            //set_button_mode_aware(32 - i + 1, v);
+            coll_head_lastButtonState[31 - i + 1] = v;
+            coll_head_triggerState[31 - i + 1] = 0;
+          }
         }
       }
-    }
+ //   }
   }
 }
 
