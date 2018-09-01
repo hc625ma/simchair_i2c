@@ -69,7 +69,7 @@ void loop()
 //    Serial.print(" ");
 //    printBits(b2);
 //    Serial.println();
- }
+ } 
   
 }
 

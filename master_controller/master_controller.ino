@@ -1,4 +1,4 @@
-//version 0.4
+//version 0.9
 #include <Wire.h>
 #include <Joystick.h>
 #include <Adafruit_ADS1015.h>
@@ -94,11 +94,11 @@ char PTT_KEYBOARD_KEY_MOD = KEY_LEFT_CTRL;
 //#define HUEY_COLL_HEAD_SW_HOLD_TIMEOUT 200
 
 #define COLLECTIVE_HOLD_ENABLED 1 // this will hold your collective in place until you press the button again and return the lever to the initial position
-#define HUEY_HEAD_COLLECTIVE_HOLD_BUTTON 3
+#define HUEY_HEAD_COLLECTIVE_HOLD_BUTTON 13
 #define AB412_HEAD_COLLECTIVE_HOLD_BUTTON 2
 
 #define AB412_COLL_HEAD_MODE_SWITCH 18 // 3-way fixed switch only; first (lower number) switch button must be defined there; remove it and next button from everywhere else; set to 0 to disable MODE SWITCH
-#define HUEY_COLL_HEAD_MODE_SWITCH 4
+#define HUEY_COLL_HEAD_MODE_SWITCH 3
 
 //for sims that do not support axis movement below idle stop, sends the throttle up/down key when holding idle stop and rotating throttle simultaneously
 //not 100% realistic, yet better than nothing
@@ -106,7 +106,7 @@ char PTT_KEYBOARD_KEY_MOD = KEY_LEFT_CTRL;
 #define COLL_HEAD_IDLE_STOP_COMPAT_PROFILE "DCS_HUEY" //DCS_HUEY or XTRIDENT412
 #define COLL_HEAD_IDLE_STOP_COMPAT_PROFILE_XTRIDENT412 1
 
-byte huey_coll_head_idle_stop_buttons[] = {12};
+byte huey_coll_head_idle_stop_buttons[] = {11};
 byte ab412_coll_head_idle_stop_buttons[] = {9,10}; // put 1 or 2 buttons here as seen in joy.cpl; these keys MUST be in the ab412_sw_mode_button_switches[] array below
 byte ab412_coll_head_starter_buttons[] = {11,12};
 byte coll_head_idle_stop_compat_throttle_up_keys[] = {KEY_PAGE_DOWN,'z'};
@@ -125,9 +125,9 @@ byte ab412_sw_mode_toggle_switches[] = {3,4,5,6,7,8};//e.g. {3,4,5,6,7,8,15,16};
 byte ab412_sw_mode_selector_button_switches[] = {13}; //e.g. {3,5,7,15}; //3-WAY SWITCHES ONLY, FIRST BUTTON (WITH LOWER NUMBER) MUST BE GIVEN HERE; REMOVE THE SECOND BUTTON FROM EVERYWHERE ELSE FOR CORRECT OPERATION; when switch is on, button is held; when off, another button is pressed and held;
 byte ab412_sw_mode_selector_switches[] = {15};//e.g. {3,5,7,15}; //same as above, but buttons are pressed and released - e.g. landing light extend / hold / retract
 
-byte huey_sw_mode_button_switches[] = {7,8,9,12,13};// active when being held
-byte huey_sw_mode_toggle_switches[] = {6};// 2-way switch mode: single button press when switch is turned to "on", one more press when switch is turned to "off"; something you can assign to a single key press; e.g. gear extend/retract
-byte huey_sw_mode_selector_button_switches[] = {1,10}; //3-WAY SWITCHES ONLY, FIRST BUTTON (WITH LOWER NUMBER) MUST BE GIVEN HERE; REMOVE THE SECOND BUTTON FROM EVERYWHERE ELSE FOR CORRECT OPERATION; when switch is on, button is held; when off, 
+byte huey_sw_mode_button_switches[] = {7,8,9,10,11,12,13};//{7,8,9,12,13};// active when being held
+byte huey_sw_mode_toggle_switches[] = {1,2,5,6};//{6};// 2-way switch mode: single button press when switch is turned to "on", one more press when switch is turned to "off"; something you can assign to a single key press; e.g. gear extend/retract
+byte huey_sw_mode_selector_button_switches[] = {}; //3-WAY SWITCHES ONLY, FIRST BUTTON (WITH LOWER NUMBER) MUST BE GIVEN HERE; REMOVE THE SECOND BUTTON FROM EVERYWHERE ELSE FOR CORRECT OPERATION; when switch is on, button is held; when off, 
 //another button is pressed and held; THIS MODE SUPPORTS MODE SWITCH! for normal operation, return all switches to center when switching mode, otherwise they will hold button pressed until it will be pressed again in the same mode. This may or may not be
 //what you expect, so be warned.
 byte huey_sw_mode_selector_switches[] = {}; //same as above, but buttons are pressed and released - e.g. landing light extend / hold / retract
@@ -859,7 +859,8 @@ void poll_single_engine_collective()
     int one_percent_range = COLLECTIVE_ADC_RANGE / 100;
     int diff_z = z - collective_hold_position; // this is needed because of how the abs() works
 
-    if ((abs(diff_z)) < (PSEUDO_FORCE_TRIM_RELEASE_DEVIATION * one_percent_range))
+   // if ((abs(diff_z)) < (PSEUDO_FORCE_TRIM_RELEASE_DEVIATION * one_percent_range))
+   if (abs(diff_z) < 2 * one_percent_range)
     {
       simchair.setZAxis(z);
       collective_hold_position_set = 0;
@@ -956,7 +957,8 @@ void poll_twin_engine_collective()
     int one_percent_range = COLLECTIVE_ADC_RANGE / 100;
     int diff_z = z - collective_hold_position; // this is needed because of how the abs() works
 
-    if ((abs(diff_z)) < (PSEUDO_FORCE_TRIM_RELEASE_DEVIATION * one_percent_range))
+    //if ((abs(diff_z)) < (PSEUDO_FORCE_TRIM_RELEASE_DEVIATION * one_percent_range))
+    if (abs(diff_z) < 2 * one_percent_range)
     {
       simchair.setZAxis(z);
       collective_hold_position_set = 0;
