@@ -36,11 +36,11 @@ void loop()
 
   
   z = map(z,0,1002,1023,0);
-  rz = map(rz,83,1023,1023,0);
+  rz = map(rz,0,918,1023,0);
 
-//  Serial.print(z); 
-//  Serial.print(" ");
-//  Serial.println(rz);
+  //Serial.print(z); 
+  //Serial.print(" ");
+  //Serial.println(rz);
   
 
 }

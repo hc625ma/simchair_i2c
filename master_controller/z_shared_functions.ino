@@ -29,7 +29,7 @@ uint16_t coll_head_idle_stop_compat_dcs (uint16_t throttle0, uint16_t throttle1,
         if (diff < - COLL_HEAD_IDLE_STOP_COMPAT_TRESHOLD)
         {
           Keyboard.press(coll_head_idle_stop_compat_throttle_down_keys[i]);
-          delay(300);
+          delay(COLL_HEAD_DCS_HUEY_COMPAT_MODE_BUTTON_HOLD);
           Keyboard.releaseAll();
         }
       }
@@ -39,7 +39,7 @@ uint16_t coll_head_idle_stop_compat_dcs (uint16_t throttle0, uint16_t throttle1,
         if (diff > COLL_HEAD_IDLE_STOP_COMPAT_TRESHOLD)
         {
           Keyboard.press(coll_head_idle_stop_compat_throttle_up_keys[i]);
-          delay(300);
+          delay(COLL_HEAD_DCS_HUEY_COMPAT_MODE_BUTTON_HOLD);
           Keyboard.releaseAll();
         }
         last_throttle_setting[i] = throttle[i];
@@ -192,12 +192,12 @@ void coll_head_parse_switches (int sw, int start_pos, int end_pos)
                   if (collective_hold_active == 0)
                   {
                     collective_hold_active = 1;
-                    coll_head_lastButtonState[i] = v;// added
+                    //coll_head_lastButtonState[i] = v;// added
                   }
                   else if (collective_hold_active == 1)
                   {
                     collective_hold_active = 0;
-                    coll_head_lastButtonState[i] = v; //added
+                    //coll_head_lastButtonState[i] = v; //added
                   }
                 }
               }

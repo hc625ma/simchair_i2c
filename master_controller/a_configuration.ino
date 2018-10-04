@@ -61,7 +61,7 @@
 
 // <PEDALS>
 
-  #define INVERT_RUDDER 1
+  #define INVERT_RUDDER 0
   #define RUDDER_FILTERING_ENABLED 0
   #define CUSTOM_RUDDER_SENS 80 // this value will be used if SENS_SWITCH is disabled
 
@@ -81,6 +81,8 @@
 
   byte coll_head_idle_stop_compat_throttle_up_keys[] = {KEY_PAGE_DOWN,'z'};
   byte coll_head_idle_stop_compat_throttle_down_keys[] = {KEY_PAGE_UP,'x'};
+
+  #define COLL_HEAD_DCS_HUEY_COMPAT_MODE_BUTTON_HOLD 50 // how long to hold throttle up button, adjusted depending on idle stop axis range (smaller range- bigger hold time and vice versa)
   
 // </COLLECTIVE>
 
@@ -119,11 +121,11 @@
   byte huey_coll_head_idle_stop_buttons[] = {11};
    
   #define COLL_HEAD_IDLE_STOP_COMPAT_TRESHOLD 5 // should be larger than jitter of your throttle pot
-  #define SINGLE_ENGINE_COLLECTIVE_IDLE_STOP_AXIS_VAL 70 //find it out with uncommenting Serial.print(throttle) in poll_single_engine_collective sub, see below
+  #define SINGLE_ENGINE_COLLECTIVE_IDLE_STOP_AXIS_VAL 137 //find it out with uncommenting Serial.print(throttle) in poll_single_engine_collective sub, see below
   
-  byte huey_sw_mode_button_switches[] = {7,8,9,10,11,12,13};//{7,8,9,12,13};// active when being held
-  byte huey_sw_mode_toggle_switches[] = {1,2,5,6};//{6};// 2-way switch mode: single button press when switch is turned to "on", one more press when switch is turned to "off"; something you can assign to a single key press; e.g. gear extend/retract
-  byte huey_sw_mode_selector_button_switches[] = {}; //3-WAY SWITCHES ONLY, FIRST BUTTON (WITH LOWER NUMBER) MUST BE GIVEN HERE; REMOVE THE SECOND BUTTON FROM EVERYWHERE ELSE FOR CORRECT OPERATION; when switch is on, button is held; when off, 
+  byte huey_sw_mode_button_switches[] = {7,8,11,12,13};//{7,8,9,12,13};// active when being held
+  byte huey_sw_mode_toggle_switches[] = {5,6};//{6};// 2-way switch mode: single button press when switch is turned to "on", one more press when switch is turned to "off"; something you can assign to a single key press; e.g. gear extend/retract
+  byte huey_sw_mode_selector_button_switches[] = {1,9}; //3-WAY SWITCHES ONLY, FIRST BUTTON (WITH LOWER NUMBER) MUST BE GIVEN HERE; REMOVE THE SECOND BUTTON FROM EVERYWHERE ELSE FOR CORRECT OPERATION; when switch is on, button is held; when off, 
   //another button is pressed and held; THIS MODE SUPPORTS MODE SWITCH! for normal operation, return all switches to center when switching mode, otherwise they will hold button pressed until it will be pressed again in the same mode. This may or may not be
   //what you expect, so be warned.
   byte huey_sw_mode_selector_switches[] = {}; //same as above, but buttons are pressed and released - e.g. landing light extend / hold / retract
