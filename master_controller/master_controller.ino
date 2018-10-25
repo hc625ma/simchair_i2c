@@ -15,7 +15,7 @@
 //  false, false, false);  // No accelerator, brake, or steering
 
 Joystick_ simchair(0x20, 0x04, 32, 1, true, true, true, true, true, false, true, true, false, false, false);
-Joystick_ simchair_aux1(0x21, 0x04, 32, 1, true, true, true, true, true, true, false, true, false, false, false);
+Joystick_ simchair_aux1(0x21, 0x04, 32, 1, true, true, true, true, true, true, true, true, true, true, true);
 Joystick_ simchair_aux2(0x22, 0x04, 96, 1, false, false, false, true, true, false, false, false, false, false, false);
 
 Adafruit_ADS1115 cyclic;

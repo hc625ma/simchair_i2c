@@ -23,7 +23,7 @@ void setup()
   digitalWrite(10, HIGH);
   Wire.begin(12);                // join i2c bus with address #11
   Wire.onRequest(requestEvent); // register event
-  //Serial.begin(9600);           // start serial for output
+//  Serial.begin(9600);           // start serial for output
 }
 
 void loop() 
@@ -36,11 +36,11 @@ void loop()
 
   
   z = map(z,0,1002,1023,0);
-  rz = map(rz,0,918,1023,0);
+  rz = map(rz,0,992,1023,0);
 
-  //Serial.print(z); 
-  //Serial.print(" ");
-  //Serial.println(rz);
+//  Serial.print(z); 
+//  Serial.print(" ");
+//  Serial.println(rz);
   
 
 }

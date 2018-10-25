@@ -7,6 +7,9 @@
 
 // <CYCLIC>
 
+  #define FSGIMBAL_INVERT_X 1
+  #define FSGIMBAL_INVERT_Y 0
+
   #define B8_POT_MODE "HAT_SW" // HAT_SW or ANALOG
   
   #define SENS_ADJ_METHOD  "LINEAR"
@@ -82,7 +85,7 @@
   byte coll_head_idle_stop_compat_throttle_up_keys[] = {KEY_PAGE_DOWN,'z'};
   byte coll_head_idle_stop_compat_throttle_down_keys[] = {KEY_PAGE_UP,'x'};
 
-  #define COLL_HEAD_DCS_HUEY_COMPAT_MODE_BUTTON_HOLD 50 // how long to hold throttle up button, adjusted depending on idle stop axis range (smaller range- bigger hold time and vice versa)
+  #define COLL_HEAD_DCS_HUEY_COMPAT_MODE_BUTTON_HOLD 50 // how long to hold throttle up/down buttons, adjusted depending on idle stop axis range (smaller range- bigger hold time and vice versa)
   
 // </COLLECTIVE>
 
@@ -131,6 +134,15 @@
   byte huey_sw_mode_selector_switches[] = {}; //same as above, but buttons are pressed and released - e.g. landing light extend / hold / retract
 
 // </HUEY COLL HEAD>
+
+//<THROTTLE QUADRANT>
+  #define THROTTLE_QUADRANT_PHYSICAL_AXIS_MAX 1006
+  #define THROTTLE_QUADRANT_PHYSICAL_AXIS_MIN 10
+
+  #define THROTTLE_QUADRANT_MAIN_AXIS_TRESHOLD 718
+  #define THROTTLE_QUADRANT_SECONDARY_AXIS_TRESHOLD 763
+
+//</THROTTLE QUADRANT>
 
 
 

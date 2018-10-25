@@ -11,25 +11,6 @@ void setup_cessna_engine_and_prop_controls()
   }
 }
 
-void parse_sw_array (byte sw_arr[], byte sw_arr_size, bool parsed_sw_arr[])
-{
-  byte z = 0;
-  for (int i = 0; i < sw_arr_size; i++)
-  {
-    for (int k = z; k <= sw_arr[i]; k++)
-    {
-      if (k == (sw_arr[i] - 1))
-      {
-        parsed_sw_arr[k] = 1;
-      }
-      else
-      {
-        parsed_sw_arr[k] = 0;
-      }
-    }
-    z = sw_arr[i];
-  }
-}
 
 void poll_cessna_engine_and_prop_controls()
 {

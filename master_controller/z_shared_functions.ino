@@ -47,6 +47,26 @@ uint16_t coll_head_idle_stop_compat_dcs (uint16_t throttle0, uint16_t throttle1,
     }
 }
 
+void parse_sw_array (byte sw_arr[], byte sw_arr_size, bool parsed_sw_arr[])
+{
+  byte z = 0;
+  for (int i = 0; i < sw_arr_size; i++)
+  {
+    for (int k = z; k <= sw_arr[i]; k++)
+    {
+      if (k == (sw_arr[i] - 1))
+      {
+        parsed_sw_arr[k] = 1;
+      }
+      else
+      {
+        parsed_sw_arr[k] = 0;
+      }
+    }
+    z = sw_arr[i];
+  }
+}
+
 void coll_head_parse_switches (int sw, int start_pos, int end_pos)
 {
   if (end_pos == 0)

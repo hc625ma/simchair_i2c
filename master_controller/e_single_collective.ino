@@ -27,6 +27,10 @@ void poll_single_engine_collective()
     z = (z << 8) | b2;
     throttle = b3;
     throttle = (throttle << 8) | b4;
+    if (throttle > 60000)
+    {
+      throttle = 0;
+    }
   }
   // uncomment the next line and turn your throttle to idle stop position to see SINGLE_ENGINE_COLLECTIVE_IDLE_STOP_AXIS_VAL value 
   //Serial.println(throttle);

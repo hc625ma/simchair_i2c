@@ -47,12 +47,21 @@ void poll_cyclic()
   {
     x = cyclic.readADC_SingleEnded(0) >> (15 - ADS1115_RESOLUTION);
     y = cyclic.readADC_SingleEnded(1) >> (15 - ADS1115_RESOLUTION);
-    // uncomment next 3 lines for cyclic calibration
-    //Serial.print(x);
-    //Serial.print(" ");
-    //Serial.println(y);
-  }
 
+    if (FSGIMBAL_INVERT_X == 1)
+    {
+      x = ADC_RANGE - x;
+    }
+    if (FSGIMBAL_INVERT_Y == 1)
+    {
+      y = ADC_RANGE - y;
+    }
+    // uncomment next 3 lines for cyclic calibration
+//    Serial.print(x);
+//    Serial.print(" ");
+//    Serial.println(y);
+  }
+  
   if (SENS_SWITCH_ENABLED == 1)
   {
     x = adjust_sensitivity(x, cyclic_sens);

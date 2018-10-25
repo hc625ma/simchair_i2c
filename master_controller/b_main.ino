@@ -45,6 +45,7 @@ bool dev_pedals = 0;
 bool dev_cessna_engine_and_prop_controls = 0;
 bool dev_ab412_coll_head = 0;
 bool dev_huey_coll_head = 0;
+bool dev_throttle_quadrant = 0;
 bool SW_MODE_BUTTON = 0;
 bool SW_MODE_TOGGLE = 1;
 bool zero = 0;
@@ -82,6 +83,7 @@ void setup()
   setup_cessna_engine_and_prop_controls();
   setup_ab412_coll_head();
   setup_huey_coll_head();
+  setup_throttle_quadrant();
   if ((PTT_KEYBOARD_PRESS == 1) || (COLL_HEAD_IDLE_STOP_COMPAT_PROFILE_XTRIDENT412 == 1))
   {
     Keyboard.begin();
@@ -128,6 +130,10 @@ void loop()
   if (dev_huey_coll_head == 1)
   {
     poll_huey_coll_head();
+  }
+  if (dev_throttle_quadrant == 1)
+  {
+    poll_throttle_quadrant();
   }
 }
 
