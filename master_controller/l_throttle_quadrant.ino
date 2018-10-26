@@ -9,7 +9,7 @@ void setup_throttle_quadrant()
     simchair_aux1.setThrottleRange(THROTTLE_QUADRANT_MAIN_AXIS_TRESHOLD, THROTTLE_QUADRANT_PHYSICAL_AXIS_MIN);
     simchair_aux1.setRzAxisRange(THROTTLE_QUADRANT_SECONDARY_AXIS_TRESHOLD, THROTTLE_QUADRANT_PHYSICAL_AXIS_MAX);
     simchair_aux1.setRudderRange(THROTTLE_QUADRANT_SECONDARY_AXIS_TRESHOLD, THROTTLE_QUADRANT_PHYSICAL_AXIS_MAX);
-    simchair_aux1.setAcceleratorRange(THROTTLE_QUADRANT_SECONDARY_AXIS_TRESHOLD, THROTTLE_QUADRANT_PHYSICAL_AXIS_MAX);
+    simchair_aux1.setZAxisRange(THROTTLE_QUADRANT_SECONDARY_AXIS_TRESHOLD, THROTTLE_QUADRANT_PHYSICAL_AXIS_MAX);
     
     dev_throttle_quadrant = 1;
   }
@@ -37,8 +37,13 @@ void poll_throttle_quadrant()
     ry = (ry << 8) | b6;
   }
 
-  //Serial.println(rx);
-  ry = throttle = THROTTLE_QUADRANT_MAIN_AXIS_TRESHOLD;
+//  Serial.print(rx);
+//  Serial.print(" ");
+//  Serial.print(ry);
+//  Serial.print(" ");
+//  Serial.print(throttle);
+//  Serial.println(" ");
+  
 
 
   if (rx < THROTTLE_QUADRANT_MAIN_AXIS_TRESHOLD)
@@ -58,7 +63,7 @@ void poll_throttle_quadrant()
 
   if (ry < THROTTLE_QUADRANT_MAIN_AXIS_TRESHOLD)
   {
-     simchair_aux1.setRxAxis(ry);
+     simchair_aux1.setRyAxis(ry);
   }
   else if (ry > THROTTLE_QUADRANT_SECONDARY_AXIS_TRESHOLD)
   {
@@ -77,13 +82,13 @@ void poll_throttle_quadrant()
   }
   else if (throttle > THROTTLE_QUADRANT_SECONDARY_AXIS_TRESHOLD)
   {
-    simchair_aux1.setAccelerator(rx);
+    simchair_aux1.setZAxis(throttle);
     
   }
   else
   {
     simchair_aux1.setThrottle(THROTTLE_QUADRANT_MAIN_AXIS_TRESHOLD);
-    simchair_aux1.setAccelerator(THROTTLE_QUADRANT_SECONDARY_AXIS_TRESHOLD);
+    simchair_aux1.setZAxis(THROTTLE_QUADRANT_SECONDARY_AXIS_TRESHOLD);
   }
 
   
