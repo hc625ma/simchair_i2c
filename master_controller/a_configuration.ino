@@ -35,7 +35,7 @@
   #define SENS_SWITCH_ENABLED 1
   #define SENS_SWITCH_BUTTON 0 //0 is the first button
   
-  #define B8_HAT_SWITCH_MODE "ATT_TRIM" //"ATT_TRIM" or "HAT", it will adjust the position of the trimmed cyclic with hat(Bell 407-style)
+  #define B8_HAT_SWITCH_MODE "BOTH" //"ATT_TRIM","HAT", or "BOTH", it will adjust the position of the trimmed cyclic with hat(Bell 407-style)
   #define ATT_TRIM_STEP_Y 0.05 //IN PERCENTS OF AXIS LENGHT
   #define ATT_TRIM_STEP_X 0.05 //IN PERCENTS OF AXIS LENGHT
   #define INVERT_HAT_TRIM_X 0
@@ -139,8 +139,8 @@
   #define THROTTLE_QUADRANT_PHYSICAL_AXIS_MAX 1006
   #define THROTTLE_QUADRANT_PHYSICAL_AXIS_MIN 10
 
-  #define THROTTLE_QUADRANT_MAIN_AXIS_TRESHOLD 718
-  #define THROTTLE_QUADRANT_SECONDARY_AXIS_TRESHOLD 763
+  #define THROTTLE_QUADRANT_MAIN_AXIS_TRESHOLD 718 //450
+  #define THROTTLE_QUADRANT_SECONDARY_AXIS_TRESHOLD 763 //600
 
 //</THROTTLE QUADRANT>
 

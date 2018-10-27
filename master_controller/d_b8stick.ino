@@ -43,6 +43,18 @@ void poll_b8stick()
         int16_t hat_val = parse_hat_sw(rx, ry, 8);
         simchair.setHatSwitch(0, hat_val);
       }
+      else if (B8_HAT_SWITCH_MODE == "BOTH")
+      {
+        if (force_trim_on == 0)
+        {
+          int16_t hat_val = parse_hat_sw(rx, ry, 8);
+          simchair.setHatSwitch(0, hat_val);
+        }
+        else
+        {
+          int16_t hat_val = parse_hat_trim(rx, ry, INVERT_HAT_TRIM_X, INVERT_HAT_TRIM_Y);     
+        }
+      }
       else
       {
         int16_t hat_val = parse_hat_trim(rx, ry, INVERT_HAT_TRIM_X, INVERT_HAT_TRIM_Y);
@@ -128,5 +140,71 @@ void poll_b8stick()
       }
       b8stick_lastButtonState[i] = v;
     }
+  }
+}
+
+int parse_hat_trim (int x, int y, bool invert_x, bool invert_y)
+{
+  int hat_val;
+
+  if (force_trim_position_set == 1)
+  {
+    int one_percent_range = ADC_RANGE / 100;
+    int adj_step_x = one_percent_range * ATT_TRIM_STEP_X;
+    int adj_step_y = one_percent_range * ATT_TRIM_STEP_Y;
+    if (y > 145)
+    {
+      //hat up
+      if (invert_y == 0)
+      {
+        force_trim_y = force_trim_y + adj_step_y;
+      }
+      else
+      {
+        force_trim_y = force_trim_y - adj_step_y;
+      }
+    }
+    else if (y < 105)
+    {
+      //hat down
+      if (invert_y == 0)
+      {
+        force_trim_y = force_trim_y - adj_step_y;
+      }
+      else
+      {
+        force_trim_y = force_trim_y + adj_step_y;
+      }
+    }
+    else if (x > 145)
+    {
+      //hat right
+      if (invert_x == 0)
+      {
+        force_trim_x = force_trim_x + adj_step_x;
+      }
+      else
+      {
+        force_trim_x = force_trim_x - adj_step_x;
+      }
+    }
+    else if (x < 105)
+    {
+      //hat left
+      if (invert_x == 0)
+      {
+        force_trim_x = force_trim_x - adj_step_x;
+      }
+      else
+      {
+        force_trim_x = force_trim_x + adj_step_x;
+      }
+    }
+//
+//          Serial.print(force_trim_x);
+//      Serial.print(" ");
+//      Serial.println(force_trim_y);
+      simchair.setXAxis(force_trim_x);
+      simchair.setYAxis(force_trim_y);
   }
 }
