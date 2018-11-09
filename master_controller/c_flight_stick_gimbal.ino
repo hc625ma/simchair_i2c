@@ -31,7 +31,7 @@ void setup_cyclic()
 
 void poll_cyclic()
 {
-  uint16_t x, y;
+  uint32_t x, y;
   if (XY_FILTERING_ENABLED == 1)
   {
     total_x = total_x - buf_x[xy_read_index];
@@ -138,8 +138,29 @@ void poll_cyclic()
       
       if ((cyclic_force_trim_state == 0) || (cyclic_force_trim_state == 2))
       {
-        simchair.setXAxis(force_trim_x + (x - (ADC_RANGE / 2)));
-        simchair.setYAxis(force_trim_y + (y - (ADC_RANGE / 2)));
+        int32_t xval = force_trim_x + (x - (ADC_RANGE / 2));
+        int32_t yval = force_trim_y + (y - (ADC_RANGE / 2));
+                   
+        if(xval < 50)
+        {
+          xval = 50; 
+        }
+        else if (xval > (ADC_RANGE))
+        {
+          xval = ADC_RANGE;
+        }
+        if(yval < 50)
+        {  
+          yval = 50; 
+        }
+          if ((yval > (ADC_RANGE)))
+        {
+          yval = ADC_RANGE;
+                  
+        }
+
+        simchair.setXAxis(xval);
+        simchair.setYAxis(yval);
       }
       if (cyclic_force_trim_state == 1) // after assigning a new center, wait for the stick to be returned to its mechanical center
       {

@@ -114,7 +114,13 @@ void poll_pedals()
       
       if ((pedals_force_trim_state == 0) || (pedals_force_trim_state == 2))
       {
-        simchair.setRudder(force_trim_rudder + (rudder - (ADC_RANGE / 2)));
+        uint16_t rudder_val = force_trim_rudder + (rudder - (ADC_RANGE / 2));
+
+//        Serial.println(rudder_val);
+        if ((rudder_val > 0) && (rudder_val < ADC_RANGE))
+        {
+          simchair.setRudder(rudder_val);
+        }
         //prev_cyclic_force_trim_state = 0;
       }
       if (pedals_force_trim_state == 1) // after assigning a new center, wait for the stick to be returned to its mechanical center
