@@ -1,18 +1,10 @@
 // This file contains global variables definitions and main subroutines.
 
-bool force_trim_on = 0;
-bool force_trim_position_set = 0;
-bool force_trim_rudder_on = 0;
-bool force_trim_rudder_position_set = 0;
-uint16_t force_trim_x = 0;
-uint16_t force_trim_y = 0 ;
-uint16_t force_trim_rudder = 0;
-
-
-
-
 int cyclic_sens = 100;
 int rudder_sens = 100;
+int physical_cyclic_center_x = 0;
+int physical_cyclic_center_y = 0;
+int physical_pedals_center = 0;
 
 bool coll_head_lastButtonState[60];
 bool coll_head_triggerState[60];
@@ -64,6 +56,19 @@ long total_rudder = 0;
 
 int ADC_RANGE = 0.5 + pow(2, ADS1115_RESOLUTION);
 int COLLECTIVE_ADC_RANGE = 0.5 + pow(2, 10);
+
+bool force_trim_on = 0;
+bool force_trim_position_set = 0;
+byte cyclic_force_trim_state = 0;
+bool force_trim_rudder_on = 0;
+bool force_trim_rudder_position_set = 0;
+byte pedals_force_trim_state = 0;
+
+uint16_t force_trim_x = ADC_RANGE / 2;
+uint16_t force_trim_y = ADC_RANGE / 2 ;
+uint16_t force_trim_rudder = ADC_RANGE / 2;
+
+int one_percent_range = ADC_RANGE / 100;
 
 void setup()
 {

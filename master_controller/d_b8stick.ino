@@ -98,6 +98,12 @@ void poll_b8stick()
                   force_trim_position_set = 0;
                   force_trim_rudder_on = 0;
                   force_trim_rudder_position_set = 0;
+
+                  force_trim_x = ADC_RANGE / 2;
+                  force_trim_y = ADC_RANGE / 2 ;
+                  force_trim_rudder = ADC_RANGE / 2;
+                  cyclic_force_trim_state = 0;
+                  pedals_force_trim_state = 0;
                 }
               }
             }
@@ -116,16 +122,8 @@ void poll_b8stick()
             }
             else if ((i == PSEUDO_FORCE_TRIM_BUTTON) && (PSEUDO_FORCE_TRIM == 1) && (v == 1))
             {
-              if (force_trim_on == 0)
-              {
-                force_trim_on = 1;
-                force_trim_rudder_on = 1;
-              }
-              else
-              {
-                force_trim_on = 0;
-                force_trim_rudder_on = 0;
-              }
+              force_trim_on = !force_trim_on;
+              force_trim_rudder_on = !force_trim_rudder_on;
             }
             else
             {
@@ -147,9 +145,9 @@ int parse_hat_trim (int x, int y, bool invert_x, bool invert_y)
 {
   int hat_val;
 
-  if (force_trim_position_set == 1)
+  if ((force_trim_position_set == 1) || (CYCLIC_HAS_CENTERING == 1))
   {
-    int one_percent_range = ADC_RANGE / 100;
+    //int one_percent_range = ADC_RANGE / 100;
     int adj_step_x = one_percent_range * ATT_TRIM_STEP_X;
     int adj_step_y = one_percent_range * ATT_TRIM_STEP_Y;
     if (y > 145)
@@ -204,7 +202,10 @@ int parse_hat_trim (int x, int y, bool invert_x, bool invert_y)
 //          Serial.print(force_trim_x);
 //      Serial.print(" ");
 //      Serial.println(force_trim_y);
+    if (CYCLIC_HAS_CENTERING == 0)
+    {
       simchair.setXAxis(force_trim_x);
       simchair.setYAxis(force_trim_y);
+    }
   }
 }

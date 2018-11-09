@@ -16,6 +16,17 @@ void setup_cyclic()
     cyclic.begin();
     cyclic.setGain(GAIN_ONE);
   }
+
+  physical_cyclic_center_x = cyclic.readADC_SingleEnded(0) >> (15 - ADS1115_RESOLUTION);
+  physical_cyclic_center_y = cyclic.readADC_SingleEnded(1) >> (15 - ADS1115_RESOLUTION);
+  if (FSGIMBAL_INVERT_X == 1)
+  {
+    physical_cyclic_center_x = ADC_RANGE - physical_cyclic_center_x;
+  }
+  if (FSGIMBAL_INVERT_Y == 1)
+  {
+    physical_cyclic_center_y = ADC_RANGE - physical_cyclic_center_y;
+  }
 }
 
 void poll_cyclic()
@@ -37,6 +48,7 @@ void poll_cyclic()
       // ...wrap around to the beginning:
       xy_read_index = 0;
     }
+    
 
     x = total_x / xy_readings;
     y = total_y / xy_readings;
@@ -73,39 +85,96 @@ void poll_cyclic()
     y = adjust_sensitivity(y, CUSTOM_CYCLIC_SENS);
   }
 
-  if (PSEUDO_FORCE_TRIM_RELEASE_MODE == "ADAPTIVE")
+  if (CYCLIC_HAS_CENTERING == 0) // CYCLIC WITHOUT SPRINGS
   {
-    if ((force_trim_on == 0) && (force_trim_position_set == 0))
+    if (PSEUDO_FORCE_TRIM_RELEASE_MODE == "ADAPTIVE")
     {
-      simchair.setXAxis(x);
-      simchair.setYAxis(y);
-    }
-    else if ((force_trim_on == 1) && (force_trim_position_set == 0))
-    {
-      force_trim_x = x;
-      force_trim_y = y;
-      force_trim_position_set = 1;
-    }
-    else if ((force_trim_on == 0) && (force_trim_position_set == 1))
-    {
-      int one_percent_range = ADC_RANGE / 100;
-      int diff_x = x - force_trim_x; // this is needed because of how the abs() works
-      int diff_y = y - force_trim_y;
-
-      if (((abs(diff_x)) < (PSEUDO_FORCE_TRIM_RELEASE_DEVIATION * one_percent_range)) && ((abs(diff_y)) < (PSEUDO_FORCE_TRIM_RELEASE_DEVIATION * one_percent_range)))
+      if ((force_trim_on == 0) && (force_trim_position_set == 0))
       {
         simchair.setXAxis(x);
         simchair.setYAxis(y);
-        force_trim_position_set = 0;
+      }
+      else if ((force_trim_on == 1) && (force_trim_position_set == 0))
+      {
+        force_trim_x = x;
+        force_trim_y = y;
+        force_trim_position_set = 1;
+      }
+      else if ((force_trim_on == 0) && (force_trim_position_set == 1))
+      {
+        //int one_percent_range = ADC_RANGE / 100;
+        int diff_x = x - force_trim_x; // this is needed because of how the abs() works
+        int diff_y = y - force_trim_y;
+  
+        if (((abs(diff_x)) < (PSEUDO_FORCE_TRIM_RELEASE_DEVIATION * one_percent_range)) && ((abs(diff_y)) < (PSEUDO_FORCE_TRIM_RELEASE_DEVIATION * one_percent_range)))
+        {
+          simchair.setXAxis(x);
+          simchair.setYAxis(y);
+          force_trim_position_set = 0;
+        }
+      }
+    }
+    else //INSTANT mode
+    {
+      if (force_trim_on == 0)
+      {
+        simchair.setXAxis(x);
+        simchair.setYAxis(y);
       }
     }
   }
-  else //INSTANT mode
+  else // CYCLIC WITH SPRINGS
   {
-    if (force_trim_on == 0)
+//    Serial.print(force_trim_on);
+//    Serial.print(" ");
+//    Serial.print(force_trim_position_set);
+//    Serial.print(" ");
+//    Serial.print(cyclic_force_trim_state);
+//    Serial.println(" ");
+    
+
+    if (force_trim_on == 0) // button is not pressed
     {
-      simchair.setXAxis(x);
-      simchair.setYAxis(y);
+      
+      if ((cyclic_force_trim_state == 0) || (cyclic_force_trim_state == 2))
+      {
+        simchair.setXAxis(force_trim_x + (x - (ADC_RANGE / 2)));
+        simchair.setYAxis(force_trim_y + (y - (ADC_RANGE / 2)));
+      }
+      if (cyclic_force_trim_state == 1) // after assigning a new center, wait for the stick to be returned to its mechanical center
+      {
+          //int one_percent_range = ADC_RANGE / 100;
+          int diff_x_center = x - physical_cyclic_center_x; // this is needed because of how the abs() works
+          int diff_y_center = y - physical_cyclic_center_y;
+  
+          if (((abs(diff_x_center)) < (PSEUDO_FORCE_TRIM_RELEASE_DEVIATION * one_percent_range)) && ((abs(diff_y_center)) < (PSEUDO_FORCE_TRIM_RELEASE_DEVIATION * one_percent_range)))
+          {
+            
+            cyclic_force_trim_state = 2;
+          }
+          
+      }
+      
     }
+    else if (force_trim_on == 1) // button is pressed
+    {
+      force_trim_on = 0;
+      if (cyclic_force_trim_state == 0) //1st trim button press - assign new center
+      {
+        force_trim_x = x;
+        force_trim_y = y;
+        cyclic_force_trim_state = 1;
+
+      }
+      if ((cyclic_force_trim_state == 2))// && (force_trim_on != prev_cyclic_force_trim_state)) //2nd button press - return center to its default position
+      {
+        //int one_percent_range = ADC_RANGE / 100;
+        force_trim_x = force_trim_x + (x - (physical_cyclic_center_x));
+        force_trim_y = force_trim_y + (y - (physical_cyclic_center_y));
+        cyclic_force_trim_state = 1;
+      }
+      
+    }
+
   }
 }

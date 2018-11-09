@@ -10,6 +10,8 @@
   #define FSGIMBAL_INVERT_X 1
   #define FSGIMBAL_INVERT_Y 0
 
+  #define CYCLIC_HAS_CENTERING 1
+
   #define B8_POT_MODE "HAT_SW" // HAT_SW or ANALOG
   
   #define SENS_ADJ_METHOD  "LINEAR"

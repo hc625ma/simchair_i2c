@@ -90,7 +90,7 @@ void poll_single_engine_collective()
   }
   else if ((collective_hold_active == 0) && (collective_hold_position_set == 1))
   {
-    int one_percent_range = COLLECTIVE_ADC_RANGE / 100;
+    //int one_percent_range = COLLECTIVE_ADC_RANGE / 100;
     int diff_z = z - collective_hold_position; // this is needed because of how the abs() works
 
    // if ((abs(diff_z)) < (PSEUDO_FORCE_TRIM_RELEASE_DEVIATION * one_percent_range))
