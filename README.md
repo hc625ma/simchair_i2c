@@ -1,6 +1,8 @@
 # simchair_i2c
 
-This is software for new simchair mkIII I2C controllers (master and peripherals). The master is based on Arduino Leonardo. 
+![Simchair MKIII](http://hc625ma.org/wp-content/uploads/2018/10/05310003.jpg)
+
+This software is for new simchair mkIII I2C controllers (master and peripherals). The master is based on Arduino Leonardo. 
 It uses an epic Leonardo Joystick library by MHeironimus: https://github.com/MHeironimus/ArduinoJoystickLibrary 
 and the I2C bus to communicate with peripherals, which use Arduino Pro mini or Adafruit ADS1115 ADC boards.
 
