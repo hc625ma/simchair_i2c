@@ -128,7 +128,7 @@ void poll_pedals()
           //int one_percent_range = ADC_RANGE / 100;
           int diff_rudder_center = rudder - physical_pedals_center; // this is needed because of how the abs() works
           //Serial.println(diff_rudder_center);
-         if ((abs(diff_rudder_center)) < (1 * one_percent_range))
+         if ((abs(diff_rudder_center)) < (PSEUDO_FORCE_TRIM_RELEASE_DEVIATION * one_percent_range))
          {
             
             pedals_force_trim_state = 2;
@@ -143,7 +143,7 @@ void poll_pedals()
       force_trim_rudder_on = 0;
       if (pedals_force_trim_state == 0) //1st trim button press - assign new center
       {
-        force_trim_rudder = rudder;
+        force_trim_rudder = force_trim_rudder + (rudder - (physical_pedals_center));
         pedals_force_trim_state = 1;
       }
       if ((pedals_force_trim_state == 2))//2nd button press - return center to its default position

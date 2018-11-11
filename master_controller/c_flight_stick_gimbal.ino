@@ -182,8 +182,8 @@ void poll_cyclic()
       force_trim_on = 0;
       if (cyclic_force_trim_state == 0) //1st trim button press - assign new center
       {
-        force_trim_x = x;
-        force_trim_y = y;
+        force_trim_x = force_trim_x + (x - (physical_cyclic_center_x));
+        force_trim_y = force_trim_y + (y - (physical_cyclic_center_y));
         cyclic_force_trim_state = 1;
 
       }

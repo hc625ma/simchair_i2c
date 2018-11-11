@@ -26,7 +26,8 @@
   #define PSEUDO_FORCE_TRIM_RELEASE_MODE "ADAPTIVE" //INSTANT or ADAPTIVE
   // ADAPTIVE will release trim when your lever will be close to the position it is held after the button press
   // INSTANT will release instantly, on press
-  #define PSEUDO_FORCE_TRIM_RELEASE_DEVIATION 5  // how much deviation is allowed from trimmed position when releasing trim, percent
+  #define PSEUDO_FORCE_TRIM_RELEASE_DEVIATION 1  // how much deviation is allowed from trimmed position when releasing trim, percent; 0,5 to 1 for cyclic with springs, 
+  //5 for non-centering one. Less deviation = more precise trimming, but may require extra movements to unlock the controls.
   #define SENS_SWITCH_TRIM_EMERGENCY_RELEASE 1 // release the trim when you press SENS SWITCH
   
   // use a button on cyclic to switch sensitivity in flight.
@@ -37,9 +38,9 @@
   #define SENS_SWITCH_ENABLED 1
   #define SENS_SWITCH_BUTTON 0 //0 is the first button
   
-  #define B8_HAT_SWITCH_MODE "BOTH" //"ATT_TRIM","HAT", or "BOTH", it will adjust the position of the trimmed cyclic with hat(Bell 407-style)
-  #define ATT_TRIM_STEP_Y 0.05 //IN PERCENTS OF AXIS LENGHT
-  #define ATT_TRIM_STEP_X 0.05 //IN PERCENTS OF AXIS LENGHT
+  #define B8_HAT_SWITCH_MODE "ATT_TRIM" //"ATT_TRIM","HAT", or "BOTH", it will adjust the position of the trimmed cyclic with hat(Bell 407-style)
+  #define ATT_TRIM_STEP_Y 0.02 //0.05 //IN PERCENTS OF AXIS LENGHT, 0.05 for non-centering cyclic, 0.02 for a spring-loaded one
+  #define ATT_TRIM_STEP_X 0.02 //0.05 //IN PERCENTS OF AXIS LENGHT
   #define INVERT_HAT_TRIM_X 0
   #define INVERT_HAT_TRIM_Y 1
   
