@@ -20,7 +20,7 @@
 uint8_t x1,y1,x2,y2,r1,r2;
 uint8_t b = 0b00000000; //digital pins 2 to 9; x ^= (1 << n); - toggles nth bit of x.  all other bits left alone.
 
-//INTERCOM TRIGGER PIN IS DEFINED SEPARATELY!
+//MODE SWITCH GOES THERE!
 byte pins[] = {11,12};
 
 byte data[7]; //6 8 bit axes + 2 buttons in the 7th byte

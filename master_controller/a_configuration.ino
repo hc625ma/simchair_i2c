@@ -106,15 +106,16 @@
 
   #define TWIN_ENGINE_COLLECTIVE_IDLE_STOP_THROTTLE1_VAL 50
   #define TWIN_ENGINE_COLLECTIVE_IDLE_STOP_THROTTLE2_VAL 50
-
-  byte ab412_coll_head_idle_stop_buttons[] = {9,10}; // put 1 or 2 buttons here as seen in joy.cpl; these keys MUST be in the ab412_sw_mode_button_switches[] array below
-  byte ab412_coll_head_starter_buttons[] = {11,12};
+// This is the compatibility mode that can send keyboard presses instead of joystick button pressed if you need so. This was needed because of how old 412 compat mode worked
+// and will probably be removed in the future, because there's now a much better lua script.
+  byte ab412_coll_head_idle_stop_buttons[] = {};//{9,10}; // put 1 or 2 buttons here as seen in joy.cpl; if used with compat mode, these keys MUST be in the ab412_sw_mode_button_switches[] array below
+  byte ab412_coll_head_starter_buttons[] = {};//{11,12};
 
   // AB412 switch modes
   // write joystick button numbers here as they are displayed in joy.cpl in order of increment
-  byte ab412_sw_mode_button_switches[] = {1,2,9,10,11,12,17};//e.g. {1,2,9,10,11,12,13,14,17};// active when being held
+  byte ab412_sw_mode_button_switches[] = {1,2,17};//e.g. {1,2,9,10,11,12,13,14,17};// active when being held
   byte ab412_sw_mode_toggle_switches[] = {3,4,5,6,7,8};//e.g. {3,4,5,6,7,8,15,16};// 2-way switch mode: single button press when switch is turned to "on", one more press when switch is turned to "off"; something you can assign to a single key press; e.g. gear extend/retract
-  byte ab412_sw_mode_selector_button_switches[] = {13}; //e.g. {3,5,7,15}; //3-WAY SWITCHES ONLY, FIRST BUTTON (WITH LOWER NUMBER) MUST BE GIVEN HERE; REMOVE THE SECOND BUTTON FROM EVERYWHERE ELSE FOR CORRECT OPERATION; when switch is on, button is held; when off, another button is pressed and held;
+  byte ab412_sw_mode_selector_button_switches[] = {9,11,13}; //e.g. {3,5,7,15}; //3-WAY SWITCHES ONLY, FIRST BUTTON (WITH LOWER NUMBER) MUST BE GIVEN HERE; REMOVE THE SECOND BUTTON FROM EVERYWHERE ELSE FOR CORRECT OPERATION; when switch is on, button is held; when off, another button is pressed and held;
   byte ab412_sw_mode_selector_switches[] = {15};//e.g. {3,5,7,15}; //same as above, but buttons are pressed and released - e.g. landing light extend / hold / retract
   
 // </AB412 COLL HEAD>

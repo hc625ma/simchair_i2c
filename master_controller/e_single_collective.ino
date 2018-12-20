@@ -4,7 +4,7 @@ void setup_single_engine_collective()
   int error = Wire.endTransmission();
   if (error == 0)
   {
-    simchair.setZAxisRange(0, 1023);
+    simchair.setZAxisRange(64, 1023);
     simchair.setThrottleRange(0,1023);//SINGLE_ENGINE_COLLECTIVE_IDLE_STOP_AXIS_VAL, 1023);
     dev_single_engine_collective = 1;
   }
@@ -34,6 +34,7 @@ void poll_single_engine_collective()
   }
   // uncomment the next line and turn your throttle to idle stop position to see SINGLE_ENGINE_COLLECTIVE_IDLE_STOP_AXIS_VAL value 
   //Serial.println(throttle);
+  //Serial.println(z);
   if ((COLL_HEAD_IDLE_STOP_COMPAT_MODE == 1) && (coll_head_mode_sw_position == 0))
   {
     if (COLL_HEAD_IDLE_STOP_COMPAT_PROFILE == "DCS_HUEY")
