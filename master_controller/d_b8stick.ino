@@ -74,7 +74,8 @@ void poll_b8stick()
           }
           else
           {
-            if (((SENS_SWITCH_MODE == "FORCE_TRIM") || ((SENS_SWITCH_MODE == "TOGGLE") && (v == 1))) && (i != PTT_BUTTON) && (i != PSEUDO_FORCE_TRIM_BUTTON))
+            //if (((SENS_SWITCH_MODE == "FORCE_TRIM") || ((SENS_SWITCH_MODE == "TOGGLE") && (v == 1))) && (i != PTT_BUTTON) && (i != PSEUDO_FORCE_TRIM_BUTTON))
+            if ((v == 1) && (i != PTT_BUTTON) && (i != PSEUDO_FORCE_TRIM_BUTTON))
             {
               if (cyclic_sens == 100)
               {
@@ -145,7 +146,7 @@ int parse_hat_trim (int x, int y, bool invert_x, bool invert_y)
 {
   int hat_val;
 
-  if ((force_trim_position_set == 1) || (CYCLIC_HAS_CENTERING == 1))
+  if ((force_trim_position_set == 1) || (SPRING_LOADED_CYCLIC_AND_PEDALS == 1))
   {
     //int one_percent_range = ADC_RANGE / 100;
     int adj_step_x = one_percent_range * ATT_TRIM_STEP_X;
@@ -202,7 +203,7 @@ int parse_hat_trim (int x, int y, bool invert_x, bool invert_y)
 //          Serial.print(force_trim_x);
 //      Serial.print(" ");
 //      Serial.println(force_trim_y);
-    if (CYCLIC_HAS_CENTERING == 0)
+    if (SPRING_LOADED_CYCLIC_AND_PEDALS == 0)
     {
       simchair.setXAxis(force_trim_x);
       simchair.setYAxis(force_trim_y);

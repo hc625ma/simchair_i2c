@@ -9,12 +9,11 @@
 
   #define FSGIMBAL_INVERT_X 1
   #define FSGIMBAL_INVERT_Y 0
-
-  #define CYCLIC_HAS_CENTERING 1
+  
+  #define SPRING_LOADED_CYCLIC_AND_PEDALS 1 // set to 0 if your cyclic and pedals do not have springs (changes force trim behavior)
 
   #define B8_POT_MODE "HAT_SW" // HAT_SW or ANALOG
   
-  #define SENS_ADJ_METHOD  "LINEAR"
   
   #define PSEUDO_FORCE_TRIM 1
   // this will freeze cyclic in-place until you press the button again.
@@ -43,13 +42,6 @@
   #define ATT_TRIM_STEP_X 0.02 //0.05 //IN PERCENTS OF AXIS LENGHT
   #define INVERT_HAT_TRIM_X 0
   #define INVERT_HAT_TRIM_Y 1
-  
-  // sens. switch behavior available options: "FORCE_TRIM" or "TOGGLE"
-  // FORCE_TRIM will reduce sensitivity to CYCLIC_SENS and RUDDER_SENS
-  // while SENSITIVITY_SWITCH_BUTTON is pressed, "TOGGLE" will act
-  // as a regular switch
-  
-  #define SENS_SWITCH_MODE "TOGGLE"
   
   // if SENS_SWITCH is disabled, these values will be used;
   // set to 100 for full axis range

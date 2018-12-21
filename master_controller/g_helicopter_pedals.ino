@@ -52,14 +52,14 @@ void poll_pedals()
   }
   if (SENS_SWITCH_ENABLED == 1)
   {
-    rudder = adjust_sensitivity(rudder, rudder_sens);
+    rudder = adjust_sensitivity(rudder, rudder_sens, physical_pedals_center);
   }
   else
   {
-    rudder = adjust_sensitivity(rudder, CUSTOM_RUDDER_SENS);
+    rudder = adjust_sensitivity(rudder, CUSTOM_RUDDER_SENS, physical_pedals_center);
   }
 
-  if (CYCLIC_HAS_CENTERING == 0) // CYCLIC WITHOUT SPRINGS
+  if (SPRING_LOADED_CYCLIC_AND_PEDALS == 0) // CYCLIC WITHOUT SPRINGS
   {
     if (PSEUDO_FORCE_TRIM_EFFECTS_PEDALS == 1)
     {
@@ -99,7 +99,7 @@ void poll_pedals()
       simchair.setRudder(rudder);
     }
   }
-  else if (CYCLIC_HAS_CENTERING == 1) // CYCLIC WITH SPRINGS
+  else if (SPRING_LOADED_CYCLIC_AND_PEDALS == 1) // CYCLIC WITH SPRINGS
   {
 //    Serial.print(force_trim_rudder_on);
 //    Serial.print(" ");
