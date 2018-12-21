@@ -81,6 +81,8 @@ void poll_b8stick()
               {
                 cyclic_sens = CUSTOM_CYCLIC_SENS;
                 rudder_sens = CUSTOM_RUDDER_SENS;
+                physical_cyclic_center_x = adjust_sensitivity (physical_cyclic_center_x, CUSTOM_CYCLIC_SENS);
+                physical_cyclic_center_y = adjust_sensitivity (physical_cyclic_center_y, CUSTOM_CYCLIC_SENS);
                 if (SENS_SWITCH_TRIM_EMERGENCY_RELEASE == 1)
                 {
                   force_trim_on = 0;
@@ -93,6 +95,8 @@ void poll_b8stick()
               {
                 cyclic_sens = 100;
                 rudder_sens = 100;
+                physical_cyclic_center_x = adjust_sensitivity (physical_cyclic_center_x, 100);
+                physical_cyclic_center_y = adjust_sensitivity (physical_cyclic_center_y, 100);
                 if (SENS_SWITCH_TRIM_EMERGENCY_RELEASE == 1)
                 {
                   force_trim_on = 0;

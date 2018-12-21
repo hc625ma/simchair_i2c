@@ -52,11 +52,11 @@ void poll_pedals()
   }
   if (SENS_SWITCH_ENABLED == 1)
   {
-    rudder = adjust_sensitivity(rudder, rudder_sens, physical_pedals_center);
+    rudder = adjust_sensitivity(rudder, rudder_sens);
   }
   else
   {
-    rudder = adjust_sensitivity(rudder, CUSTOM_RUDDER_SENS, physical_pedals_center);
+    rudder = adjust_sensitivity(rudder, CUSTOM_RUDDER_SENS);
   }
 
   if (SPRING_LOADED_CYCLIC_AND_PEDALS == 0) // CYCLIC WITHOUT SPRINGS

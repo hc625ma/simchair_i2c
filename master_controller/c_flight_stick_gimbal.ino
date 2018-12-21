@@ -76,13 +76,13 @@ void poll_cyclic()
   
   if (SENS_SWITCH_ENABLED == 1)
   {
-    x = adjust_sensitivity(x, cyclic_sens, physical_cyclic_center_x);
-    y = adjust_sensitivity(y, cyclic_sens, physical_cyclic_center_y);
+    x = adjust_sensitivity(x, cyclic_sens);
+    y = adjust_sensitivity(y, cyclic_sens);
   }
   else
   {
-    x = adjust_sensitivity(x, CUSTOM_CYCLIC_SENS, physical_cyclic_center_x);
-    y = adjust_sensitivity(y, CUSTOM_CYCLIC_SENS, physical_cyclic_center_y);
+    x = adjust_sensitivity(x, CUSTOM_CYCLIC_SENS);
+    y = adjust_sensitivity(y, CUSTOM_CYCLIC_SENS);
   }
 
   if (SPRING_LOADED_CYCLIC_AND_PEDALS == 0) // CYCLIC WITHOUT SPRINGS
