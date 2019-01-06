@@ -59,7 +59,7 @@
 
 // <PEDALS>
 
-  #define INVERT_RUDDER 0
+  #define INVERT_RUDDER 1
   #define RUDDER_FILTERING_ENABLED 0
   #define CUSTOM_RUDDER_SENS 80 // this value will be used if SENS_SWITCH is disabled
 
