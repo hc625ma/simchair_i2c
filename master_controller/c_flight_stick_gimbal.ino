@@ -32,6 +32,7 @@ void setup_cyclic()
 void poll_cyclic()
 {
   uint32_t x, y;
+  
   if (XY_FILTERING_ENABLED == 1)
   {
     total_x = total_x - buf_x[xy_read_index];
@@ -59,6 +60,20 @@ void poll_cyclic()
   {
     x = cyclic.readADC_SingleEnded(0) >> (15 - ADS1115_RESOLUTION);
     y = cyclic.readADC_SingleEnded(1) >> (15 - ADS1115_RESOLUTION);
+    ftcr = cyclic.readADC_SingleEnded(2) >> 5;
+    if (ftcr == 255)
+    {
+      physical_cyclic_center_x = x;
+      physical_cyclic_center_y = y;
+      if (FSGIMBAL_INVERT_X == 1)
+      {
+        physical_cyclic_center_x = ADC_RANGE - physical_cyclic_center_x;
+      }
+      if (FSGIMBAL_INVERT_Y == 1)
+      {
+        physical_cyclic_center_y = ADC_RANGE - physical_cyclic_center_y;
+      }
+    }
 
     if (FSGIMBAL_INVERT_X == 1)
     {
@@ -68,10 +83,11 @@ void poll_cyclic()
     {
       y = ADC_RANGE - y;
     }
+
     // uncomment next 3 lines for cyclic calibration
 //    Serial.print(x);
 //    Serial.print(" ");
-//    Serial.println(y);
+    //Serial.println(ftcr);
   }
   
   if (SENS_SWITCH_ENABLED == 1)

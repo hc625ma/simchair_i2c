@@ -50,6 +50,14 @@ void poll_pedals()
     rudder = pedals.readADC_SingleEnded(0) >> (15 - ADS1115_RESOLUTION);
     //Serial.println(rudder); //uncomment to calibrate pedals
   }
+  if (ftcr == 255)
+  {
+    physical_pedals_center = rudder;
+    if (INVERT_RUDDER == 1)
+    {
+      physical_pedals_center = ADC_RANGE - physical_pedals_center;
+    }
+  }
   if (SENS_SWITCH_ENABLED == 1)
   {
     rudder = adjust_sensitivity(rudder, rudder_sens);

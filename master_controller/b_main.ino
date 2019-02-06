@@ -68,7 +68,10 @@ uint16_t force_trim_x = ADC_RANGE / 2;
 uint16_t force_trim_y = ADC_RANGE / 2 ;
 uint16_t force_trim_rudder = ADC_RANGE / 2;
 
+
 int one_percent_range = ADC_RANGE / 100;
+
+uint8_t ftcr;
 
 void setup()
 {
