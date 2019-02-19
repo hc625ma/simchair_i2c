@@ -23,7 +23,7 @@ uint16_t coll_head_idle_stop_compat_dcs (uint16_t throttle0, uint16_t throttle1,
   uint16_t throttle[] = {throttle0,throttle1};
   uint16_t idle_val[] = {idle_val0,idle_val1};
 
-  for (byte i = 0; i < sizeof(ab412_coll_head_idle_stop_buttons);i++)
+  for (byte i = 0; i < 2;i++)//sizeof(ab412_coll_head_idle_stop_buttons);i++)
     {
       if ((throttle[i] < idle_val[i]) && (throttle_idle_cutoff[i] == 1))
       {
