@@ -74,6 +74,7 @@ int one_percent_range = ADC_RANGE / 100;
 uint8_t ftcr;
 
 bool physical_latch_button_state = 0;
+bool throttle_latch_pressed = 0;
 
 void setup()
 {

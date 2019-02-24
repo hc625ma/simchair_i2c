@@ -10,6 +10,19 @@ void setup_single_engine_collective()
   }
 }
 
+void set_idle_stop_latch_state(uint16_t throttle)
+{
+  if (idle_stop_pressed[0] == 1)
+  {
+    throttle_latch_pressed = 1;
+  }
+  if (throttle > SINGLE_ENGINE_COLLECTIVE_IDLE_STOP_AXIS_VAL + 100)
+  {
+    throttle_latch_pressed = 0;
+  }
+    
+}
+
 void poll_single_engine_collective()
 {
   uint16_t z;
@@ -34,6 +47,7 @@ void poll_single_engine_collective()
     }
     raw_throttle = throttle;
   }
+  set_idle_stop_latch_state(raw_throttle);
   // uncomment the next line and turn your throttle to idle stop position to see SINGLE_ENGINE_COLLECTIVE_IDLE_STOP_AXIS_VAL value 
   //Serial.println(throttle);
   //Serial.println(z);
@@ -103,10 +117,10 @@ void poll_single_engine_collective()
       collective_hold_position_set = 0;
     }
   }
-  if (PHYSICAL_LATCH_MOD == 1)
+  if (BUTTON_PRESS_ON_THROTTLE_CUTOFF == 1)
   {
     //Serial.println(raw_throttle);
-    if ( raw_throttle < (THROTTLE_MIN_AXIS_VALUE + 10))
+    if ( ((THROTTLE_LATCH_MODE == "PHYSICAL") && (raw_throttle < (THROTTLE_MIN_AXIS_VALUE + 10))) || (THROTTLE_LATCH_MODE == "TACTILE") && (raw_throttle < (THROTTLE_MIN_AXIS_VALUE + 10)) && (throttle_latch_pressed == 1) )
     {
       //Serial.println(raw_throttle);
       if (physical_latch_button_state != 1)
@@ -126,3 +140,6 @@ void poll_single_engine_collective()
   }
 
 }
+
+
+

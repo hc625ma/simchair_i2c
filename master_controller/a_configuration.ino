@@ -82,7 +82,8 @@
 
   #define COLL_HEAD_DCS_HUEY_COMPAT_MODE_BUTTON_HOLD 50 // how long to hold throttle up/down buttons, adjusted depending on idle stop axis range (smaller range- bigger hold time and vice versa)
 
-  #define PHYSICAL_LATCH_MOD 1 // this feature will send a joystick button press when the throttle is fully closed
+  #define BUTTON_PRESS_ON_THROTTLE_CUTOFF 1// this feature will send a joystick button press when the throttle is fully closed
+  #define THROTTLE_LATCH_MODE "TACTILE" // PHYSICAL for physical latch mod or TACTILE for levers with tactile marks
   #define PHYSICAL_LATCH_MOD_JOY_BUTTON 32 // joystick button number as seen in joy.cpl for the 1st Leonardo in the list
   #define THROTTLE_MIN_AXIS_VALUE 0 // check this if the default doesn't work, print raw_throttle value in e_single_collective.ino and set this line to its value, corresponding to a fully closed throttle
   
