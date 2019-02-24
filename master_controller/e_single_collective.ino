@@ -4,7 +4,7 @@ void setup_single_engine_collective()
   int error = Wire.endTransmission();
   if (error == 0)
   {
-    simchair.setZAxisRange(64, 1023);
+    simchair.setZAxisRange(63, 1023);
     simchair.setThrottleRange(0,1023);//SINGLE_ENGINE_COLLECTIVE_IDLE_STOP_AXIS_VAL, 1023);
     dev_single_engine_collective = 1;
   }
@@ -14,6 +14,7 @@ void poll_single_engine_collective()
 {
   uint16_t z;
   uint16_t throttle;
+  uint16_t raw_throttle;
 
   Wire.requestFrom(12, 4);
   while (Wire.available())
@@ -31,6 +32,7 @@ void poll_single_engine_collective()
     {
       throttle = 0;
     }
+    raw_throttle = throttle;
   }
   // uncomment the next line and turn your throttle to idle stop position to see SINGLE_ENGINE_COLLECTIVE_IDLE_STOP_AXIS_VAL value 
   //Serial.println(throttle);
@@ -99,6 +101,27 @@ void poll_single_engine_collective()
     {
       simchair.setZAxis(z);
       collective_hold_position_set = 0;
+    }
+  }
+  if (PHYSICAL_LATCH_MOD == 1)
+  {
+    //Serial.println(raw_throttle);
+    if ( raw_throttle < (THROTTLE_MIN_AXIS_VALUE + 10))
+    {
+      //Serial.println(raw_throttle);
+      if (physical_latch_button_state != 1)
+      {
+        simchair.setButton(PHYSICAL_LATCH_MOD_JOY_BUTTON - 1, 1);
+        physical_latch_button_state = 1;
+      }
+    }
+    else
+    {
+      if (physical_latch_button_state != 0)
+      {
+        simchair.setButton(PHYSICAL_LATCH_MOD_JOY_BUTTON - 1, 0);
+        physical_latch_button_state = 0;
+      }
     }
   }
 

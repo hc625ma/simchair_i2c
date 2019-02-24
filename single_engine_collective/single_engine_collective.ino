@@ -35,9 +35,9 @@ void loop()
   // of your lever
 
   
-  z = map(z,0,1002,1023,0);
+  z = map(z,14,1003,1023,0);
   rz = map(rz,0,992,1023,0);
-
+//
 //  Serial.print(z); 
 //  Serial.print(" ");
 //  Serial.println(rz);

@@ -28,12 +28,32 @@ void setup()
 
 void loop() 
 {
-  z = filteredRead(A1,filter_counter_z);
-  rz = filteredRead(A0,filter_counter_rz);
+  z = filteredRead(A0,filter_counter_z);
+  rz = filteredRead(A1,filter_counter_rz);
   // uncomment Serial.print statements and change 2nd and 3rd values to physical min and max
   // of your lever; change the order of 2 last values to invert an axis
-  z = map(z,0,961,1023,0);
-  rz = map(rz,0,982,0,1023);
+  z = map(z,1002,18,0,1023);
+  rz = map(rz,10,976,1023,0);
+
+  if (z > 1023)
+  {
+    z = 1023;
+  }
+
+  if (rz > 1023)
+  {
+    rz = 1023;
+  }
+
+  if (z > 30000)
+  {
+    z = 0;
+  }
+
+  if (rz > 30000)
+  {
+    rz = 0;
+  }
   
 //Serial.print(z); 
 //Serial.print(" ");
