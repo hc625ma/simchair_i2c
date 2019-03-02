@@ -49,12 +49,10 @@ void poll_single_engine_collective()
   }
   set_idle_stop_latch_state(raw_throttle);
   // uncomment the next line and turn your throttle to idle stop position to see SINGLE_ENGINE_COLLECTIVE_IDLE_STOP_AXIS_VAL value 
-//  Serial.println(throttle);
+  //Serial.println(throttle);
   //Serial.println(z);
-  if ((COLL_HEAD_IDLE_STOP_COMPAT_MODE == 1) && (coll_head_mode_sw_position == 0))
+  if ((DCS_HUEY_IDLE_STOP_COMPAT_MODE_ENABLED == 1) && (coll_head_mode_sw_position == 0))
   {
-    if (COLL_HEAD_IDLE_STOP_COMPAT_PROFILE == "DCS_HUEY")
-    {
       if (min_throttle_val[0] != SINGLE_ENGINE_COLLECTIVE_IDLE_STOP_AXIS_VAL)
       {
          simchair.setThrottleRange(SINGLE_ENGINE_COLLECTIVE_IDLE_STOP_AXIS_VAL, SINGLE_COLLECTIVE_THR_MAX);
@@ -79,12 +77,6 @@ void poll_single_engine_collective()
       {
         throttle_idle_cutoff[0] = 1; 
       }   
-    }
-    else
-    {
-      //other profiles
-      simchair.setThrottle(throttle);
-    }
   }
   else
   {

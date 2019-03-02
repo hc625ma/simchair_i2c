@@ -8,28 +8,14 @@ void setup_huey_coll_head()
     simchair_aux2.setXAxisRange(0, 255);
     simchair_aux2.setYAxisRange(0, 255);
     dev_huey_coll_head = 1;
+    IDLE_STOP_BUTTON = huey_coll_head_idle_stop_buttons[0];
+    for (byte i=0;i<32;i++)
+    {
+      switch_matrix[i].sw_id = pgm_read_byte(&huey_switch_matrix[i].sw_id);
+      switch_matrix[i].sw_type = pgm_read_byte(&huey_switch_matrix[i].sw_type);
+      switch_matrix[i].sw_middle_b = pgm_read_byte(&huey_switch_matrix[i].sw_middle_b) - 1;
+    }
     
-    for (int i = 0; i < sizeof(coll_head_triggerState); i++)
-    {
-      coll_head_triggerState[i] = 0;
-    }
-    parse_sw_array(huey_sw_mode_button_switches, sizeof(huey_sw_mode_button_switches), coll_head_sw_mode_button_switches_parsed);
-    parse_sw_array(huey_sw_mode_toggle_switches, sizeof(huey_sw_mode_toggle_switches), coll_head_sw_mode_toggle_switches_parsed);
-    parse_sw_array(huey_sw_mode_selector_button_switches, sizeof(huey_sw_mode_selector_button_switches), coll_head_sw_mode_selector_button_switches_parsed);
-    parse_sw_array(huey_sw_mode_selector_switches, sizeof(huey_sw_mode_selector_switches), coll_head_sw_mode_selector_switches_parsed);
-
-    for (int i = 0; i < sizeof(huey_sw_mode_selector_button_switches); i++)
-    {
-      coll_head_lastButtonState[huey_sw_mode_selector_button_switches[i]] = 1;
-    }
-
-//          for (int p = 0; p < sizeof(huey_sw_mode_selector_button_switches_parsed); p++)
-//        {
-//          Serial.print(p);
-//          Serial.print(" ");
-//          Serial.println(huey_sw_mode_selector_button_switches_parsed[p]);
-//        }
-
   }
 }
 
@@ -68,7 +54,7 @@ void poll_huey_coll_head()
 
   simchair_aux2.setHatSwitch(0, hat_val);
 
-  coll_head_parse_switches(s0, 0, 0);
-  coll_head_parse_switches(s1, 8, 0);
+  parse_coll_head_sw_matrix(s0,0,0);
+  parse_coll_head_sw_matrix(s1,8,0);
 
 }

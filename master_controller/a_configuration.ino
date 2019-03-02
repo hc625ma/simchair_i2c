@@ -67,15 +67,13 @@
 
 // <COLLECTIVE>
 
-  #define COLLECTIVE_HOLD_ENABLED 1 // this will hold your collective in place until you press the button again and return the lever to the initial position
-  #define HUEY_HEAD_COLLECTIVE_HOLD_BUTTON 13
-  #define AB412_HEAD_COLLECTIVE_HOLD_BUTTON 2
+//  #define COLLECTIVE_HOLD_ENABLED 1 // this will hold your collective in place until you press the button again and return the lever to the initial position
+//  #define HUEY_HEAD_COLLECTIVE_HOLD_BUTTON 13
+//  #define AB412_HEAD_COLLECTIVE_HOLD_BUTTON 2
   
   //for sims that do not support axis movement below idle stop, sends the throttle up/down key when holding idle stop and rotating throttle simultaneously
   //not 100% realistic, yet better than nothing
-  #define COLL_HEAD_IDLE_STOP_COMPAT_MODE 1 // ASSIGN IDLE STOP IN_GAME WHILE IN MODE 0 (MODE SWITCH CENTERED)!
-  #define COLL_HEAD_IDLE_STOP_COMPAT_PROFILE "DCS_HUEY" //DCS_HUEY or XTRIDENT412
-  #define COLL_HEAD_IDLE_STOP_COMPAT_PROFILE_XTRIDENT412 1
+  #define DCS_HUEY_IDLE_STOP_COMPAT_MODE_ENABLED 1 // ASSIGN IDLE STOP IN_GAME WHILE IN MODE 0 (MODE SWITCH CENTERED)!
 
   byte coll_head_idle_stop_compat_throttle_up_keys[] = {KEY_PAGE_DOWN,'z'};
   byte coll_head_idle_stop_compat_throttle_down_keys[] = {KEY_PAGE_UP,'x'};
@@ -125,16 +123,56 @@
   #define TWIN_ENGINE_COLLECTIVE_IDLE_STOP_THROTTLE2_VAL 50
 // This is the compatibility mode that can send keyboard presses instead of joystick button pressed if you need so. This was needed because of how old 412 compat mode worked
 // and will probably be removed in the future, because there's now a much better lua script.
-  byte ab412_coll_head_idle_stop_buttons[] = {};//{9,10}; // put 1 or 2 buttons here as seen in joy.cpl; if used with compat mode, these keys MUST be in the ab412_sw_mode_button_switches[] array below
-  byte ab412_coll_head_starter_buttons[] = {};//{11,12};
+  byte ab412_coll_head_idle_stop_buttons[] = {17};// for Huey compat mode
 
-  // AB412 switch modes
-  // write joystick button numbers here as they are displayed in joy.cpl in order of increment
-  byte ab412_sw_mode_button_switches[] = {1,2,17};//e.g. {1,2,9,10,11,12,13,14,17};// active when being held
-  byte ab412_sw_mode_toggle_switches[] = {3,4,5,6,7,8};//e.g. {3,4,5,6,7,8,15,16};// 2-way switch mode: single button press when switch is turned to "on", one more press when switch is turned to "off"; something you can assign to a single key press; e.g. gear extend/retract
-  byte ab412_sw_mode_selector_button_switches[] = {9,11,13}; //e.g. {3,5,7,15}; //3-WAY SWITCHES ONLY, FIRST BUTTON (WITH LOWER NUMBER) MUST BE GIVEN HERE; REMOVE THE SECOND BUTTON FROM EVERYWHERE ELSE FOR CORRECT OPERATION; when switch is on, button is held; when off, another button is pressed and held;
-  byte ab412_sw_mode_selector_switches[] = {15};//e.g. {3,5,7,15}; //same as above, but buttons are pressed and released - e.g. landing light extend / hold / retract
-  
+ // COLLECTIVE SWITCHPANEL SWITCH MATRIX - NOW SUPPORTS UP TO 32 BUTTONS + 10 ADDITIONAL BUTTONS FOR TYPES 3 AND 4
+ // 4 SWITCH TYPES ARE SUPPORTED: 
+ // 1: button
+ // 2: momentarily press button
+ // 3: selector button (button + middle button press when switch is centered)
+ // 4: selector momentarily press button (momentarily press button + middle button momentarily press when switch is centered)
+ // ASSIGN THE BUTTON AFTER TYPES 3 AND 4 TO TYPE 5 (SLAVE) AND SET JOYSTICK BUTTON YOU WANT TO BE THE MIDDLE BUTTON IN 3RD COLUMN! 
+ // BUTTONS FROM 33 TO 42 ARE RESERVED FOR MIDDLE BUTTONS
+
+  //0 - disabled, 1 - button, 2 - 3 - selector_button, 4 - selector, 5 - slave
+  const sw_matrix ab412_switch_matrix[] PROGMEM = 
+  {
+  // i  t  m  is  i - id, t - type, m - middle button for types 3 and 4
+    {1, 1, 0},
+    {2, 1, 0},
+    {3, 2, 0},
+    {4, 2, 0},
+    {5, 2, 0},
+    {6, 2, 0},
+    {7, 2, 0},
+    {8, 2, 0},
+    {9, 3, 33},
+    {10,5, 33},
+    {11,3, 34},
+    {12,5, 34},
+    {13,3, 35},
+    {14,5, 35},
+    {15,4, 36},
+    {16,5, 36},
+    {17,1, 0},
+    {18,0, 0},
+    {19,0, 0},
+    {20,0, 0},
+    {21,0, 0},
+    {22,0, 0},
+    {23,0, 0},
+    {24,0, 0},
+    {25,0, 0},
+    {26,0, 0},
+    {27,0, 0},
+    {28,0, 0},
+    {29,0, 0},
+    {30,0, 0},
+    {31,0, 0},
+    {32,0, 0},
+
+  };
+//  
 // </AB412 COLL HEAD>
 
 // <HUEY COLL HEAD>
@@ -146,13 +184,53 @@
    
   #define COLL_HEAD_IDLE_STOP_COMPAT_TRESHOLD 5 // should be larger than jitter of your throttle pot
   #define SINGLE_ENGINE_COLLECTIVE_IDLE_STOP_AXIS_VAL 137 //find it out with uncommenting Serial.print(throttle) in poll_single_engine_collective sub, see below
+
+ // COLLECTIVE SWITCHPANEL SWITCH MATRIX - NOW SUPPORTS UP TO 32 BUTTONS + 10 ADDITIONAL BUTTONS FOR TYPES 3 AND 4
+ // 4 SWITCH TYPES ARE SUPPORTED: 
+ // 1: button
+ // 2: momentarily press button
+ // 3: selector button (button + middle button press when switch is centered)
+ // 4: selector momentarily press button (momentarily press button + middle button momentarily press when switch is centered)
+ // ASSIGN THE BUTTON AFTER TYPES 3 AND 4 TO TYPE 5 (SLAVE) AND SET JOYSTICK BUTTON YOU WANT TO BE THE MIDDLE BUTTON IN 3RD COLUMN! 
+ // BUTTONS FROM 33 TO 42 ARE RESERVED FOR MIDDLE BUTTONS
   
-  byte huey_sw_mode_button_switches[] = {7,8,11,12,13};//{7,8,9,12,13};// active when being held
-  byte huey_sw_mode_toggle_switches[] = {5,6};//{6};// 2-way switch mode: single button press when switch is turned to "on", one more press when switch is turned to "off"; something you can assign to a single key press; e.g. gear extend/retract
-  byte huey_sw_mode_selector_button_switches[] = {1,9}; //3-WAY SWITCHES ONLY, FIRST BUTTON (WITH LOWER NUMBER) MUST BE GIVEN HERE; REMOVE THE SECOND BUTTON FROM EVERYWHERE ELSE FOR CORRECT OPERATION; when switch is on, button is held; when off, 
-  //another button is pressed and held; THIS MODE SUPPORTS MODE SWITCH! for normal operation, return all switches to center when switching mode, otherwise they will hold button pressed until it will be pressed again in the same mode. This may or may not be
-  //what you expect, so be warned.
-  byte huey_sw_mode_selector_switches[] = {}; //same as above, but buttons are pressed and released - e.g. landing light extend / hold / retract
+  const sw_matrix huey_switch_matrix[] PROGMEM = 
+  {
+  // i  t  m  is  i - id, t - type, m - middle button for types 3 and 4
+    {1, 3, 33},
+    {2, 5, 33},
+    {3, 0, 0}, // buttons 3 and 4 are mode switch
+    {4, 0, 0},
+    {5, 2, 0},
+    {6, 2, 0},
+    {7, 1, 0},
+    {8, 1, 0},
+    {9, 3, 34},
+    {10,5, 34},
+    {11,1, 0},
+    {12,1, 0},
+    {13,1, 0},
+    {14,0, 0},
+    {15,0, 0},
+    {16,0, 0},
+    {17,0, 0},
+    {18,0, 0},
+    {19,0, 0},
+    {20,0, 0},
+    {21,0, 0},
+    {22,0, 0},
+    {23,0, 0},
+    {24,0, 0},
+    {25,0, 0},
+    {26,0, 0},
+    {27,0, 0},
+    {28,0, 0},
+    {29,0, 0},
+    {30,0, 0},
+    {31,0, 0},
+    {32,0, 0},
+
+  };
 
 // </HUEY COLL HEAD>
 

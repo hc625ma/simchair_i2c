@@ -4,6 +4,7 @@
 #include <Joystick.h>
 #include <Adafruit_ADS1015.h>
 #include <Keyboard.h>
+#include <avr/pgmspace.h>
 
 
 
@@ -15,10 +16,20 @@
 //  false, false, false);  // No accelerator, brake, or steering
 
 Joystick_ simchair(0x20, 0x04, 32, 1, true, true, true, true, true, false, true, true, false, false, false);
-Joystick_ simchair_aux1(0x21, 0x04, 32, 1, true, true, true, true, true, true, true, true, true, true, true);
-Joystick_ simchair_aux2(0x22, 0x04, 96, 1, false, false, false, true, true, false, false, false, false, false, false);
+Joystick_ simchair_aux1(0x21, 0x04, 16, 1, true, true, true, true, true, true, true, true, true, true, true);
+Joystick_ simchair_aux2(0x22, 0x04, 128, 1, false, false, false, true, true, false, false, false, false, false, false);
 
 Adafruit_ADS1115 cyclic;
 Adafruit_ADS1115 pedals(0x4A);
+
+typedef struct
+{
+   uint8_t sw_id;
+   uint8_t sw_type;
+   uint8_t sw_middle_b;
+   bool sw_val;
+   long sw_ts;
+   bool sw_tr_state;
+}  sw_matrix;
 
 

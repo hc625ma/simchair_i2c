@@ -11,28 +11,16 @@ void setup_ab412_coll_head()
     simchair_aux2.setZAxisRange(0, 255);
     simchair_aux2.setRzAxisRange(0, 255);
     dev_ab412_coll_head = 1;
-    for (int i = 0; i < sizeof(coll_head_triggerState); i++)
+
+    for (byte i=0;i<32;i++)
     {
-      coll_head_triggerState[i] = 0;
+      switch_matrix[i].sw_id = pgm_read_byte(&ab412_switch_matrix[i].sw_id);
+      switch_matrix[i].sw_type = pgm_read_byte(&ab412_switch_matrix[i].sw_type);
+      switch_matrix[i].sw_middle_b = pgm_read_byte(&ab412_switch_matrix[i].sw_middle_b) - 1;
     }
-    parse_sw_array(ab412_sw_mode_button_switches, sizeof(ab412_sw_mode_button_switches), coll_head_sw_mode_button_switches_parsed);
-    parse_sw_array(ab412_sw_mode_toggle_switches, sizeof(ab412_sw_mode_toggle_switches), coll_head_sw_mode_toggle_switches_parsed);
-    parse_sw_array(ab412_sw_mode_selector_button_switches, sizeof(ab412_sw_mode_selector_button_switches), coll_head_sw_mode_selector_button_switches_parsed);
-    parse_sw_array(ab412_sw_mode_selector_switches, sizeof(ab412_sw_mode_selector_switches), coll_head_sw_mode_selector_switches_parsed);
     
-
-    for (int i = 0; i < sizeof(ab412_sw_mode_selector_button_switches); i++)
-    {
-      coll_head_lastButtonState[ab412_sw_mode_selector_button_switches[i]] = 1;
-    }
-
-//        for (int p = 0; p < sizeof(coll_head_sw_mode_button_switches_parsed); p++)
-//        {
-//          Serial.print(p);
-//          Serial.print(" ");
-//          Serial.println(coll_head_sw_mode_button_switches_parsed[p]);
-//        }
-
+    MODE_SWITCH_BUTTON = AB412_COLL_HEAD_MODE_SWITCH;
+    IDLE_STOP_BUTTON = ab412_coll_head_idle_stop_buttons[0] - 1;
   }
 }
 
@@ -59,7 +47,6 @@ void poll_ab412_coll_head()
     rz = b6;
     b = b7;
   }
-
 
   Wire.requestFrom(13, 3);
   while (Wire.available())
@@ -91,11 +78,10 @@ void poll_ab412_coll_head()
   int16_t hat1_val = parse_hat_sw(rx, ry, AB412_COLL_HEAD_RIGHT_HAT_DIRECTIONS);
   simchair_aux1.setHatSwitch(0, hat1_val);
 
-  coll_head_parse_switches(b, 0, 2);
-  coll_head_parse_switches(s0, 2, 0);
-  coll_head_parse_switches(s1, 10, 0);
-  coll_head_parse_switches(s2, 18, 0);
-
+  parse_coll_head_sw_matrix(b,0,2);
+  parse_coll_head_sw_matrix(s0,2,0);
+  parse_coll_head_sw_matrix(s1,10,0);
+  parse_coll_head_sw_matrix(s2,18,0);
 
 
   simchair_aux2.setRxAxis(z);

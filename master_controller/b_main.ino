@@ -6,14 +6,6 @@ int physical_cyclic_center_x = 0;
 int physical_cyclic_center_y = 0;
 int physical_pedals_center = 0;
 
-bool coll_head_lastButtonState[60];
-bool coll_head_triggerState[60];
-long coll_head_sw_ts[60];
-byte coll_head_sw_mode[60];
-bool coll_head_sw_mode_button_switches_parsed[40];
-bool coll_head_sw_mode_toggle_switches_parsed[40];
-bool coll_head_sw_mode_selector_button_switches_parsed[40];
-bool coll_head_sw_mode_selector_switches_parsed[40];
 byte coll_head_mode_sw_position = 0;
 bool collective_hold_active = 0;
 uint16_t collective_hold_position = 0;
@@ -76,6 +68,11 @@ uint8_t ftcr;
 bool physical_latch_button_state = 0;
 bool throttle_latch_pressed = 0;
 
+
+sw_matrix switch_matrix[32];
+byte MODE_SWITCH_BUTTON = 0;
+byte IDLE_STOP_BUTTON = 0;
+
 void setup()
 {
   delay (2000);
@@ -95,7 +92,7 @@ void setup()
   setup_ab412_coll_head();
   setup_huey_coll_head();
   setup_throttle_quadrant();
-  if ((PTT_KEYBOARD_PRESS == 1) || (COLL_HEAD_IDLE_STOP_COMPAT_PROFILE_XTRIDENT412 == 1))
+  if ((PTT_KEYBOARD_PRESS == 1) || (DCS_HUEY_IDLE_STOP_COMPAT_MODE_ENABLED == 1))
   {
     Keyboard.begin();
   }
