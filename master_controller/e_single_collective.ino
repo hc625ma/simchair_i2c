@@ -4,8 +4,8 @@ void setup_single_engine_collective()
   int error = Wire.endTransmission();
   if (error == 0)
   {
-    simchair.setZAxisRange(63, 1023);
-    simchair.setThrottleRange(0,1023);//SINGLE_ENGINE_COLLECTIVE_IDLE_STOP_AXIS_VAL, 1023);
+    simchair.setZAxisRange(SINGLE_COLLECTIVE_MIN, SINGLE_COLLECTIVE_MAX);
+    simchair.setThrottleRange(SINGLE_COLLECTIVE_THR_MIN,SINGLE_COLLECTIVE_THR_MAX);//SINGLE_ENGINE_COLLECTIVE_IDLE_STOP_AXIS_VAL, 1023);
     dev_single_engine_collective = 1;
   }
 }
@@ -49,7 +49,7 @@ void poll_single_engine_collective()
   }
   set_idle_stop_latch_state(raw_throttle);
   // uncomment the next line and turn your throttle to idle stop position to see SINGLE_ENGINE_COLLECTIVE_IDLE_STOP_AXIS_VAL value 
-  //Serial.println(throttle);
+//  Serial.println(throttle);
   //Serial.println(z);
   if ((COLL_HEAD_IDLE_STOP_COMPAT_MODE == 1) && (coll_head_mode_sw_position == 0))
   {
@@ -57,7 +57,7 @@ void poll_single_engine_collective()
     {
       if (min_throttle_val[0] != SINGLE_ENGINE_COLLECTIVE_IDLE_STOP_AXIS_VAL)
       {
-         simchair.setThrottleRange(SINGLE_ENGINE_COLLECTIVE_IDLE_STOP_AXIS_VAL, 1023);
+         simchair.setThrottleRange(SINGLE_ENGINE_COLLECTIVE_IDLE_STOP_AXIS_VAL, SINGLE_COLLECTIVE_THR_MAX);
          min_throttle_val[0] = SINGLE_ENGINE_COLLECTIVE_IDLE_STOP_AXIS_VAL;
       }
      
@@ -90,7 +90,7 @@ void poll_single_engine_collective()
   {
     if (min_throttle_val[0] != 0)
     {
-      simchair.setThrottleRange(0, 1023);
+      simchair.setThrottleRange(SINGLE_COLLECTIVE_THR_MIN, SINGLE_COLLECTIVE_THR_MAX);
       min_throttle_val[0] = 0;
     }
     simchair.setThrottle(throttle);
@@ -120,7 +120,7 @@ void poll_single_engine_collective()
   if (BUTTON_PRESS_ON_THROTTLE_CUTOFF == 1)
   {
     //Serial.println(raw_throttle);
-    if ( ((THROTTLE_LATCH_MODE == "PHYSICAL") && (raw_throttle < (THROTTLE_MIN_AXIS_VALUE + 10))) || (THROTTLE_LATCH_MODE == "TACTILE") && (raw_throttle < (THROTTLE_MIN_AXIS_VALUE + 10)) && (throttle_latch_pressed == 1) )
+    if ( ((THROTTLE_LATCH_MODE == "PHYSICAL") && (raw_throttle < (SINGLE_COLLECTIVE_THR_MIN + 15))) || (THROTTLE_LATCH_MODE == "TACTILE") && (raw_throttle < (SINGLE_COLLECTIVE_THR_MIN + 15)) && (throttle_latch_pressed == 1) )
     {
       //Serial.println(raw_throttle);
       if (physical_latch_button_state != 1)

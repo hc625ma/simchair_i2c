@@ -16,7 +16,7 @@ byte data[2];
 void setup() {
   Wire.begin(13);                // join i2c bus with address #8
   Wire.onRequest(requestEvent); // register event
-  //Serial.begin(9600);           // start serial for output
+//  Serial.begin(9600);           // start serial for output
   for (int i = 0; i <= pins; i++)
   {
     pinMode(i, INPUT_PULLUP);

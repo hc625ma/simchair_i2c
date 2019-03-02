@@ -4,9 +4,9 @@ void setup_twin_engine_collective()
   int error = Wire.endTransmission();
   if (error == 0)
   {
-    simchair.setZAxisRange(1023, 0);
-    simchair.setThrottleRange(0,1023);//SINGLE_ENGINE_COLLECTIVE_IDLE_STOP_AXIS_VAL, 1023);
-    simchair.setRyAxisRange(0,1023);
+    simchair.setZAxisRange(TWIN_COLLECTIVE_MIN, TWIN_COLLECTIVE_MAX);
+    simchair.setThrottleRange(TWIN_COLLECTIVE_THR1_MIN,TWIN_COLLECTIVE_THR1_MAX);//SINGLE_ENGINE_COLLECTIVE_IDLE_STOP_AXIS_VAL, 1023);
+    simchair.setRyAxisRange(TWIN_COLLECTIVE_THR2_MIN,TWIN_COLLECTIVE_THR2_MAX);
     dev_twin_engine_collective = 1;
   }
 }
@@ -76,8 +76,8 @@ void poll_twin_engine_collective()
   {
     if (min_throttle_val[0] != 0)
     {
-      simchair.setThrottleRange(0, 1023);
-      simchair.setRyAxisRange(0,1023);
+      simchair.setThrottleRange(TWIN_COLLECTIVE_THR1_MIN, TWIN_COLLECTIVE_THR1_MAX);
+      simchair.setRyAxisRange(TWIN_COLLECTIVE_THR2_MIN,TWIN_COLLECTIVE_THR2_MAX);
       min_throttle_val[0] = 0;
     }
     simchair.setThrottle(throttle);

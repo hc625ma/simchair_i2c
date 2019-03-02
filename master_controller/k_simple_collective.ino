@@ -4,8 +4,8 @@ void setup_simple_collective()
   int error = Wire.endTransmission();
   if (error == 0)
   {
-    simchair.setZAxisRange(0, 1023);
-    simchair.setThrottleRange(0, 1023);
+    simchair.setZAxisRange(SIMPLE_COLLECTIVE_MIN, SIMPLE_COLLECTIVE_MAX);
+    simchair.setThrottleRange(SIMPLE_COLLECTIVE_THR_MIN, SIMPLE_COLLECTIVE_THR_MAX);
     dev_simple_collective = 1;
   }
 }

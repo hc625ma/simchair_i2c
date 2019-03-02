@@ -83,9 +83,29 @@
   #define COLL_HEAD_DCS_HUEY_COMPAT_MODE_BUTTON_HOLD 50 // how long to hold throttle up/down buttons, adjusted depending on idle stop axis range (smaller range- bigger hold time and vice versa)
 
   #define BUTTON_PRESS_ON_THROTTLE_CUTOFF 1// this feature will send a joystick button press when the throttle is fully closed
-  #define THROTTLE_LATCH_MODE "TACTILE" // PHYSICAL for physical latch mod or TACTILE for levers with tactile marks
+  #define THROTTLE_LATCH_MODE "PHYSICAL" // PHYSICAL for physical latch mod or TACTILE for levers with tactile marks
   #define PHYSICAL_LATCH_MOD_JOY_BUTTON 32 // joystick button number as seen in joy.cpl for the 1st Leonardo in the list
-  #define THROTTLE_MIN_AXIS_VALUE 0 // check this if the default doesn't work, print raw_throttle value in e_single_collective.ino and set this line to its value, corresponding to a fully closed throttle
+ // #define THROTTLE_MIN_AXIS_VALUE 0 // check this if the default doesn't work, print raw_throttle value in e_single_collective.ino and set this line to its value, corresponding to a fully closed throttle
+
+  // all pots are different! Please look into the corresponding page for your lever
+  // uncomment Serial.print's and set values below. To invert an axis, set MIN to MAX and vice versa.
+  
+  #define SINGLE_COLLECTIVE_MIN 63
+  #define SINGLE_COLLECTIVE_MAX 1023
+  #define SINGLE_COLLECTIVE_THR_MIN 0
+  #define SINGLE_COLLECTIVE_THR_MAX 1023
+
+  #define TWIN_COLLECTIVE_MIN 1023
+  #define TWIN_COLLECTIVE_MAX 0
+  #define TWIN_COLLECTIVE_THR1_MIN 0
+  #define TWIN_COLLECTIVE_THR1_MAX 1023
+  #define TWIN_COLLECTIVE_THR2_MIN 0
+  #define TWIN_COLLECTIVE_THR2_MAX 1023
+
+  #define SIMPLE_COLLECTIVE_MIN 0
+  #define SIMPLE_COLLECTIVE_MAX 1023
+  #define SIMPLE_COLLECTIVE_THR_MIN 0
+  #define SIMPLE_COLLECTIVE_THR_MAX 1023
   
 // </COLLECTIVE>
 
