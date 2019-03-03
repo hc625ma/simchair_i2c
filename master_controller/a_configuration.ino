@@ -130,7 +130,7 @@
  // 1: button
  // 2: momentarily press button
  // 3: selector button (button + middle button press when switch is centered)
- // 4: selector momentarily press button (momentarily press button + middle button momentarily press when switch is centered)
+ // 4: selector momentary press button (momentary press button + middle button momentary press when switch is centered)
  // ASSIGN THE BUTTON AFTER TYPES 3 AND 4 TO TYPE 5 (SLAVE) AND SET JOYSTICK BUTTON YOU WANT TO BE THE MIDDLE BUTTON IN 3RD COLUMN! 
  // BUTTONS FROM 33 TO 42 ARE RESERVED FOR MIDDLE BUTTONS
 
@@ -190,7 +190,7 @@
  // 1: button
  // 2: momentarily press button
  // 3: selector button (button + middle button press when switch is centered)
- // 4: selector momentarily press button (momentarily press button + middle button momentarily press when switch is centered)
+ // 4: selector momentary press button (momentary press button + middle button momentary press when switch is centered)
  // ASSIGN THE BUTTON AFTER TYPES 3 AND 4 TO TYPE 5 (SLAVE) AND SET JOYSTICK BUTTON YOU WANT TO BE THE MIDDLE BUTTON IN 3RD COLUMN! 
  // BUTTONS FROM 33 TO 42 ARE RESERVED FOR MIDDLE BUTTONS
   
