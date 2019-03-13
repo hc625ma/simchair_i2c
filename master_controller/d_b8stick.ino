@@ -45,7 +45,8 @@ void poll_b8stick()
       }
       else if (B8_HAT_SWITCH_MODE == "BOTH")
       {
-        if (force_trim_on == 0)
+        //if (force_trim_on == 0)
+        if (controls_freezed == 0)
         {
           int16_t hat_val = parse_hat_sw(rx, ry, 8);
           simchair.setHatSwitch(0, hat_val);
@@ -83,7 +84,7 @@ void poll_b8stick()
                 rudder_sens = CUSTOM_RUDDER_SENS;
                 physical_cyclic_center_x = adjust_sensitivity (physical_cyclic_center_x, CUSTOM_CYCLIC_SENS);
                 physical_cyclic_center_y = adjust_sensitivity (physical_cyclic_center_y, CUSTOM_CYCLIC_SENS);
-                if (SENS_SWITCH_TRIM_EMERGENCY_RELEASE == 1)
+                if (SENS_SWITCH_TRIM_RESET == 1)
                 {
                   force_trim_on = 0;
                   force_trim_position_set = 0;
@@ -97,8 +98,12 @@ void poll_b8stick()
                 rudder_sens = 100;
                 physical_cyclic_center_x = adjust_sensitivity (physical_cyclic_center_x, 100);
                 physical_cyclic_center_y = adjust_sensitivity (physical_cyclic_center_y, 100);
-                if (SENS_SWITCH_TRIM_EMERGENCY_RELEASE == 1)
+                if (SENS_SWITCH_TRIM_RESET == 1)
                 {
+                  x_diff = 0;
+                  y_diff = 0;
+                  cyclic_x_adj = 0;
+                  cyclic_y_adj = 0;
                   force_trim_on = 0;
                   force_trim_position_set = 0;
                   force_trim_rudder_on = 0;
@@ -128,11 +133,15 @@ void poll_b8stick()
             else if ((i == PSEUDO_FORCE_TRIM_BUTTON) && (PSEUDO_FORCE_TRIM == 1) && (v == 1))
             {
               force_trim_on = !force_trim_on;
+              controls_freezed = !controls_freezed;
+              
               force_trim_rudder_on = !force_trim_rudder_on;
+              force_trim_button_pressed = 1;
             }
             else
             {
               simchair.setButton(i, v);
+              force_trim_button_pressed = 0;
             }
           }
         }
@@ -149,9 +158,7 @@ void poll_b8stick()
 int parse_hat_trim (int x, int y, bool invert_x, bool invert_y)
 {
   int hat_val;
-
-  if ((force_trim_position_set == 1) || (SPRING_LOADED_CYCLIC_AND_PEDALS == 1))
-  {
+  
     //int one_percent_range = ADC_RANGE / 100;
     int adj_step_x = one_percent_range * ATT_TRIM_STEP_X;
     int adj_step_y = one_percent_range * ATT_TRIM_STEP_Y;
@@ -160,11 +167,21 @@ int parse_hat_trim (int x, int y, bool invert_x, bool invert_y)
       //hat up
       if (invert_y == 0)
       {
-        force_trim_y = force_trim_y + adj_step_y;
+        cyclic_y_adj = cyclic_y_adj + adj_step_y;
+        if ((FORCE_TRIM_BUTTON_MODE == "MOMENTARY") && (controls_freezed == 1))
+        {
+         // yval = yval + cyclic_y_adj;
+          simchair.setYAxis(yval + cyclic_y_adj);
+        }
       }
       else
       {
-        force_trim_y = force_trim_y - adj_step_y;
+        cyclic_y_adj = cyclic_y_adj - adj_step_y;
+        if ((FORCE_TRIM_BUTTON_MODE == "MOMENTARY") && (controls_freezed == 1))
+        {
+         // yval = yval + cyclic_y_adj;
+          simchair.setYAxis(yval + cyclic_y_adj);
+        }
       }
     }
     else if (y < 105)
@@ -172,11 +189,21 @@ int parse_hat_trim (int x, int y, bool invert_x, bool invert_y)
       //hat down
       if (invert_y == 0)
       {
-        force_trim_y = force_trim_y - adj_step_y;
+       cyclic_y_adj = cyclic_y_adj - adj_step_y;
+       if ((FORCE_TRIM_BUTTON_MODE == "MOMENTARY") && (controls_freezed == 1))
+        {
+         // yval = yval + cyclic_y_adj;
+          simchair.setYAxis(yval + cyclic_y_adj);
+        }
       }
       else
       {
-        force_trim_y = force_trim_y + adj_step_y;
+        cyclic_y_adj = cyclic_y_adj + adj_step_y;
+        if ((FORCE_TRIM_BUTTON_MODE == "MOMENTARY") && (controls_freezed == 1))
+        {
+         // yval = yval + cyclic_y_adj;
+          simchair.setYAxis(yval + cyclic_y_adj);
+        }
       }
     }
     else if (x > 145)
@@ -184,11 +211,20 @@ int parse_hat_trim (int x, int y, bool invert_x, bool invert_y)
       //hat right
       if (invert_x == 0)
       {
-        force_trim_x = force_trim_x + adj_step_x;
+        cyclic_x_adj = cyclic_x_adj + adj_step_x;
+        if ((FORCE_TRIM_BUTTON_MODE == "MOMENTARY") && (controls_freezed == 1))
+        {
+         // yval = yval + cyclic_y_adj;
+          simchair.setXAxis(xval + cyclic_x_adj);
+        }
       }
       else
       {
-        force_trim_x = force_trim_x - adj_step_x;
+        cyclic_x_adj = cyclic_x_adj - adj_step_x;
+        if ((FORCE_TRIM_BUTTON_MODE == "MOMENTARY") && (controls_freezed == 1))
+        {
+          simchair.setXAxis(xval + cyclic_x_adj);
+        }
       }
     }
     else if (x < 105)
@@ -196,21 +232,22 @@ int parse_hat_trim (int x, int y, bool invert_x, bool invert_y)
       //hat left
       if (invert_x == 0)
       {
-        force_trim_x = force_trim_x - adj_step_x;
+        cyclic_x_adj = cyclic_x_adj - adj_step_x;
+        if ((FORCE_TRIM_BUTTON_MODE == "MOMENTARY") && (controls_freezed == 1))
+        {
+         // yval = yval + cyclic_y_adj;
+          simchair.setXAxis(xval + cyclic_x_adj);
+        }
       }
       else
       {
-        force_trim_x = force_trim_x + adj_step_x;
+        cyclic_x_adj = cyclic_x_adj + adj_step_x;
+        if ((FORCE_TRIM_BUTTON_MODE == "MOMENTARY") && (controls_freezed == 1))
+        {
+         // yval = yval + cyclic_y_adj;
+          simchair.setXAxis(xval + cyclic_x_adj);
+        }
       }
     }
-//
-//          Serial.print(force_trim_x);
-//      Serial.print(" ");
-//      Serial.println(force_trim_y);
-    if (SPRING_LOADED_CYCLIC_AND_PEDALS == 0)
-    {
-      simchair.setXAxis(force_trim_x);
-      simchair.setYAxis(force_trim_y);
-    }
-  }
+    
 }

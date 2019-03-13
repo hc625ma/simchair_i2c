@@ -8,9 +8,7 @@
 // <CYCLIC>
 
   #define FSGIMBAL_INVERT_X 1
-  #define FSGIMBAL_INVERT_Y 0
-  
-  #define SPRING_LOADED_CYCLIC_AND_PEDALS 1 // set to 0 if your cyclic and pedals do not have springs (changes force trim behavior)
+  #define FSGIMBAL_INVERT_Y 0  
 
   #define B8_POT_MODE "HAT_SW" // HAT_SW or ANALOG
   
@@ -22,12 +20,9 @@
   #define PSEUDO_FORCE_TRIM_BUTTON 1
   // this will disable a choosen button and dedicate it to force trim. Top button in Huey, mid button in 407
   #define PSEUDO_FORCE_TRIM_EFFECTS_PEDALS 1 //in a real heli force trim affects both cyclic and pedals, this is a default behavior
-  #define PSEUDO_FORCE_TRIM_RELEASE_MODE "ADAPTIVE" //INSTANT or ADAPTIVE
-  // ADAPTIVE will release trim when your lever will be close to the position it is held after the button press
-  // INSTANT will release instantly, on press
-  #define PSEUDO_FORCE_TRIM_RELEASE_DEVIATION 1  // how much deviation is allowed from trimmed position when releasing trim, percent; 0,5 to 1 for cyclic with springs, 
-  //5 for non-centering one. Less deviation = more precise trimming, but may require extra movements to unlock the controls.
-  #define SENS_SWITCH_TRIM_EMERGENCY_RELEASE 1 // release the trim when you press SENS SWITCH
+  #define FORCE_TRIM_BUTTON_MODE "HOLD"// "MOMENTARY" or "HOLD" - use "MOMENTARY" for non-centering cyclic
+
+  #define SENS_SWITCH_TRIM_RESET 0 // DEPRECATED - USE FTCR INSTEAD - release the trim when you press SENS SWITCH
   
   // use a button on cyclic to switch sensitivity in flight.
   // this kind of functionality is not available in a real aircraft, however
@@ -37,7 +32,7 @@
   #define SENS_SWITCH_ENABLED 1
   #define SENS_SWITCH_BUTTON 0 //0 is the first button
   
-  #define B8_HAT_SWITCH_MODE "ATT_TRIM" //"ATT_TRIM","HAT", or "BOTH", it will adjust the position of the trimmed cyclic with hat(Bell 407-style)
+  #define B8_HAT_SWITCH_MODE "ATT_TRIM" //"ATT_TRIM","HAT", or "BOTH", it will adjust the position of the trimmed cyclic with hat(Bell 407-style), only use "BOTH" with FORCE_TRIM_BUTTON_MODE "MOMENTARY"
   #define ATT_TRIM_STEP_Y 0.02 //0.05 //IN PERCENTS OF AXIS LENGHT, 0.05 for non-centering cyclic, 0.02 for a spring-loaded one
   #define ATT_TRIM_STEP_X 0.02 //0.05 //IN PERCENTS OF AXIS LENGHT
   #define INVERT_HAT_TRIM_X 0
@@ -59,7 +54,7 @@
 
 // <PEDALS>
 
-  #define INVERT_RUDDER 1
+  #define INVERT_RUDDER 0
   #define RUDDER_FILTERING_ENABLED 0
   #define CUSTOM_RUDDER_SENS 80 // this value will be used if SENS_SWITCH is disabled
 

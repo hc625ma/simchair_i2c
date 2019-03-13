@@ -55,6 +55,11 @@ byte cyclic_force_trim_state = 0;
 bool force_trim_rudder_on = 0;
 bool force_trim_rudder_position_set = 0;
 byte pedals_force_trim_state = 0;
+bool force_trim_button_pressed = 0;
+bool controls_freezed = 0;
+
+int cyclic_x_adj = 0;
+int cyclic_y_adj = 0;
 
 uint16_t force_trim_x = ADC_RANGE / 2;
 uint16_t force_trim_y = ADC_RANGE / 2 ;
@@ -68,6 +73,16 @@ uint8_t ftcr;
 bool physical_latch_button_state = 0;
 bool throttle_latch_pressed = 0;
 
+int x_diff;
+int y_diff;
+int rudder_diff;
+int diffy;
+int diffx;
+int32_t xval;
+int32_t yval;
+int32_t rudder_val;
+
+int xval_prev;
 
 sw_matrix switch_matrix[32];
 byte MODE_SWITCH_BUTTON = 0;

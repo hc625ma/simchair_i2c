@@ -6,7 +6,7 @@ void setup_ab412_coll_head()
   {
     simchair_aux2.setXAxisRange(0, 255);
     simchair_aux2.setYAxisRange(0, 255);
-    simchair_aux2.setRxAxisRange(255, 0);
+    simchair_aux2.setRxAxisRange(0, 255);
     simchair_aux2.setRyAxisRange(0, 255);
     simchair_aux2.setZAxisRange(0, 255);
     simchair_aux2.setRzAxisRange(0, 255);
