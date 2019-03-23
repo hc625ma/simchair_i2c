@@ -62,9 +62,9 @@
 
 // <COLLECTIVE>
 
-//  #define COLLECTIVE_HOLD_ENABLED 1 // this will hold your collective in place until you press the button again and return the lever to the initial position
-//  #define HUEY_HEAD_COLLECTIVE_HOLD_BUTTON 13
-//  #define AB412_HEAD_COLLECTIVE_HOLD_BUTTON 2
+  #define COLLECTIVE_HOLD_ENABLED 1 // this will hold your collective in place until you press the button again and return the lever to the initial position
+  #define HUEY_HEAD_COLLECTIVE_HOLD_BUTTON 13
+  #define AB412_HEAD_COLLECTIVE_HOLD_BUTTON 2
   
   //for sims that do not support axis movement below idle stop, sends the throttle up/down key when holding idle stop and rotating throttle simultaneously
   //not 100% realistic, yet better than nothing

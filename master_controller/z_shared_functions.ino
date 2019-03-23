@@ -88,6 +88,18 @@ void parse_coll_head_sw_matrix (int sw, uint8_t start_pos, uint8_t end_pos)
       else if (switch_matrix[i].sw_val == mode_sw_pos_0)
       {
         coll_head_mode_sw_position = 0;
+        
+      }
+    }
+    else if ((i == (COLLECTIVE_HOLD_BUTTON - 1)) && (COLLECTIVE_HOLD_ENABLED == 1))
+    {
+      if (v != switch_matrix[i].sw_val)
+      {
+        if (v == 1)
+        {
+          collective_hold_active = !collective_hold_active;
+        }
+        switch_matrix[i].sw_val = v;
       }
     }
     //</determine mode switch position>

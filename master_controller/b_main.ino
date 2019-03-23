@@ -67,6 +67,7 @@ uint16_t force_trim_rudder = ADC_RANGE / 2;
 
 
 int one_percent_range = ADC_RANGE / 100;
+int one_percent_coll_range = COLLECTIVE_ADC_RANGE / 100;
 
 uint8_t ftcr;
 
@@ -87,6 +88,8 @@ int xval_prev;
 sw_matrix switch_matrix[32];
 byte MODE_SWITCH_BUTTON = 0;
 byte IDLE_STOP_BUTTON = 0;
+
+byte COLLECTIVE_HOLD_BUTTON = 255;
 
 void setup()
 {

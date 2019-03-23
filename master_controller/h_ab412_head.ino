@@ -22,6 +22,7 @@ void setup_ab412_coll_head()
     MODE_SWITCH_BUTTON = AB412_COLL_HEAD_MODE_SWITCH;
     IDLE_STOP_BUTTON = ab412_coll_head_idle_stop_buttons[0] - 1;
   }
+  COLLECTIVE_HOLD_BUTTON = AB412_HEAD_COLLECTIVE_HOLD_BUTTON;
 }
 
 void poll_ab412_coll_head()

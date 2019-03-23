@@ -17,6 +17,7 @@ void setup_huey_coll_head()
     }
     
   }
+  COLLECTIVE_HOLD_BUTTON = HUEY_HEAD_COLLECTIVE_HOLD_BUTTON;
 }
 
 void poll_huey_coll_head()

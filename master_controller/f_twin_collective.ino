@@ -100,7 +100,7 @@ void poll_twin_engine_collective()
     int diff_z = z - collective_hold_position; // this is needed because of how the abs() works
 
     //if ((abs(diff_z)) < (PSEUDO_FORCE_TRIM_RELEASE_DEVIATION * one_percent_range))
-    if (abs(diff_z) < 2 * one_percent_range)
+    if (abs(diff_z) < 2 * one_percent_coll_range)
     {
       simchair.setZAxis(z);
       collective_hold_position_set = 0;
