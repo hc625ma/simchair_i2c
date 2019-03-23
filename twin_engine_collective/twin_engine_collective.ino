@@ -41,12 +41,18 @@ void loop()
 // function that executes whenever data is received from master
 // this function is registered as an event, see setup()
 void requestEvent() {
-  data[0] = (z >> 8) & 0xFF;
-  data[1] = z & 0xFF;
-  data[2] = (rz >> 8) & 0xFF;
-  data[3] = rz & 0xFF;
-  data[4] = (ry >> 8) & 0xFF;
-  data[5] = ry & 0xFF;
+  // copy values so they don't get modified while we're writing them down the wire!
+  uint16_t z_copy,rz_copy,ry_copy;
+  z_copy = z;
+  //z_copy = filteredRead(A0,filter_counter_z); // send actual value instead of mapped value, uncomment and comment above line to calibrate
+  rz_copy = rz;
+  ry_copy = ry;
+  data[0] = (z_copy >> 8) & 0xFF;
+  data[1] = z_copy & 0xFF;
+  data[2] = (rz_copy >> 8) & 0xFF;
+  data[3] = rz_copy & 0xFF;
+  data[4] = (ry_copy >> 8) & 0xFF;
+  data[5] = ry_copy & 0xFF;
   Wire.write(data,6);
 }
 
