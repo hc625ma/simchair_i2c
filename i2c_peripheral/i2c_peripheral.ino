@@ -11,6 +11,9 @@
 
 
 #include <Wire.h>
+
+//#define DEBUG
+
 uint16_t x,y;
 uint8_t b = 0b00000000; //digital pins 2 to 9; x ^= (1 << n); - toggles nth bit of x.  all other bits left alone.
 byte pins[] = {2};
@@ -21,12 +24,15 @@ byte data[5];
 void setup() {
   Wire.begin(8);                // join i2c bus with address #8
   Wire.onRequest(requestEvent); // register event
-  Serial.begin(9600);           // start serial for output
+  #if defined(DEBUG)
+    Serial.begin(9600);           // start serial for output
+  #endif
+
   for (int i = 0; i < sizeof(pins); i++)
   {
     pinMode(pins[i], INPUT_PULLUP);
   }
-  
+
 }
 
 void loop() {
@@ -43,13 +49,16 @@ void loop() {
     {
       b &= ~(1 << i);      // forces ith bit of b to be 0.  all other bits left alone.
     }
-    
-    //Serial.println(b);
-    
+
+    #if defined(DEBUG)
+      Serial.println(b);
+    #endif
   }
-  
-//Serial.println(x);
-//Serial.println(y);
+
+  #if defined(DEBUG)
+    Serial.println(x);
+    Serial.println(y);
+  #endif
 }
 
 // function that executes whenever data is received from master

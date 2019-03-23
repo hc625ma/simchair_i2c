@@ -4,6 +4,9 @@
 //SECOND ROW: 1st PIN6,PIN7 etc
 
 #include <Wire.h>
+
+//#define DEBUG
+
 uint16_t x,y;
 uint8_t b = 0b00000000; //digital pins 0 to 7; x ^= (1 << n); - toggles nth bit of x.  all other bits left alone.
 uint8_t b1 = 0b00000000; //digital pins 8 to 15
@@ -16,18 +19,20 @@ byte data[2];
 void setup() {
   Wire.begin(13);                // join i2c bus with address #8
   Wire.onRequest(requestEvent); // register event
- // Serial.begin(9600);           // start serial for output
+  #if defined(DEBUG)
+    Serial.begin(9600);           // start serial for output
+  #endif
   for (int i = 0; i <= pins; i++)
   {
     pinMode(i, INPUT_PULLUP);
   }
-  
+
 }
 
-void loop() 
+void loop()
 {
 
-  
+
   for (int i = 0; i <= pins; i++)
   {
     bool pin = !digitalRead(i);
@@ -61,16 +66,17 @@ void loop()
         b2 &= ~(1 <<  (i - 16));
       }
     }
-    
-// DEBUG
-//    printBits(b);
-//    Serial.print(" ");
-//    printBits(b1);
-//    Serial.print(" ");
-//    printBits(b2);
-//    Serial.println();
- } 
-  
+
+    #if defined(DEBUG)
+      printBits(b);
+      Serial.print(" ");
+      printBits(b1);
+      Serial.print(" ");
+      printBits(b2);
+      Serial.println();
+    #endif
+ }
+
 }
 
 void requestEvent() {
@@ -88,4 +94,3 @@ void printBits(byte myByte){
        Serial.print('0');
  }
 }
-
