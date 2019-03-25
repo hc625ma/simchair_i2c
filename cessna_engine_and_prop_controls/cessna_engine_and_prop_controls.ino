@@ -1,3 +1,5 @@
+#define GA_CONTROLS_I2C_ADDRESS 11
+
 #include <Wire.h>
 uint16_t rx,ry,rz;
 
@@ -10,11 +12,11 @@ uint8_t filter_counter_rz = 8;
 void setup() {
   pinMode(10, OUTPUT);           // power up pots
   digitalWrite(10, HIGH);
-  Wire.begin(11);                // join i2c bus with address #8
+  Wire.begin(GA_CONTROLS_I2C_ADDRESS);                // join i2c bus with address #8
   Wire.onRequest(requestEvent); // register event
 }
 
-void loop() 
+void loop()
 {
   rx = filteredRead(A0,filter_counter_rx);
   ry = filteredRead(A1,filter_counter_ry);
@@ -39,12 +41,12 @@ uint16_t filteredRead (uint16_t input,uint8_t filter_counter)
   uint32_t filter = 0;
   for (uint8_t i=0;i<filter_counter;i++)
   {
-    
+
       filter+= analogRead(input);
-      delay(1); 
+      delay(1);
   }
 
   uint16_t val = filter/filter_counter;
   return val;
-  
+
 }

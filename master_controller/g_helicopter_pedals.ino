@@ -1,6 +1,6 @@
 void setup_pedals()
 {
-  Wire.beginTransmission(0X4A);
+  Wire.beginTransmission(HELICOPTER_PEDALS_I2C_ADDRESS);
   int error = Wire.endTransmission();
   if (error == 0)
   {
@@ -87,7 +87,7 @@ void poll_pedals()
 //        {
 //          //int one_percent_range = ADC_RANGE / 100;
 //          int diff_rudder = rudder - force_trim_rudder; // this is needed because of how the abs() works
-//  
+//
 //          if ((abs(diff_rudder)) < (PSEUDO_FORCE_TRIM_RELEASE_DEVIATION * one_percent_range))
 //          {
 //            simchair.setRudder(rudder);
@@ -117,10 +117,10 @@ void poll_pedals()
 //    Serial.print(physical_pedals_center);
 //    Serial.print(" ");
 
-    
+
     if (force_trim_rudder_on == 0) // button is not pressed
     {
-      
+
       if ((pedals_force_trim_state == 0) || (pedals_force_trim_state == 2))
       {
         //uint16_t rudder_val = force_trim_rudder + (rudder - (ADC_RANGE / 2));
@@ -129,7 +129,7 @@ void poll_pedals()
          {
             rudder_val = rudder + rudder_diff;
            // ruval_prev = rudder;
-            
+
          }
          //else if (x > force_trim_x)
          else if (force_trim_rudder + (ADC_RANGE /2) - rudder > 0)
@@ -137,7 +137,7 @@ void poll_pedals()
             rudder_val = rudder - rudder_diff;
           //  xval_prev = x;
          }
-         
+
          if (rudder_val < 0)
          {
           rudder_val = 0;
@@ -147,12 +147,12 @@ void poll_pedals()
         {
           rudder_val = ADC_RANGE;
         }
-        
+
 //        Serial.println(rudder_val);
         //if ((rudder_val > 0) && (rudder_val < ADC_RANGE))
 //        if (force_trim_button_pressed == 0)
 //        {
-//          
+//
 //          rudder_diff = rudder - force_trim_rudder;
 //        }
         //prev_cyclic_force_trim_state = 0;
@@ -162,9 +162,9 @@ void poll_pedals()
 //           Serial.print(" ");
 //            Serial.println(rudder_val);
             simchair.setRudder(rudder_val);
-         
+
       }
-      
+
       if (pedals_force_trim_state == 1) // after assigning a new center, wait for the stick to be returned to its mechanical center
       {
           //int one_percent_range = ADC_RANGE / 100;
@@ -172,7 +172,7 @@ void poll_pedals()
 //          //Serial.println(diff_rudder_center);
 //         if ((abs(diff_rudder_center)) < (PSEUDO_FORCE_TRIM_RELEASE_DEVIATION * one_percent_range))
 //         {
-//            
+//
 //            pedals_force_trim_state = 2;
 
 
@@ -195,8 +195,8 @@ void poll_pedals()
             }
           }
       }
-      
-      
+
+
     }
     else if (force_trim_rudder_on == 1) // button is pressed
     {
@@ -213,7 +213,7 @@ void poll_pedals()
         force_trim_rudder = rudder_val;
         pedals_force_trim_state = 1;
       }
-      
+
     }
  // }
 

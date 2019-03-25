@@ -1,7 +1,7 @@
 void setup_b8stick()
 {
   //MKIII B8 stick
-  Wire.beginTransmission(20);
+  Wire.beginTransmission(B8STICK_I2C_ADDRESS);
   int error = Wire.endTransmission();
   if (error == 0)
   {
@@ -14,14 +14,14 @@ void setup_b8stick()
 void poll_b8stick()
 {
   //hot swap support for cyclic grip - a very useful feature
-  Wire.beginTransmission(20);
+  Wire.beginTransmission(B8STICK_I2C_ADDRESS);
   int error = Wire.endTransmission();
   if (error == 0)
   {
     uint8_t rx;
     uint8_t ry;
     uint8_t b;
-    Wire.requestFrom(20, 3);
+    Wire.requestFrom(B8STICK_I2C_ADDRESS, 3);
     while (Wire.available())
     {
       byte b1 = Wire.read();
@@ -53,14 +53,14 @@ void poll_b8stick()
         }
         else
         {
-          int16_t hat_val = parse_hat_trim(rx, ry, INVERT_HAT_TRIM_X, INVERT_HAT_TRIM_Y);     
+          int16_t hat_val = parse_hat_trim(rx, ry, INVERT_HAT_TRIM_X, INVERT_HAT_TRIM_Y);
         }
       }
       else
       {
         int16_t hat_val = parse_hat_trim(rx, ry, INVERT_HAT_TRIM_X, INVERT_HAT_TRIM_Y);
       }
-      
+
     }
     for (byte i = 0; i < 6; i++)
     {
@@ -134,7 +134,7 @@ void poll_b8stick()
             {
               force_trim_on = !force_trim_on;
               controls_freezed = !controls_freezed;
-              
+
               force_trim_rudder_on = !force_trim_rudder_on;
               force_trim_button_pressed = 1;
             }
@@ -158,7 +158,7 @@ void poll_b8stick()
 int parse_hat_trim (int x, int y, bool invert_x, bool invert_y)
 {
   int hat_val;
-  
+
     //int one_percent_range = ADC_RANGE / 100;
     int adj_step_x = one_percent_range * ATT_TRIM_STEP_X;
     int adj_step_y = one_percent_range * ATT_TRIM_STEP_Y;
@@ -249,5 +249,5 @@ int parse_hat_trim (int x, int y, bool invert_x, bool invert_y)
         }
       }
     }
-    
+
 }

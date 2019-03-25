@@ -1,3 +1,5 @@
+#define TWIN_COLLECTIVE_I2C_ADDRESS 15
+
 #include <Wire.h>
 uint16_t z,rz,ry;
 byte data[6];
@@ -6,14 +8,14 @@ uint8_t filter_counter_z = 6;
 uint8_t filter_counter_rz = 6;
 uint8_t filter_counter_ry = 6;
 
-void setup() 
+void setup()
 {
-  Wire.begin(15);                // join i2c bus with address #11
+  Wire.begin(TWIN_COLLECTIVE_I2C_ADDRESS);                // join i2c bus with address #11
   Wire.onRequest(requestEvent); // register event
  // Serial.begin(9600);           // start serial for output
 }
 
-void loop() 
+void loop()
 {
   // read axis, invert if needed
   z = filteredRead(A0,filter_counter_z);
@@ -29,12 +31,12 @@ void loop()
   rz = map(rz,125,1023,1023,0);
   ry = map(ry,114,1023,1023,0);
 //
-//  Serial.print(z); 
+//  Serial.print(z);
 //  Serial.print(" ");
 //  Serial.print(rz);
 //  Serial.print(" ");
 //  Serial.println(ry);
-//  
+//
 
 }
 
@@ -60,14 +62,14 @@ uint16_t filteredRead (uint16_t input,uint8_t filter_counter)
 {
   uint32_t filter = 0;
   for (uint8_t i=0;i<filter_counter;i++)
-  {  
+  {
       filter+= analogRead(input);
-      delay(1); 
+      delay(1);
   }
 
   uint16_t val = filter/filter_counter;
   return val;
-  
+
 }
 
 int invert (int val)
@@ -75,4 +77,3 @@ int invert (int val)
   val = 1023 - val;
   return val;
 }
-

@@ -3,6 +3,7 @@
 //FIRST ROW: 1st: PIN0,PIN1 2nd: PIN2,PIN3 3rd:  PIN4,PIN5
 //SECOND ROW: 1st PIN6,PIN7 etc
 
+#define HUEY_HEAD_I2C_ADDRESS 17
 
 #include <Wire.h>
 uint8_t x,y;
@@ -15,22 +16,22 @@ byte pins = 13;
 byte data[4];
 
 void setup() {
-  Wire.begin(17);                // join i2c bus with address #8
+  Wire.begin(HUEY_HEAD_I2C_ADDRESS);                // join i2c bus with address #8
   Wire.onRequest(requestEvent); // register event
     //Serial.begin(9600);           // start serial for output
   for (int i = 0; i <= pins; i++)
   {
     pinMode(i, INPUT_PULLUP);
   }
-  
+
 }
 
-void loop() 
+void loop()
 {
-  x = analogRead(A0) >> 2; 
+  x = analogRead(A0) >> 2;
   y = analogRead(A1) >> 2;
 
-  
+
   for (int i = 0; i <= pins; i++)
   {
     bool pin = !digitalRead(i);
@@ -56,7 +57,7 @@ void loop()
         b1 &= ~(1 << (i - 8));
       }
     }
-    
+
 // DEBUG
 //    printBits(b);
 //    Serial.print(" ");
@@ -66,9 +67,9 @@ void loop()
 //    Serial.print(" ");
 //    Serial.print(y);
 //    Serial.println();
-    
+
  }
-  
+
 }
 
 void requestEvent() {
@@ -87,4 +88,3 @@ void printBits(byte myByte){
        Serial.print('0');
  }
 }
-

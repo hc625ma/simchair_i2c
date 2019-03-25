@@ -1,6 +1,6 @@
 void setup_ab412_coll_head()
 {
-  Wire.beginTransmission(13);
+  Wire.beginTransmission(AB412_HEAD_I2C_ADDRESS);
   int error = Wire.endTransmission();
   if (error == 0)
   {
@@ -19,7 +19,7 @@ void setup_ab412_coll_head()
       switch_matrix[i].sw_type = pgm_read_byte(&ab412_switch_matrix[i].sw_type);
       switch_matrix[i].sw_middle_b = pgm_read_byte(&ab412_switch_matrix[i].sw_middle_b) - 1;
     }
-    
+
     MODE_SWITCH_BUTTON = AB412_COLL_HEAD_MODE_SWITCH;
     IDLE_STOP_BUTTON = ab412_coll_head_idle_stop_buttons[0] - 1;
   }
@@ -30,7 +30,7 @@ void poll_ab412_coll_head()
 {
   uint8_t x, y, rx, ry, z, rz, b, s0, s1, s2;
 
-  Wire.requestFrom(14, 7);
+  Wire.requestFrom(AB412_HEAD_POT_I2C_ADDRESS, 7);
   while (Wire.available())
   {
     byte b1 = Wire.read(); // receive a byte as character
@@ -50,7 +50,7 @@ void poll_ab412_coll_head()
     b = b7;
   }
 
-  Wire.requestFrom(13, 3);
+  Wire.requestFrom(AB412_HEAD_I2C_ADDRESS, 3);
   while (Wire.available())
   {
     byte b1 = Wire.read(); // receive a byte as character

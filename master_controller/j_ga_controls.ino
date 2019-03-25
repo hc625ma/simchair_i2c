@@ -1,6 +1,6 @@
 void setup_cessna_engine_and_prop_controls()
 {
-  Wire.beginTransmission(11);
+  Wire.beginTransmission(GA_CONTROLS_I2C_ADDRESS);
   int error = Wire.endTransmission();
   if (error == 0)
   {
@@ -16,7 +16,7 @@ void poll_cessna_engine_and_prop_controls()
 {
   uint16_t rx, ry, throttle;
 
-  Wire.requestFrom(11, 6);
+  Wire.requestFrom(GA_CONTROLS_I2C_ADDRESS, 6);
   while (Wire.available())
   {
     byte b1 = Wire.read(); // receive a byte as character

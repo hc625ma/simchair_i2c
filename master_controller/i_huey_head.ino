@@ -1,7 +1,7 @@
 void setup_huey_coll_head()
 {
 
-  Wire.beginTransmission(17);
+  Wire.beginTransmission(HUEY_HEAD_I2C_ADDRESS);
   int error = Wire.endTransmission();
   if (error == 0)
   {
@@ -16,17 +16,17 @@ void setup_huey_coll_head()
       switch_matrix[i].sw_type = pgm_read_byte(&huey_switch_matrix[i].sw_type);
       switch_matrix[i].sw_middle_b = pgm_read_byte(&huey_switch_matrix[i].sw_middle_b) - 1;
     }
-    
+
   }
   
 }
 
 void poll_huey_coll_head()
 {
-  
+
   uint8_t x, y, s0, s1;
 
-  Wire.requestFrom(17, 4);
+  Wire.requestFrom(HUEY_HEAD_I2C_ADDRESS, 4);
   while (Wire.available())
   {
     byte b1 = Wire.read(); // receive a byte as character

@@ -1,6 +1,6 @@
 void setup_simple_collective()
 {
-  Wire.beginTransmission(10);
+  Wire.beginTransmission(SIMPLE_COLLECTIVE_I2C_ADDRESS);
   int error = Wire.endTransmission();
   if (error == 0)
   {
@@ -15,7 +15,7 @@ void poll_simple_collective()
   uint16_t z;
   uint16_t throttle;
 
-  Wire.requestFrom(10, 4);
+  Wire.requestFrom(SIMPLE_COLLECTIVE_I2C_ADDRESS, 4);
   while (Wire.available())
   {
     byte b1 = Wire.read(); // receive a byte as character

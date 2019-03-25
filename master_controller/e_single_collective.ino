@@ -1,6 +1,6 @@
 void setup_single_engine_collective()
 {
-  Wire.beginTransmission(12);
+  Wire.beginTransmission(SINGLE_COLLECTIVE_I2C_ADDRESS);
   int error = Wire.endTransmission();
   if (error == 0)
   {
@@ -8,7 +8,7 @@ void setup_single_engine_collective()
     simchair.setThrottleRange(SINGLE_COLLECTIVE_THR_MIN,SINGLE_COLLECTIVE_THR_MAX);//SINGLE_ENGINE_COLLECTIVE_IDLE_STOP_AXIS_VAL, 1023);
     dev_single_engine_collective = 1;
   }
-  
+
 }
 
 void set_idle_stop_latch_state(uint16_t throttle)
@@ -21,7 +21,7 @@ void set_idle_stop_latch_state(uint16_t throttle)
   {
     throttle_latch_pressed = 0;
   }
-    
+
 }
 
 void poll_single_engine_collective()
@@ -30,7 +30,7 @@ void poll_single_engine_collective()
   uint16_t throttle;
   uint16_t raw_throttle;
 
-  Wire.requestFrom(12, 4);
+  Wire.requestFrom(SINGLE_COLLECTIVE_I2C_ADDRESS, 4);
   while (Wire.available())
   {
     byte b1 = Wire.read(); // receive a byte as character
@@ -49,7 +49,7 @@ void poll_single_engine_collective()
     raw_throttle = throttle;
   }
   set_idle_stop_latch_state(raw_throttle);
-  // uncomment the next line and turn your throttle to idle stop position to see SINGLE_ENGINE_COLLECTIVE_IDLE_STOP_AXIS_VAL value 
+  // uncomment the next line and turn your throttle to idle stop position to see SINGLE_ENGINE_COLLECTIVE_IDLE_STOP_AXIS_VAL value
   //Serial.println(throttle);
   //Serial.println(z);
   if ((DCS_HUEY_IDLE_STOP_COMPAT_MODE_ENABLED == 1) && (coll_head_mode_sw_position == 0))
@@ -59,7 +59,7 @@ void poll_single_engine_collective()
          simchair.setThrottleRange(SINGLE_ENGINE_COLLECTIVE_IDLE_STOP_AXIS_VAL, SINGLE_COLLECTIVE_THR_MAX);
          min_throttle_val[0] = SINGLE_ENGINE_COLLECTIVE_IDLE_STOP_AXIS_VAL;
       }
-     
+
       coll_head_idle_stop_compat_dcs (throttle,0,SINGLE_ENGINE_COLLECTIVE_IDLE_STOP_AXIS_VAL,0);
       last_throttle_setting[0] = throttle;
       if (throttle < SINGLE_ENGINE_COLLECTIVE_IDLE_STOP_AXIS_VAL)
@@ -68,7 +68,7 @@ void poll_single_engine_collective()
       }
       else
       {
-        throttle_idle_cutoff[0] = 0; 
+        throttle_idle_cutoff[0] = 0;
       }
       if ((idle_stop_pressed[0] != 1) && (throttle_idle_cutoff[0] == 0))
       {
@@ -76,8 +76,8 @@ void poll_single_engine_collective()
       }
       else if (idle_stop_pressed[0] == 1)
       {
-        throttle_idle_cutoff[0] = 1; 
-      }   
+        throttle_idle_cutoff[0] = 1;
+      }
   }
   else
   {
@@ -87,7 +87,7 @@ void poll_single_engine_collective()
       min_throttle_val[0] = 0;
     }
     simchair.setThrottle(throttle);
-  } 
+  }
 
   if ((collective_hold_active == 0) && (collective_hold_position_set == 0))
   {
@@ -133,6 +133,3 @@ void poll_single_engine_collective()
   }
 
 }
-
-
-

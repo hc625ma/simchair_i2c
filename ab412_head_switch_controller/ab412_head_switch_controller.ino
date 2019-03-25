@@ -3,6 +3,8 @@
 //FIRST ROW: 1st: PIN0,PIN1 2nd: PIN2,PIN3 3rd:  PIN4,PIN5
 //SECOND ROW: 1st PIN6,PIN7 etc
 
+#define AB412_HEAD_I2C_ADDRESS 13
+
 #include <Wire.h>
 uint16_t x,y;
 uint8_t b = 0b00000000; //digital pins 0 to 7; x ^= (1 << n); - toggles nth bit of x.  all other bits left alone.
@@ -14,20 +16,20 @@ byte pins = 16;
 byte data[2];
 
 void setup() {
-  Wire.begin(13);                // join i2c bus with address #8
+  Wire.begin(AB412_HEAD_I2C_ADDRESS);                // join i2c bus with address #8
   Wire.onRequest(requestEvent); // register event
  // Serial.begin(9600);           // start serial for output
   for (int i = 0; i <= pins; i++)
   {
     pinMode(i, INPUT_PULLUP);
   }
-  
+
 }
 
-void loop() 
+void loop()
 {
 
-  
+
   for (int i = 0; i <= pins; i++)
   {
     bool pin = !digitalRead(i);
@@ -61,7 +63,7 @@ void loop()
         b2 &= ~(1 <<  (i - 16));
       }
     }
-    
+
 // DEBUG
 //    printBits(b);
 //    Serial.print(" ");
@@ -69,8 +71,8 @@ void loop()
 //    Serial.print(" ");
 //    printBits(b2);
 //    Serial.println();
- } 
-  
+ }
+
 }
 
 void requestEvent() {
@@ -88,4 +90,3 @@ void printBits(byte myByte){
        Serial.print('0');
  }
 }
-

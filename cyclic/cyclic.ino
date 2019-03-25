@@ -9,6 +9,7 @@
 
 // This example code is in the public domain.
 
+#define SIMPLE_COLLECTIVE_I2C_ADDRESS 10
 
 #include <Wire.h>
 #include <Adafruit_ADS1015.h>
@@ -19,20 +20,20 @@ int16_t x,y;
 byte data[4];
 
 void setup() {
-  //Wire.begin(10);                // join i2c bus with address #8
+  //Wire.begin(SIMPLE_COLLECTIVE_I2C_ADDRESS);                // join i2c bus with address #8
  // Wire.onRequest(requestEvent); // register event
 //  Serial.begin(9600);           // start serial for output
  // ads1115.begin();
   //ads1115.setGain(GAIN_ONE);
-  
+
 }
 
-void loop() 
-{  
+void loop()
+{
  // x = ads1115.readADC_SingleEnded(0) >> 3;
  // y = ads1115.readADC_SingleEnded(1) >> 3;
 
-  
+
 //Serial.println(x);
 //Serial.println(y);
 }

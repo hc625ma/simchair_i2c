@@ -9,6 +9,7 @@
 
 // This example code is in the public domain.
 
+#define I2C_PERIPHERAL_I2C_ADDRESS 8
 
 #include <Wire.h>
 uint16_t x,y;
@@ -19,14 +20,14 @@ byte pins[] = {2};
 byte data[5];
 
 void setup() {
-  Wire.begin(8);                // join i2c bus with address #8
+  Wire.begin(I2C_PERIPHERAL_I2C_ADDRESS);                // join i2c bus with address #8
   Wire.onRequest(requestEvent); // register event
   Serial.begin(9600);           // start serial for output
   for (int i = 0; i < sizeof(pins); i++)
   {
     pinMode(pins[i], INPUT_PULLUP);
   }
-  
+
 }
 
 void loop() {
@@ -43,11 +44,11 @@ void loop() {
     {
       b &= ~(1 << i);      // forces ith bit of b to be 0.  all other bits left alone.
     }
-    
+
     //Serial.println(b);
-    
+
   }
-  
+
 //Serial.println(x);
 //Serial.println(y);
 }
