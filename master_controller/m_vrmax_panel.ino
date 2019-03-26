@@ -1,10 +1,9 @@
 void setup_vrmax_panel()
 {
-  Wire.beginTransmission(13);
+  Wire.beginTransmission(21);
   int error = Wire.endTransmission();
   if (error == 0)
   {
-    //Serial.println ("VRMAX FOUND!");
     dev_vrmax_panel = 1;
   }
   
@@ -42,10 +41,10 @@ void poll_vrmax_panel()
     byte b5 = Wire.read(); // encoder 4
 
     but2 = b1;
-    e_state[3].val = b2;
+    e_state[3].val = b5;
     e_state[4].val = b3;
     e_state[5].val = b4;
-    e_state[6].val = b5;
+    e_state[6].val = b2;
   }
 
   
@@ -62,7 +61,7 @@ void poll_vrmax_panel()
     if (e_state[i].last_val != e_state[i].val)
     {
       int e_diff = e_state[i].last_val - e_state[i].val;
-      if ((e_diff > 3) && (e_diff < 100)) // right turn
+      if ((e_diff > 3) && (e_diff < 100)) // left turn
       {
         e_state[i].last_val = e_state[i].val;
         //simchair_aux1.setButton(i, 1);       
@@ -71,11 +70,12 @@ void poll_vrmax_panel()
         //e_state[i].button_id = i;
         e_state[i].button_val = 1;
       }
-      else if ((e_diff < -3) && (e_diff > - 100)) // left turn
+      else if ((e_diff < -3) && (e_diff > - 100)) // right turn
       {
         e_state[i].last_val = e_state[i].val;
         //simchair_aux1.setButton(7 + i, 1); 
-        set_button_mode_and_radio_switch_aware(i,1,7);      
+        //set_button_mode_and_radio_switch_aware(i,1,7);      
+        set_button_mode_and_radio_switch_aware(i,1,1);
         e_state[i].enc_ts = millis();
         //e_state[i].button_id = 7 + i;
         e_state[i].button_val = 1;
@@ -87,93 +87,195 @@ void poll_vrmax_panel()
     }
   }
 
-  // parse switches and buttons - 7 encoders * 2 buttons each * 3 radios = 42 joystick buttons
+  // parse switches and buttons - ( 4 encoders * 2 buttons each * 3 radios ) + MAG encoder (2 buttons) + OBS (3 * 2 buttons) + ALT (2 * 2 buttons)
   parse_radio_panel_switches(but0,0);
   parse_radio_panel_switches(but1,8);
   parse_radio_panel_switches(but2,16);
     
 }
 
-void set_button_mode_and_radio_switch_aware (byte i,bool val,byte offset)
+void set_button_mode_and_radio_switch_aware (byte i,bool val,byte dir)
 {
- // Serial.println(i);
-  // 1st 24 buttons are reserved for switches; OBS, ALT and MAG knobs are another 6 buttons; so the radio panel knobs start with button 31
+  byte offset = 7;
+ // turn direction - 0 left, 1 right
 
-  if (radio_mode == 1) // middle position of panel sw
+  if ((i != 6) && (i != 4) && (i != 5)) // radio panel
   {
-    if ((i != 3) && (i != 4) && (i != 5)) // radio panel knobs
+    if (radio_mode == 1) // middle position of panel sw
     {
       if (radio_device == 0) // COM/NAV 1, buttons 31 - 35
       {
-        simchair_aux1.setButton(25 + i + offset, val); 
-        e_state[i].button_id = (25 + i + offset);
+        
+        //simchair_aux1.setButton(25 + i + offset, val); 
+        //e_state[i].button_id = (25 + i + offset);
+        if (dir == 0)
+        {
+          simchair_aux1.setButton(radio_panel_knob_matrix[i].r0l - 1,val);
+          e_state[i].button_id = (radio_panel_knob_matrix[i].r0l - 1);
+        }
+        else
+        {
+          simchair_aux1.setButton(radio_panel_knob_matrix[i].r0r - 1,val);
+          e_state[i].button_id = (radio_panel_knob_matrix[i].r0r - 1);
+        }
       }
       else if (radio_device == 1) // COM/NAV 2 36-40
       {
-        simchair_aux1.setButton(30 + i + offset, val); 
-        e_state[i].button_id = (30 + i + offset);
+        //simchair_aux1.setButton(30 + i + offset, val); 
+        //e_state[i].button_id = (30 + i + offset);
+        if (dir == 0)
+        {
+          simchair_aux1.setButton(radio_panel_knob_matrix[i].r1l - 1,val);
+          e_state[i].button_id = (radio_panel_knob_matrix[i].r1l - 1);
+        }
+        else
+        {
+          simchair_aux1.setButton(radio_panel_knob_matrix[i].r1r - 1,val);
+          e_state[i].button_id = (radio_panel_knob_matrix[i].r1r - 1);
+        }
       }
       else if (radio_device == 2) // XPDR 41 - 45
       {
-        simchair_aux1.setButton(35 + i + offset, val); 
-        e_state[i].button_id = (35 + i + offset);
+        //simchair_aux1.setButton(35 + i + offset, val); 
+        //e_state[i].button_id = (35 + i + offset);
+        if (dir == 0)
+        {
+          simchair_aux1.setButton(radio_panel_knob_matrix[i].r2l - 1,val);
+          e_state[i].button_id = (radio_panel_knob_matrix[i].r2l - 1);
+        }
+        else
+        {
+          simchair_aux1.setButton(radio_panel_knob_matrix[i].r2r - 1,val);
+          e_state[i].button_id = (radio_panel_knob_matrix[i].r2r - 1);
+        }
       }
     }
-  }
-  else // only 4 radio knobs are affected by panel mode switch
-  {
-    if ((i != 3) && (i != 4) && (i != 5))
+    else if (radio_mode == 0)
     {
-      if (radio_mode == 0)
-      {
-        simchair_aux1.setButton(55 + i + offset, val); 
-        e_state[i].button_id = (55 + i + offset);
-      }
-      else if (radio_mode == 2)
-      {
-        simchair_aux1.setButton(60 + i + offset, val); 
-        e_state[i].button_id = (60 + i + offset);
-      }
+      //simchair_aux1.setButton(55 + i + offset, val); 
+      //e_state[i].button_id = (55 + i + offset);
+      if (dir == 0)
+        {
+          simchair_aux1.setButton(radio_panel_knob_matrix[i].m0l - 1,val);
+          e_state[i].button_id = (radio_panel_knob_matrix[i].m0l - 1);
+        }
+        else
+        {
+          simchair_aux1.setButton(radio_panel_knob_matrix[i].m0r - 1,val);
+          e_state[i].button_id = (radio_panel_knob_matrix[i].m0r - 1);
+        }
+    }
+    else if (radio_mode == 2)
+    {
+      if (dir == 0)
+        {
+          simchair_aux1.setButton(radio_panel_knob_matrix[i].m2l - 1,val);
+          e_state[i].button_id = (radio_panel_knob_matrix[i].m2l - 1);
+        }
+        else
+        {
+          simchair_aux1.setButton(radio_panel_knob_matrix[i].m2r - 1,val);
+          e_state[i].button_id = (radio_panel_knob_matrix[i].m2r - 1);
+        }
     }
   }
-  
-  if ((i == 3) || (i == 4) || (i == 5))// side panels knobs
+  else // side panels knobs
   {
     if (i == 5)
     {
       if (alt_mode == 0)
       {
-        simchair_aux1.setButton(40 + i + offset, val); 
-        e_state[i].button_id = (40 + i + offset);
+        //simchair_aux1.setButton(40 + i + offset, val); 
+        //e_state[i].button_id = (40 + i + offset);
+        if (dir == 0)
+        {
+          simchair_aux1.setButton(alt_knob_conf[0].a0l - 1,val);
+          e_state[i].button_id = (alt_knob_conf[0].a0l - 1);
+        }
+        else
+        {
+          simchair_aux1.setButton(alt_knob_conf[0].a0r - 1,val);
+          e_state[i].button_id = (alt_knob_conf[0].a0r - 1);
+        }
       }
       else if (alt_mode == 2)
       {
-        simchair_aux1.setButton(42 + i + offset, val); 
-        e_state[i].button_id = (42 + i + offset);
+        //simchair_aux1.setButton(42 + i + offset, val); 
+        //e_state[i].button_id = (42 + i + offset);
+        if (dir == 0)
+        {
+          simchair_aux1.setButton(alt_knob_conf[0].a2l - 1,val);
+          e_state[i].button_id = (alt_knob_conf[0].a2l - 1);
+        }
+        else
+        {
+          simchair_aux1.setButton(alt_knob_conf[0].a2r - 1,val);
+          e_state[i].button_id = (alt_knob_conf[0].a2r - 1);
+        }
       }
     }
     else if (i == 4)
     {
       if (nav_mode == 0)
       {
-        simchair_aux1.setButton(45 + i + offset, val); 
-        e_state[i].button_id = (45 + i + offset);
+        //simchair_aux1.setButton(45 + i + offset, val); 
+        //e_state[i].button_id = (45 + i + offset);
+        if (dir == 0)
+        {
+          simchair_aux1.setButton(nav_knob_conf[0].n0l - 1,val);
+          e_state[i].button_id = (nav_knob_conf[0].n0l - 1);
+        }
+        else
+        {
+          simchair_aux1.setButton(nav_knob_conf[0].n0r - 1,val);
+          e_state[i].button_id = (nav_knob_conf[0].n0r - 1);
+        }
       }
       else if (nav_mode == 1)
       {
-        simchair_aux1.setButton(49 + i + offset, val); 
-        e_state[i].button_id = (49 + i + offset);
+       // simchair_aux1.setButton(49 + i + offset, val); 
+       // e_state[i].button_id = (49 + i + offset);
+       if (dir == 0)
+        {
+          simchair_aux1.setButton(nav_knob_conf[0].n1l - 1,val);
+          e_state[i].button_id = (nav_knob_conf[0].n1l - 1);
+        }
+        else
+        {
+          simchair_aux1.setButton(nav_knob_conf[0].n1r - 1,val);
+          e_state[i].button_id = (nav_knob_conf[0].n1r - 1);
+        }
       }
       else if (nav_mode == 2)
       {
-        simchair_aux1.setButton(52 + i + offset, val); 
-        e_state[i].button_id = (52 + i + offset);
+       // simchair_aux1.setButton(52 + i + offset, val); 
+       // e_state[i].button_id = (52 + i + offset);
+       if (dir == 0)
+        {
+          simchair_aux1.setButton(nav_knob_conf[0].n2l - 1,val);
+          e_state[i].button_id = (nav_knob_conf[0].n2l - 1);
+        }
+        else
+        {
+          simchair_aux1.setButton(nav_knob_conf[0].n2r - 1,val);
+          e_state[i].button_id = (nav_knob_conf[0].n2r - 1);
+        }
       }
     }
     else // MAG knob has 1 mode
     {
-      simchair_aux1.setButton(41 + i + offset, val); 
-      e_state[i].button_id = (41 + i + offset);
+      //simchair_aux1.setButton(41 + i + offset, val); 
+      //e_state[i].button_id = (41 + i + offset);
+      if (dir == 0)
+      {
+        simchair_aux1.setButton(mag_knob_conf[0].l - 1,val);
+        e_state[i].button_id = (mag_knob_conf[0].l - 1);
+      }
+      else
+      {
+        simchair_aux1.setButton(mag_knob_conf[0].r - 1,val);
+        e_state[i].button_id = (mag_knob_conf[0].r - 1);
+      }
     }
   }
 }
