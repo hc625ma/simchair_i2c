@@ -272,7 +272,7 @@ const rp_e_matrix radio_panel_knob_matrix[] =
   const alt_conf alt_knob_conf[] =
   {
   // e  a0l a0r a1l a1r a2l a2r
-    {4, 75, 76, 77, 78, 79, 80, },
+    {5, 81, 82, 83, 84, 85, 86, },
   };
 //</RADIO PANEL>
 

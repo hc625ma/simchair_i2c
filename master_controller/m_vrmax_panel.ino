@@ -5,6 +5,7 @@ void setup_vrmax_panel()
   if (error == 0)
   {
     dev_vrmax_panel = 1;
+    
   }
   
 }
@@ -14,6 +15,7 @@ void poll_vrmax_panel()
 
   uint8_t but0,but1,but2;
   uint8_t e[7];
+  
   
   Wire.requestFrom(22, 5); //radio panel - top left encoder
   while (Wire.available())
@@ -51,7 +53,8 @@ void poll_vrmax_panel()
   // parse encoders
   for (byte i = 0; i < 7; i++)
   {
-    if ((millis() - e_state[i].enc_ts) > 100)
+    
+    if ((millis() - e_state[i].enc_ts) > 5)
     {
       e_state[i].button_val = 0;
       simchair_aux1.setButton(e_state[i].button_id, 0);
@@ -61,22 +64,26 @@ void poll_vrmax_panel()
     if (e_state[i].last_val != e_state[i].val)
     {
       int e_diff = e_state[i].last_val - e_state[i].val;
-      if ((e_diff > 3) && (e_diff < 100)) // left turn
+      if ((e_diff > 1) && (e_diff < 100)) // left turn
       {
+        Serial.println(e_diff);
         e_state[i].last_val = e_state[i].val;
         //simchair_aux1.setButton(i, 1);       
         set_button_mode_and_radio_switch_aware(i,1,0);
         e_state[i].enc_ts = millis();
+        
+        
         //e_state[i].button_id = i;
         e_state[i].button_val = 1;
       }
-      else if ((e_diff < -3) && (e_diff > - 100)) // right turn
+      else if ((e_diff < -1) && (e_diff > - 100)) // right turn
       {
         e_state[i].last_val = e_state[i].val;
         //simchair_aux1.setButton(7 + i, 1); 
         //set_button_mode_and_radio_switch_aware(i,1,7);      
         set_button_mode_and_radio_switch_aware(i,1,1);
         e_state[i].enc_ts = millis();
+        
         //e_state[i].button_id = 7 + i;
         e_state[i].button_val = 1;
       }

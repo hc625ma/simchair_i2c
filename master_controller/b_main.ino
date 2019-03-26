@@ -102,6 +102,8 @@ byte nav_mode = 0;
 bool nav_mode0_unchecked = 0;
 bool nav_mode2_unchecked = 0;
 
+byte knob_button_hold_timeout = 100;
+
 enc_state e_state[7]; 
 byte MODE_SWITCH_BUTTON = 0;
 byte IDLE_STOP_BUTTON = 0;
