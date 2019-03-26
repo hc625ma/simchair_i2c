@@ -5,6 +5,7 @@ void setup_huey_coll_head()
   int error = Wire.endTransmission();
   if (error == 0)
   {
+    COLLECTIVE_HOLD_BUTTON = HUEY_HEAD_COLLECTIVE_HOLD_BUTTON;
     simchair_aux2.setXAxisRange(0, 255);
     simchair_aux2.setYAxisRange(0, 255);
     dev_huey_coll_head = 1;
@@ -17,7 +18,7 @@ void setup_huey_coll_head()
     }
     
   }
-  COLLECTIVE_HOLD_BUTTON = HUEY_HEAD_COLLECTIVE_HOLD_BUTTON;
+  
 }
 
 void poll_huey_coll_head()

@@ -4,16 +4,16 @@
 
 byte data[5];
 
-byte encoder0PinA = 6;
-byte encoder0PinB = 7;
-byte encoder1PinA = 12;
-byte encoder1PinB = 13;
-byte encoder2PinA = 16;
-byte encoder2PinB = 17;
-
+int encoder0PinA = 2;
+int encoder0PinB = 3;
+int encoder1PinA = 5;
+int encoder1PinB = 6;
+int encoder2PinA = 10;
+int encoder2PinB = 11;
+int encoder3PinA = 15;
+int encoder3PinB = 16;
 
 uint8_t b = 0b00000000;
-uint8_t b1 = 0b00000000;
 
 uint8_t encoder0Pos = 0;
 uint8_t encoder0PinALast = LOW;
@@ -21,12 +21,14 @@ uint8_t encoder1Pos = 0;
 uint8_t encoder1PinALast = LOW;
 uint8_t encoder2Pos = 0;
 uint8_t encoder2PinALast = LOW;
+uint8_t encoder3Pos = 0;
+uint8_t encoder3PinALast = LOW;
 
-uint8_t n0,n1,n2 = LOW;
-uint8_t button_pins[] = {1,2,3,4,5,8,9,10,11,14,15};
+int n0,n1,n2,n3 = LOW;
+byte button_pins[] = {4,7,8,9,12,13,14,17};//button on pin 18 (A6) is connected to analog only pin!
 
 void setup() {
-  Wire.begin(22);                // join i2c bus with address #8
+  Wire.begin(21);                // join i2c bus with address #8
   Wire.onRequest(requestEvent); // register event
 
   
@@ -36,7 +38,7 @@ void setup() {
   }
 
   pinMode (encoder0PinA,INPUT_PULLUP);
-  pinMode (encoder0PinB, INPUT_PULLUP); 
+  pinMode (encoder0PinB, INPUT_PULLUP);
 
   pinMode (encoder1PinA,INPUT_PULLUP);
   pinMode (encoder1PinB, INPUT_PULLUP);
@@ -44,6 +46,8 @@ void setup() {
   pinMode (encoder2PinA,INPUT_PULLUP);
   pinMode (encoder2PinB, INPUT_PULLUP);
 
+  pinMode (encoder3PinA,INPUT_PULLUP);
+  pinMode (encoder3PinB, INPUT_PULLUP);
 
   #if defined(DEBUG)
     Serial.begin (115200);
@@ -57,29 +61,15 @@ void loop()
     bool pin = !digitalRead(button_pins[i]);
     if (pin == 1)
     {
-     if (i < 8)
-     {
-        b |= (1 << i);       // forces ith bit of b to be 1.  all other bits left alone.
-     }
-     else
-     {
-        b1 |= (1 <<  (i - 8));
-     }
+      b |= (1 << i);       // forces ith bit of b to be 1.  all other bits left alone.
     }
     else
     {
-      if ( i < 8)
-      {
-        b &= ~(1 << i);      // forces ith bit of b to be 0.  all other bits left alone.
-      }
-      else
-      {
-        b1 &= ~(1 << (i - 8));
-      }
+      b &= ~(1 << i);      // forces ith bit of b to be 0.  all other bits left alone.
     }
   }
-
-
+  
+  
   n0 = !digitalRead(encoder0PinA);
   if ((encoder0PinALast == LOW) && (n0 == HIGH)) 
   {
@@ -122,32 +112,43 @@ void loop()
    }
   encoder2PinALast = n2;
   
+  n3 = !digitalRead(encoder3PinA);
+  if ((encoder3PinALast == LOW) && (n3 == HIGH)) 
+  {
+    if (!digitalRead(encoder3PinB) == LOW) 
+    {
+      encoder3Pos--;
+    } 
+    else 
+    {
+      encoder3Pos++;
+    }
+   }
+  encoder3PinALast = n3;
+  
+ 
 
-
-// DEBUG
 #if defined(DEBUG)
     printBits(b);
     Serial.print(" ");
-    printBits(b1);
-    Serial.print(" ");
+
     Serial.print (encoder0Pos);
     Serial.print(" ");
     Serial.print (encoder1Pos);
     Serial.print(" ");
-    Serial.print (encoder2Pos);
-    Serial.println();
+    Serial.println(encoder2Pos);
 #endif
-  
+
+
 }
 
 void requestEvent() 
 {
   data[0] = b;
-  data[1] = b1;
-  data[2] = encoder0Pos;
-  data[3] = encoder1Pos;
-  data[4] = encoder2Pos;
-  
+  data[1] = encoder0Pos;
+  data[2] = encoder1Pos;
+  data[3] = encoder2Pos;
+  data[4] = encoder3Pos;
   Wire.write(data,5);
 }
 

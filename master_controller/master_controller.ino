@@ -32,4 +32,19 @@ typedef struct
    bool sw_tr_state;
 }  sw_matrix;
 
+typedef struct
+{
+   bool sw_val;
+}  r_matrix;
+
+typedef struct
+{
+   uint8_t enc_id;
+   uint8_t val;
+   uint8_t last_val;
+   long enc_ts;
+   byte button_id;
+   bool button_val;
+}  enc_state;
+
 

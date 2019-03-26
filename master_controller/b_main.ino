@@ -30,6 +30,7 @@ bool dev_cessna_engine_and_prop_controls = 0;
 bool dev_ab412_coll_head = 0;
 bool dev_huey_coll_head = 0;
 bool dev_throttle_quadrant = 0;
+bool dev_vrmax_panel = 0;
 bool SW_MODE_BUTTON = 0;
 bool SW_MODE_TOGGLE = 1;
 bool zero = 0;
@@ -86,6 +87,22 @@ int32_t rudder_val;
 int xval_prev;
 
 sw_matrix switch_matrix[32];
+r_matrix radio_matrix[24];
+
+byte radio_device;
+bool radio0_unchecked = 0;
+bool radio2_unchecked = 0;
+byte radio_mode = 1;
+bool radio_mode0_unchecked = 0;
+bool radio_mode2_unchecked = 0;
+byte alt_mode = 0;
+bool alt_mode0_unchecked = 0;
+bool alt_mode2_unchecked = 0;
+byte nav_mode = 0;
+bool nav_mode0_unchecked = 0;
+bool nav_mode2_unchecked = 0;
+
+enc_state e_state[7]; 
 byte MODE_SWITCH_BUTTON = 0;
 byte IDLE_STOP_BUTTON = 0;
 
@@ -94,7 +111,7 @@ byte COLLECTIVE_HOLD_BUTTON = 255;
 void setup()
 {
   delay (2000);
-  Serial.begin(9600);
+  Serial.begin(115200);
   simchair.begin();
   simchair_aux1.begin();
   simchair_aux2.begin();
@@ -108,6 +125,7 @@ void setup()
   setup_pedals();
   setup_cessna_engine_and_prop_controls();
   setup_ab412_coll_head();
+  setup_vrmax_panel();
   setup_huey_coll_head();
   setup_throttle_quadrant();
   if ((PTT_KEYBOARD_PRESS == 1) || (DCS_HUEY_IDLE_STOP_COMPAT_MODE_ENABLED == 1))
@@ -152,6 +170,10 @@ void loop()
   if (dev_ab412_coll_head == 1)
   {
     poll_ab412_coll_head();
+  }
+  if (dev_vrmax_panel == 1)
+  {
+    poll_vrmax_panel();
   }
   if (dev_huey_coll_head == 1)
   {

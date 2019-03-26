@@ -68,7 +68,7 @@ void parse_coll_head_sw_matrix (int sw, uint8_t start_pos, uint8_t end_pos)
     }
     //
     if (i == MODE_SWITCH_BUTTON - 1)
-    {
+    {   
       if (v == 1)
       {
         coll_head_mode_sw_position = 1;

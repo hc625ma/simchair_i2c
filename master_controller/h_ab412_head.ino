@@ -4,10 +4,11 @@ void setup_ab412_coll_head()
   int error = Wire.endTransmission();
   if (error == 0)
   {
+    COLLECTIVE_HOLD_BUTTON = AB412_HEAD_COLLECTIVE_HOLD_BUTTON;
     simchair_aux2.setXAxisRange(0, 255);
     simchair_aux2.setYAxisRange(0, 255);
     simchair_aux2.setRxAxisRange(0, 255);
-    simchair_aux2.setRyAxisRange(0, 255);
+    simchair_aux2.setRyAxisRange(255, 0);
     simchair_aux2.setZAxisRange(0, 255);
     simchair_aux2.setRzAxisRange(0, 255);
     dev_ab412_coll_head = 1;
@@ -22,7 +23,7 @@ void setup_ab412_coll_head()
     MODE_SWITCH_BUTTON = AB412_COLL_HEAD_MODE_SWITCH;
     IDLE_STOP_BUTTON = ab412_coll_head_idle_stop_buttons[0] - 1;
   }
-  COLLECTIVE_HOLD_BUTTON = AB412_HEAD_COLLECTIVE_HOLD_BUTTON;
+  
 }
 
 void poll_ab412_coll_head()

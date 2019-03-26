@@ -230,6 +230,9 @@
 // </HUEY COLL HEAD>
 
 //<THROTTLE QUADRANT>
+
+//  #define RADIO_PANEL_SETUP // <--- UNCOMMENT TO SEE BUTTON NUMBERS IN JOY.CPL, COMMENT OUT FOR NORMAL OPERATION!
+
   #define THROTTLE_QUADRANT_PHYSICAL_AXIS_MAX 1006
   #define THROTTLE_QUADRANT_PHYSICAL_AXIS_MIN 10
 
@@ -238,5 +241,11 @@
 
 //</THROTTLE QUADRANT>
 
+//<RADIO PANEL>//
+#define RADIO_DEVICE_SWITCH_XPDR_POSITION_JOY_BUTTON 3 // put the lower button number here
+#define RADIO_MODE_SWITCH_LOWER_POSITION_JOY_BUTTON 10 // put the lower button number here
+#define ALTIMETER_SELECTOR_JOY_BUTTON 22 // put the lower button number here
+#define NAV_MODE_SELECTOR_JOY_BUTTON 19 // put the lower button number here
+//</RADIO PANEL>
 
 
