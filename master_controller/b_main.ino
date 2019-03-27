@@ -101,6 +101,9 @@ bool alt_mode2_unchecked = 0;
 byte nav_mode = 0;
 bool nav_mode0_unchecked = 0;
 bool nav_mode2_unchecked = 0;
+bool xpdr_mode0_unchecked = 0;
+bool xpdr_mode2_unchecked = 0;
+bool xpdr_val = 0;
 
 byte knob_button_hold_timeout = 100;
 

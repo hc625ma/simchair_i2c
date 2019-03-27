@@ -246,14 +246,16 @@
 #define RADIO_MODE_SWITCH_LOWER_POSITION_JOY_BUTTON 10 // put the lower button number here
 #define ALTIMETER_SELECTOR_JOY_BUTTON 22 // put the lower button number here
 #define NAV_MODE_SELECTOR_JOY_BUTTON 19 // put the lower button number here
+#define XPDR_MODE_SW_JOY_BUTTON 7 // put the lower button number here
+#define XPDR_MODE_C_JOY_BUTTON 9 // that button will be pressed in middle xpdr switch position
 
 const rp_e_matrix radio_panel_knob_matrix[] =
   {
-  // e  r0l r0r r1l r1r r2l r2r  m0l m0r  m1l m1r  m2l m2r 
-    {0, 25, 26, 33, 34, 41, 42,  49, 50,  57, 58,  65, 66, },
-    {1, 27, 28, 35, 36, 43, 44,  51, 52,  59, 60,  67, 68, },
-    {2, 29, 30, 37, 38, 45, 46,  53, 54,  61, 62,  69, 70, },
-    {3, 31, 32, 39, 40, 47, 48,  55, 56,  63, 64,  71, 72, },
+  // e  r0l r0r r1l r1r r2l r2r  m0l m0r  m1l m1r  m2l m2r adfl adfr
+    {0, 25, 26, 33, 34, 41, 42,  49, 50,  57, 58,  65, 66, 87, 88, },
+    {1, 27, 28, 35, 36, 43, 44,  51, 52,  59, 60,  67, 68, 89, 90. },
+    {2, 29, 30, 37, 38, 45, 46,  53, 54,  61, 62,  69, 70, 91, 92, },
+    {3, 31, 32, 39, 40, 47, 48,  55, 56,  63, 64,  71, 72, 93, 94, },
 
   };
 

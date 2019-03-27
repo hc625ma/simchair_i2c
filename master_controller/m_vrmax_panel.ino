@@ -108,13 +108,10 @@ void set_button_mode_and_radio_switch_aware (byte i,bool val,byte dir)
 
   if ((i != 6) && (i != 4) && (i != 5)) // radio panel
   {
-    if (radio_mode == 1) // middle position of panel sw
+    if (radio_mode == 1)// middle position of panel sw
     {
-      if (radio_device == 0) // COM/NAV 1, buttons 31 - 35
+      if (radio_device == 0) // COM/NAV 1
       {
-        
-        //simchair_aux1.setButton(25 + i + offset, val); 
-        //e_state[i].button_id = (25 + i + offset);
         if (dir == 0)
         {
           simchair_aux1.setButton(radio_panel_knob_matrix[i].r0l - 1,val);
@@ -126,10 +123,8 @@ void set_button_mode_and_radio_switch_aware (byte i,bool val,byte dir)
           e_state[i].button_id = (radio_panel_knob_matrix[i].r0r - 1);
         }
       }
-      else if (radio_device == 1) // COM/NAV 2 36-40
+      else if (radio_device == 1) // COM/NAV 2
       {
-        //simchair_aux1.setButton(30 + i + offset, val); 
-        //e_state[i].button_id = (30 + i + offset);
         if (dir == 0)
         {
           simchair_aux1.setButton(radio_panel_knob_matrix[i].r1l - 1,val);
@@ -141,26 +136,39 @@ void set_button_mode_and_radio_switch_aware (byte i,bool val,byte dir)
           e_state[i].button_id = (radio_panel_knob_matrix[i].r1r - 1);
         }
       }
-      else if (radio_device == 2) // XPDR 41 - 45
+      else if (radio_device == 2) // XPDR
       {
-        //simchair_aux1.setButton(35 + i + offset, val); 
-        //e_state[i].button_id = (35 + i + offset);
-        if (dir == 0)
+        if (nav_mode != 1)
         {
-          simchair_aux1.setButton(radio_panel_knob_matrix[i].r2l - 1,val);
-          e_state[i].button_id = (radio_panel_knob_matrix[i].r2l - 1);
+          if (dir == 0)
+          {
+            simchair_aux1.setButton(radio_panel_knob_matrix[i].r2l - 1,val);
+            e_state[i].button_id = (radio_panel_knob_matrix[i].r2l - 1);
+          }
+          else
+          {
+            simchair_aux1.setButton(radio_panel_knob_matrix[i].r2r - 1,val);
+            e_state[i].button_id = (radio_panel_knob_matrix[i].r2r - 1);
+          }
         }
         else
         {
-          simchair_aux1.setButton(radio_panel_knob_matrix[i].r2r - 1,val);
-          e_state[i].button_id = (radio_panel_knob_matrix[i].r2r - 1);
+          if (dir == 0)
+          {
+            simchair_aux1.setButton(radio_panel_knob_matrix[i].adfl - 1,val);
+            e_state[i].button_id = (radio_panel_knob_matrix[i].adfl - 1);
+          }
+          else
+          {
+            simchair_aux1.setButton(radio_panel_knob_matrix[i].adfr - 1,val);
+            e_state[i].button_id = (radio_panel_knob_matrix[i].adfr - 1);
+          }
         }
       }
+      
     }
     else if (radio_mode == 0)
     {
-      //simchair_aux1.setButton(55 + i + offset, val); 
-      //e_state[i].button_id = (55 + i + offset);
       if (dir == 0)
         {
           simchair_aux1.setButton(radio_panel_knob_matrix[i].m0l - 1,val);
@@ -313,6 +321,22 @@ void parse_radio_panel_switches (byte b, byte start_pos)
     {
       nav_mode = 1;
     }
+    if ((xpdr_mode0_unchecked == 1) && (xpdr_mode2_unchecked == 1))
+    {
+      if (xpdr_val != 1)
+      {
+        simchair_aux1.setButton(XPDR_MODE_C_JOY_BUTTON - 1, 1);
+        xpdr_val = 1;
+      }
+    }
+    else
+    {
+      if (xpdr_val != 0)
+      {
+        simchair_aux1.setButton(XPDR_MODE_C_JOY_BUTTON - 1, 0);
+        xpdr_val = 0;
+      }
+    }
 #if !defined(RADIO_PANEL_SETUP)
     if (i == RADIO_DEVICE_SWITCH_XPDR_POSITION_JOY_BUTTON - 1)
     {
@@ -411,11 +435,35 @@ void parse_radio_panel_switches (byte b, byte start_pos)
       }
     }   
 #endif
+
     else if (v != radio_matrix[i].sw_val) // regular joy button
     {
       simchair_aux1.setButton(i, v);
       radio_matrix[i].sw_val = v;
     }
+    
+    if (i == XPDR_MODE_SW_JOY_BUTTON - 1)
+    {
+      if (v == 1)
+      {
+        xpdr_mode2_unchecked = 0;
+      }
+      else
+      {
+        xpdr_mode2_unchecked = 1;
+      }
+    }
+    else if (i == XPDR_MODE_SW_JOY_BUTTON)
+    {
+      if (v == 1)
+      {
+        xpdr_mode0_unchecked = 0;
+      }
+      else
+      {
+        xpdr_mode0_unchecked = 1;
+      }
+    }   
       //simchair_aux1.setButton(first_joy_b + i, v);
 
   }

@@ -65,6 +65,8 @@ typedef struct
   uint8_t m1r; // panel mode switch pos 1 right
   uint8_t m2l; // panel mode switch pos 2 left
   uint8_t m2r; // panel mode switch pos 2 right
+  uint8_t adfl; // nav mode switch pos middle + radio stack selector pos 2 (xpdr) - adf mode left
+  uint8_t adfr; // nav mode switch pos middle + radio stack selector pos 2 (xpdr) - adf mode right
 } rp_e_matrix;
 
 typedef struct 
