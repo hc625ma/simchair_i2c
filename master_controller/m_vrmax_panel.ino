@@ -198,10 +198,8 @@ void set_button_mode_and_radio_switch_aware (byte i,bool val,byte dir)
   {
     if (i == 5)
     {
-      if (alt_mode == 0)
+      if (alt_mode == 0) // BARO
       {
-        //simchair_aux1.setButton(40 + i + offset, val); 
-        //e_state[i].button_id = (40 + i + offset);
         if (dir == 0)
         {
           simchair_aux1.setButton(alt_knob_conf[0].a0l - 1,val);
@@ -213,10 +211,8 @@ void set_button_mode_and_radio_switch_aware (byte i,bool val,byte dir)
           e_state[i].button_id = (alt_knob_conf[0].a0r - 1);
         }
       }
-      else if (alt_mode == 2)
+      else if (alt_mode == 2) // RADIO
       {
-        //simchair_aux1.setButton(42 + i + offset, val); 
-        //e_state[i].button_id = (42 + i + offset);
         if (dir == 0)
         {
           simchair_aux1.setButton(alt_knob_conf[0].a2l - 1,val);
@@ -226,6 +222,19 @@ void set_button_mode_and_radio_switch_aware (byte i,bool val,byte dir)
         {
           simchair_aux1.setButton(alt_knob_conf[0].a2r - 1,val);
           e_state[i].button_id = (alt_knob_conf[0].a2r - 1);
+        }
+      }
+      else
+      {
+        if (dir == 0) // just in case you need them
+        {
+          simchair_aux1.setButton(alt_knob_conf[0].a1l - 1,val);
+          e_state[i].button_id = (alt_knob_conf[0].a1l - 1);
+        }
+        else
+        {
+          simchair_aux1.setButton(alt_knob_conf[0].a1r - 1,val);
+          e_state[i].button_id = (alt_knob_conf[0].a1r - 1);
         }
       }
     }
@@ -325,7 +334,7 @@ void parse_radio_panel_switches (byte b, byte start_pos)
     {
       if (xpdr_val != 1)
       {
-        simchair_aux1.setButton(XPDR_MODE_C_JOY_BUTTON - 1, 1);
+        simchair_aux1.setButton(XPDR_MODE_C_JOY_BUTTON, 1);
         xpdr_val = 1;
       }
     }
@@ -333,7 +342,7 @@ void parse_radio_panel_switches (byte b, byte start_pos)
     {
       if (xpdr_val != 0)
       {
-        simchair_aux1.setButton(XPDR_MODE_C_JOY_BUTTON - 1, 0);
+        simchair_aux1.setButton(XPDR_MODE_C_JOY_BUTTON, 0);
         xpdr_val = 0;
       }
     }
