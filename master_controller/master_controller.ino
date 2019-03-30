@@ -16,7 +16,7 @@
 //  false, false, false);  // No accelerator, brake, or steering
 
 Joystick_ simchair(0x20, 0x04, 32, 1, true, true, true, true, true, false, true, true, false, false, false);
-Joystick_ simchair_aux1(0x21, 0x04, 128, 1, true, true, true, true, true, true, true, true, true, true, true);
+Joystick_ simchair_aux1(0x21, 0x04, 142, 1, true, true, true, true, true, true, true, true, true, true, true);
 Joystick_ simchair_aux2(0x22, 0x04, 128, 1, false, false, false, true, true, false, false, false, false, false, false);
 
 Adafruit_ADS1115 cyclic;
@@ -67,6 +67,20 @@ typedef struct
   uint8_t m2r; // panel mode switch pos 2 right
   uint8_t adfl; // nav mode switch pos middle + radio stack selector pos 2 (xpdr) - adf mode left
   uint8_t adfr; // nav mode switch pos middle + radio stack selector pos 2 (xpdr) - adf mode right
+
+  uint8_t r0lpm1; // radio stack selector pos 0 left panel mode sw in pos 1
+  uint8_t r0rpm1; // radio stack selector pos 0 right panel mode sw in pos 1
+  uint8_t r1lpm1; // radio stack selector pos 1 left panel mode sw in pos 1
+  uint8_t r1rpm1; // radio stack selector pos 1 right panel mode sw in pos 1
+  uint8_t r2lpm1; // radio stack selector pos 2 left panel mode sw in pos 1
+  uint8_t r2rpm1; // radio stack selector pos 2 right panel mode sw in pos 1
+
+  uint8_t r0lpm2; // radio stack selector pos 0 left panel mode sw in pos 2
+  uint8_t r0rpm2; // radio stack selector pos 0 right panel mode sw in pos 2
+  uint8_t r1lpm2; // radio stack selector pos 1 left panel mode sw in pos 2
+  uint8_t r1rpm2; // radio stack selector pos 1 right panel mode sw in pos 2
+  uint8_t r2lpm2; // radio stack selector pos 2 left panel mode sw in pos 2
+  uint8_t r2rpm2; // radio stack selector pos 2 right panel mode sw in pos 2
 } rp_e_matrix;
 
 typedef struct 

@@ -165,7 +165,22 @@ void set_button_mode_and_radio_switch_aware (byte i,bool val,byte dir)
     }
     else if (radio_mode == 0)
     {
-      if (dir == 0)
+      if (radio_device == 0) // PANEL MODE SW UP + STACK SELECTOR SW UP
+      {
+        if (dir == 0)
+        {
+          simchair_aux1.setButton(radio_panel_knob_matrix[i].r0lpm1 - 1,val);
+          e_state[i].button_id = (radio_panel_knob_matrix[i].r0lpm1 - 1);
+        }
+        else
+        {
+          simchair_aux1.setButton(radio_panel_knob_matrix[i].r0rpm1 - 1,val);
+          e_state[i].button_id = (radio_panel_knob_matrix[i].r0rpm1 - 1);
+        }
+      }
+      else if (radio_device == 1) // PANEL MODE SW UP + STACK SELECTOR SW MIDDLE
+      {
+        if (dir == 0)
         {
           simchair_aux1.setButton(radio_panel_knob_matrix[i].m0l - 1,val);
           e_state[i].button_id = (radio_panel_knob_matrix[i].m0l - 1);
@@ -175,10 +190,42 @@ void set_button_mode_and_radio_switch_aware (byte i,bool val,byte dir)
           simchair_aux1.setButton(radio_panel_knob_matrix[i].m0r - 1,val);
           e_state[i].button_id = (radio_panel_knob_matrix[i].m0r - 1);
         }
+      }
+      else if (radio_device == 2) // PANEL MODE SW UP + STACK SELECTOR SW DOWN
+      {
+        if (dir == 0)
+        {
+          simchair_aux1.setButton(radio_panel_knob_matrix[i].r2lpm1 - 1,val);
+          e_state[i].button_id = (radio_panel_knob_matrix[i].r2lpm1 - 1);
+        }
+        else
+        {
+          simchair_aux1.setButton(radio_panel_knob_matrix[i].r2rpm1 - 1,val);
+          e_state[i].button_id = (radio_panel_knob_matrix[i].r2rpm1 - 1);
+        }       
+      }
+
     }
     else if (radio_mode == 2)
     {
-      if (dir == 0)
+
+
+      if (radio_device == 0) // PANEL MODE SW DOWN + STACK SELECTOR SW UP
+      {
+        if (dir == 0)
+        {
+          simchair_aux1.setButton(radio_panel_knob_matrix[i].r0lpm2 - 1,val);
+          e_state[i].button_id = (radio_panel_knob_matrix[i].r0lpm2 - 1);
+        }
+        else
+        {
+          simchair_aux1.setButton(radio_panel_knob_matrix[i].r0rpm2 - 1,val);
+          e_state[i].button_id = (radio_panel_knob_matrix[i].r0rpm2 - 1);
+        }
+      }
+      else if (radio_device == 1) // PANEL MODE SW DOWN + STACK SELECTOR SW MIDDLE
+      {
+        if (dir == 0)
         {
           simchair_aux1.setButton(radio_panel_knob_matrix[i].m2l - 1,val);
           e_state[i].button_id = (radio_panel_knob_matrix[i].m2l - 1);
@@ -188,6 +235,20 @@ void set_button_mode_and_radio_switch_aware (byte i,bool val,byte dir)
           simchair_aux1.setButton(radio_panel_knob_matrix[i].m2r - 1,val);
           e_state[i].button_id = (radio_panel_knob_matrix[i].m2r - 1);
         }
+      }
+      else if (radio_device == 2) // PANEL MODE SW DOWN + STACK SELECTOR SW DOWN
+      {
+        if (dir == 0)
+        {
+          simchair_aux1.setButton(radio_panel_knob_matrix[i].r2lpm2 - 1,val);
+          e_state[i].button_id = (radio_panel_knob_matrix[i].r2lpm2 - 1);
+        }
+        else
+        {
+          simchair_aux1.setButton(radio_panel_knob_matrix[i].r2rpm2 - 1,val);
+          e_state[i].button_id = (radio_panel_knob_matrix[i].r2rpm2 - 1);
+        }       
+      }
     }
   }
   else // side panels knobs
