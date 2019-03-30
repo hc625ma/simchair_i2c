@@ -1,32 +1,27 @@
 void setup_huey_coll_head()
 {
+  if (!is_device_connected(HUEY_HEAD_I2C_ADDRESS))
+    return;
 
-  Wire.beginTransmission(17);
-  int error = Wire.endTransmission();
-  if (error == 0)
+  COLLECTIVE_HOLD_BUTTON = HUEY_HEAD_COLLECTIVE_HOLD_BUTTON;
+  simchair_aux2.setXAxisRange(0, 255);
+  simchair_aux2.setYAxisRange(0, 255);
+  dev_huey_coll_head = 1;
+  IDLE_STOP_BUTTON = huey_coll_head_idle_stop_buttons[0];
+  for (byte i=0;i<32;i++)
   {
-    COLLECTIVE_HOLD_BUTTON = HUEY_HEAD_COLLECTIVE_HOLD_BUTTON;
-    simchair_aux2.setXAxisRange(0, 255);
-    simchair_aux2.setYAxisRange(0, 255);
-    dev_huey_coll_head = 1;
-    IDLE_STOP_BUTTON = huey_coll_head_idle_stop_buttons[0];
-    for (byte i=0;i<32;i++)
-    {
-      switch_matrix[i].sw_id = pgm_read_byte(&huey_switch_matrix[i].sw_id);
-      switch_matrix[i].sw_type = pgm_read_byte(&huey_switch_matrix[i].sw_type);
-      switch_matrix[i].sw_middle_b = pgm_read_byte(&huey_switch_matrix[i].sw_middle_b) - 1;
-    }
-    
+    switch_matrix[i].sw_id = pgm_read_byte(&huey_switch_matrix[i].sw_id);
+    switch_matrix[i].sw_type = pgm_read_byte(&huey_switch_matrix[i].sw_type);
+    switch_matrix[i].sw_middle_b = pgm_read_byte(&huey_switch_matrix[i].sw_middle_b) - 1;
   }
-  
 }
 
 void poll_huey_coll_head()
 {
-  
+
   uint8_t x, y, s0, s1;
 
-  Wire.requestFrom(17, 4);
+  Wire.requestFrom(HUEY_HEAD_I2C_ADDRESS, 4);
   while (Wire.available())
   {
     byte b1 = Wire.read(); // receive a byte as character

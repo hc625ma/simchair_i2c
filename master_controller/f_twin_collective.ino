@@ -1,14 +1,12 @@
 void setup_twin_engine_collective()
 {
-  Wire.beginTransmission(15);
-  int error = Wire.endTransmission();
-  if (error == 0)
-  {
-    simchair.setZAxisRange(TWIN_COLLECTIVE_MIN, TWIN_COLLECTIVE_MAX);
-    simchair.setThrottleRange(TWIN_COLLECTIVE_THR1_MIN,TWIN_COLLECTIVE_THR1_MAX);//SINGLE_ENGINE_COLLECTIVE_IDLE_STOP_AXIS_VAL, 1023);
-    simchair.setRyAxisRange(TWIN_COLLECTIVE_THR2_MIN,TWIN_COLLECTIVE_THR2_MAX);
-    dev_twin_engine_collective = 1;
-  }
+  if (!is_device_connected(TWIN_COLLECTIVE_I2C_ADDRESS))
+    return;
+
+  simchair.setZAxisRange(TWIN_COLLECTIVE_MIN, TWIN_COLLECTIVE_MAX);
+  simchair.setThrottleRange(TWIN_COLLECTIVE_THR1_MIN,TWIN_COLLECTIVE_THR1_MAX);//SINGLE_ENGINE_COLLECTIVE_IDLE_STOP_AXIS_VAL, 1023);
+  simchair.setRyAxisRange(TWIN_COLLECTIVE_THR2_MIN,TWIN_COLLECTIVE_THR2_MAX);
+  dev_twin_engine_collective = 1;
 }
 
 void poll_twin_engine_collective()
@@ -17,7 +15,7 @@ void poll_twin_engine_collective()
   uint16_t throttle;
   int16_t ry;
 
-  Wire.requestFrom(15, 6);
+  Wire.requestFrom(TWIN_COLLECTIVE_I2C_ADDRESS, 6);
   while (Wire.available())
   {
     byte b1 = Wire.read(); // receive a byte as character
@@ -34,7 +32,7 @@ void poll_twin_engine_collective()
     ry = b5;
     ry = (ry << 8) | b6;
   }
-  // uncomment the next line and turn your throttle to idle stop position to see SINGLE_ENGINE_COLLECTIVE_IDLE_STOP_AXIS_VAL value 
+  // uncomment the next line and turn your throttle to idle stop position to see SINGLE_ENGINE_COLLECTIVE_IDLE_STOP_AXIS_VAL value
   //Serial.println(throttle);
   if ((DCS_HUEY_IDLE_STOP_COMPAT_MODE_ENABLED == 1) && (coll_head_mode_sw_position == 0))
   {
@@ -45,7 +43,7 @@ void poll_twin_engine_collective()
          simchair.setThrottleRange(TWIN_ENGINE_COLLECTIVE_IDLE_STOP_THROTTLE1_VAL, 1023);
          min_throttle_val[0] = TWIN_ENGINE_COLLECTIVE_IDLE_STOP_THROTTLE1_VAL;
       }
-     
+
       coll_head_idle_stop_compat_dcs (throttle,0,TWIN_ENGINE_COLLECTIVE_IDLE_STOP_THROTTLE1_VAL,0);
       last_throttle_setting[0] = throttle;
       if (throttle < TWIN_ENGINE_COLLECTIVE_IDLE_STOP_THROTTLE1_VAL)
@@ -54,7 +52,7 @@ void poll_twin_engine_collective()
       }
       else
       {
-        throttle_idle_cutoff[0] = 0; 
+        throttle_idle_cutoff[0] = 0;
       }
       if ((idle_stop_pressed[0] != 1) && (throttle_idle_cutoff[0] == 0))
       {
@@ -62,9 +60,9 @@ void poll_twin_engine_collective()
       }
       else if (idle_stop_pressed[0] == 1)
       {
-        throttle_idle_cutoff[0] = 1; 
-      }   
-    
+        throttle_idle_cutoff[0] = 1;
+      }
+
 //    else
 //    {
 //      //other profiles
@@ -84,7 +82,7 @@ void poll_twin_engine_collective()
     simchair.setRyAxis(ry);
   }
   simchair.setRyAxis(ry);
-  
+
   if ((collective_hold_active == 0) && (collective_hold_position_set == 0))
   {
     simchair.setZAxis(z);
@@ -106,5 +104,5 @@ void poll_twin_engine_collective()
       collective_hold_position_set = 0;
     }
   }
-  
+
 }

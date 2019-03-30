@@ -3,6 +3,7 @@
 //FIRST ROW: 1st: PIN0,PIN1 2nd: PIN2,PIN3 3rd:  PIN4,PIN5
 //SECOND ROW: 1st PIN6,PIN7 etc
 
+#define HUEY_HEAD_I2C_ADDRESS 17
 
 #include <Wire.h>
 
@@ -18,7 +19,7 @@ byte pins = 13;
 byte data[4];
 
 void setup() {
-  Wire.begin(17);                // join i2c bus with address #8
+  Wire.begin(HUEY_HEAD_I2C_ADDRESS); // do not change this!
   Wire.onRequest(requestEvent); // register event
   #if defined(DEBUG)
     Serial.begin(9600);           // start serial for output
@@ -63,6 +64,7 @@ void loop()
       }
     }
 
+
     #if defined(DEBUG)
       printBits(b);
       Serial.print(" ");
@@ -74,6 +76,7 @@ void loop()
       Serial.println();
     #endif
  }
+
 }
 
 void requestEvent() {

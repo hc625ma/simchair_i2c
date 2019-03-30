@@ -3,6 +3,8 @@
 //FIRST ROW: 1st: PIN0,PIN1 2nd: PIN2,PIN3 3rd:  PIN4,PIN5
 //SECOND ROW: 1st PIN6,PIN7 etc
 
+#define AB412_HEAD_I2C_ADDRESS 13 // do not change this!
+
 #include <Wire.h>
 
 //#define DEBUG
@@ -17,7 +19,7 @@ byte pins = 16;
 byte data[2];
 
 void setup() {
-  Wire.begin(13);                // join i2c bus with address #8
+  Wire.begin(AB412_HEAD_I2C_ADDRESS);                // join i2c bus with address #8
   Wire.onRequest(requestEvent); // register event
   #if defined(DEBUG)
     Serial.begin(9600);           // start serial for output

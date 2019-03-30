@@ -3,16 +3,32 @@
 
 // <GLOBAL>
 
+/**
+ * I2C device addresses
+ */
+ #define FLIGHT_STICK_GIMBAL_I2C_ADDRESS    0x48
+ #define B8STICK_I2C_ADDRESS                20
+ #define SIMPLE_COLLECTIVE_I2C_ADDRESS      10
+ #define SINGLE_COLLECTIVE_I2C_ADDRESS      12
+ #define TWIN_COLLECTIVE_I2C_ADDRESS        15
+ #define HELICOPTER_PEDALS_I2C_ADDRESS      0x4A
+ #define AB412_HEAD_I2C_ADDRESS             13
+ #define AB412_HEAD_POT_I2C_ADDRESS         14
+ #define HUEY_HEAD_I2C_ADDRESS              17
+ #define GA_CONTROLS_I2C_ADDRESS            11
+ #define THROTTLE_QUADRANT_I2C_ADDRESS      18
+ #define VRMAX_I2C_ADDRESS                  21
+
   #define ADS1115_RESOLUTION 15 //bits, min 12, max 15
 
 // <CYCLIC>
 
   #define FSGIMBAL_INVERT_X 1
-  #define FSGIMBAL_INVERT_Y 0  
+  #define FSGIMBAL_INVERT_Y 0
 
   #define B8_POT_MODE "HAT_SW" // HAT_SW or ANALOG
-  
-  
+
+
   #define PSEUDO_FORCE_TRIM 1
   // this will freeze cyclic in-place until you press the button again.
   // this is not exactly how it works in a real helicopter (force trim only provides centering forces, not disables cyclic input),
@@ -23,33 +39,33 @@
   #define FORCE_TRIM_BUTTON_MODE "HOLD"// "MOMENTARY" or "HOLD" - use "MOMENTARY" for non-centering cyclic
 
   #define SENS_SWITCH_TRIM_RESET 0 // DEPRECATED - USE FTCR INSTEAD - release the trim when you press SENS SWITCH
-  
+
   // use a button on cyclic to switch sensitivity in flight.
   // this kind of functionality is not available in a real aircraft, however
   // it may somewhat resemble simulated force trim.
-  
+
   #define SENS_DEVICE "b8_stick"
   #define SENS_SWITCH_ENABLED 1
   #define SENS_SWITCH_BUTTON 0 //0 is the first button
-  
+
   #define B8_HAT_SWITCH_MODE "ATT_TRIM" //"ATT_TRIM","HAT", or "BOTH", it will adjust the position of the trimmed cyclic with hat(Bell 407-style), only use "BOTH" with FORCE_TRIM_BUTTON_MODE "MOMENTARY"
   #define ATT_TRIM_STEP_Y 0.02 //0.05 //IN PERCENTS OF AXIS LENGHT, 0.05 for non-centering cyclic, 0.02 for a spring-loaded one
   #define ATT_TRIM_STEP_X 0.02 //0.05 //IN PERCENTS OF AXIS LENGHT
   #define INVERT_HAT_TRIM_X 0
   #define INVERT_HAT_TRIM_Y 1
-  
+
   // if SENS_SWITCH is disabled, these values will be used;
   // set to 100 for full axis range
   #define CUSTOM_CYCLIC_SENS 80
-  
+
   #define XY_FILTERING_ENABLED 0 // this decreases jitter, but increases input lag; recommended setting is 0
-  
+
   #define PTT_KEYBOARD_PRESS 0 // set to 1 to enable keyboard combination press instead of a joystick button
   #define PTT_BUTTON 4 //1st button is 0, 4 should be PTT trigger position
   // this should press CTRL + Q
   #define PTT_KEYBOARD_KEY 'q'
   char PTT_KEYBOARD_KEY_MOD = KEY_LEFT_CTRL;
-  
+
 // </CYCLIC>
 
 // <PEDALS>
@@ -65,7 +81,7 @@
   #define COLLECTIVE_HOLD_ENABLED 1 // this will hold your collective in place until you press the button again and return the lever to the initial position
   #define HUEY_HEAD_COLLECTIVE_HOLD_BUTTON 13
   #define AB412_HEAD_COLLECTIVE_HOLD_BUTTON 2
-  
+
   //for sims that do not support axis movement below idle stop, sends the throttle up/down key when holding idle stop and rotating throttle simultaneously
   //not 100% realistic, yet better than nothing
   #define DCS_HUEY_IDLE_STOP_COMPAT_MODE_ENABLED 1 // ASSIGN IDLE STOP IN_GAME WHILE IN MODE 0 (MODE SWITCH CENTERED)!
@@ -82,7 +98,7 @@
 
   // all pots are different! Please look into the corresponding page for your lever
   // uncomment Serial.print's and set values below. To invert an axis, set MIN to MAX and vice versa.
-  
+
   #define SINGLE_COLLECTIVE_MIN 63
   #define SINGLE_COLLECTIVE_MAX 1023
   #define SINGLE_COLLECTIVE_THR_MIN 0
@@ -99,7 +115,7 @@
   #define SIMPLE_COLLECTIVE_MAX 1023
   #define SIMPLE_COLLECTIVE_THR_MIN 0
   #define SIMPLE_COLLECTIVE_THR_MAX 1023
-  
+
 // </COLLECTIVE>
 
 // <AB412 COLL HEAD>
@@ -121,16 +137,16 @@
   byte ab412_coll_head_idle_stop_buttons[] = {17};// for Huey compat mode
 
  // COLLECTIVE SWITCHPANEL SWITCH MATRIX - NOW SUPPORTS UP TO 32 BUTTONS + 10 ADDITIONAL BUTTONS FOR TYPES 3 AND 4
- // 4 SWITCH TYPES ARE SUPPORTED: 
+ // 4 SWITCH TYPES ARE SUPPORTED:
  // 1: button
  // 2: momentarily press button
  // 3: selector button (button + middle button press when switch is centered)
  // 4: selector momentary press button (momentary press button + middle button momentary press when switch is centered)
- // ASSIGN THE BUTTON AFTER TYPES 3 AND 4 TO TYPE 5 (SLAVE) AND SET JOYSTICK BUTTON YOU WANT TO BE THE MIDDLE BUTTON IN 3RD COLUMN! 
+ // ASSIGN THE BUTTON AFTER TYPES 3 AND 4 TO TYPE 5 (SLAVE) AND SET JOYSTICK BUTTON YOU WANT TO BE THE MIDDLE BUTTON IN 3RD COLUMN!
  // BUTTONS FROM 33 TO 42 ARE RESERVED FOR MIDDLE BUTTONS
 
   //0 - disabled, 1 - button, 2 - 3 - selector_button, 4 - selector, 5 - slave
-  const sw_matrix ab412_switch_matrix[] PROGMEM = 
+  const sw_matrix ab412_switch_matrix[] PROGMEM =
   {
   // i  t  m  is  i - id, t - type, m - middle button for types 3 and 4
     {1, 1, 0},
@@ -167,29 +183,29 @@
     {32,0, 0},
 
   };
-//  
+//
 // </AB412 COLL HEAD>
 
 // <HUEY COLL HEAD>
 
   #define HUEY_COLL_HEAD_HAT_DIRECTIONS 4
   #define HUEY_COLL_HEAD_MODE_SWITCH 3 // 3-way fixed switch only; first (lower number) switch button must be defined there; remove it and next button from everywhere else; set to 0 to disable MODE SWITCH
-  
+
   byte huey_coll_head_idle_stop_buttons[] = {11};
-   
+
   #define COLL_HEAD_IDLE_STOP_COMPAT_TRESHOLD 5 // should be larger than jitter of your throttle pot
   #define SINGLE_ENGINE_COLLECTIVE_IDLE_STOP_AXIS_VAL 137 //find it out with uncommenting Serial.print(throttle) in poll_single_engine_collective sub, see below
 
  // COLLECTIVE SWITCHPANEL SWITCH MATRIX - NOW SUPPORTS UP TO 32 BUTTONS + 10 ADDITIONAL BUTTONS FOR TYPES 3 AND 4
- // 4 SWITCH TYPES ARE SUPPORTED: 
+ // 4 SWITCH TYPES ARE SUPPORTED:
  // 1: button
  // 2: momentarily press button
  // 3: selector button (button + middle button press when switch is centered)
  // 4: selector momentary press button (momentary press button + middle button momentary press when switch is centered)
- // ASSIGN THE BUTTON AFTER TYPES 3 AND 4 TO TYPE 5 (SLAVE) AND SET JOYSTICK BUTTON YOU WANT TO BE THE MIDDLE BUTTON IN 3RD COLUMN! 
+ // ASSIGN THE BUTTON AFTER TYPES 3 AND 4 TO TYPE 5 (SLAVE) AND SET JOYSTICK BUTTON YOU WANT TO BE THE MIDDLE BUTTON IN 3RD COLUMN!
  // BUTTONS FROM 33 TO 42 ARE RESERVED FOR MIDDLE BUTTONS
-  
-  const sw_matrix huey_switch_matrix[] PROGMEM = 
+
+  const sw_matrix huey_switch_matrix[] PROGMEM =
   {
   // i  t  m  is  i - id, t - type, m - middle button for types 3 and 4
     {1, 3, 33},
@@ -277,5 +293,3 @@ const rp_e_matrix radio_panel_knob_matrix[] =
     {5, 81, 82, 83, 84, 85, 86, },
   };
 //</RADIO PANEL>
-
-

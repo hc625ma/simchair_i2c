@@ -1,8 +1,6 @@
 void setup_cyclic()
 {
-  Wire.beginTransmission(0x48);
-  int error = Wire.endTransmission();
-  if (error == 0)
+  if (is_device_connected(FLIGHT_STICK_GIMBAL_I2C_ADDRESS))
   {
     //initialize ADS1115 filters
     for (int thisReading = 0; thisReading < xy_readings; thisReading++)
@@ -33,7 +31,7 @@ void setup_cyclic()
 void poll_cyclic()
 {
   uint32_t x, y;
-  
+
   if (XY_FILTERING_ENABLED == 1)
   {
     total_x = total_x - buf_x[xy_read_index];
@@ -50,7 +48,7 @@ void poll_cyclic()
       // ...wrap around to the beginning:
       xy_read_index = 0;
     }
-    
+
 
     x = total_x / xy_readings;
     y = total_y / xy_readings;
@@ -92,7 +90,7 @@ void poll_cyclic()
 //    Serial.print(" ");
     //Serial.println(ftcr);
   }
-  
+
   if (SENS_SWITCH_ENABLED == 1)
   {
     x = adjust_sensitivity(x, cyclic_sens);
@@ -106,14 +104,14 @@ void poll_cyclic()
 
     if (force_trim_on == 0) // button is not pressed
     {
-      
+
       if ((cyclic_force_trim_state == 0) || (cyclic_force_trim_state == 2))
       {
        if (force_trim_x - (ADC_RANGE /2) - x < 0)
        {
           xval = x + x_diff + cyclic_x_adj;
           xval_prev = x;
-          
+
        }
        //else if (x > force_trim_x)
        else if (force_trim_x + (ADC_RANGE /2) - x > 0)
@@ -121,7 +119,7 @@ void poll_cyclic()
           xval = x - x_diff + cyclic_x_adj;
           xval_prev = x;
        }
-       
+
        if (xval < 0)
        {
         xval = 0;
@@ -136,7 +134,7 @@ void poll_cyclic()
        {
           yval = y + y_diff + cyclic_y_adj;
 //          yval_prev = y;
-          
+
        }
        //else if (x > force_trim_x)
        else if (force_trim_y + (ADC_RANGE /2) - y > 0)
@@ -144,7 +142,7 @@ void poll_cyclic()
           yval = y - y_diff + cyclic_y_adj;
        //   yval_prev = y;
        }
-       
+
        if (yval < 0)
        {
         yval = 0;
@@ -171,13 +169,13 @@ void poll_cyclic()
           //int diff_x_center = x - physical_cyclic_center_x; // this is needed because of how the abs() works
          // int diff_y_center = y - physical_cyclic_center_y;
 
-  
+
           //if (((abs(diff_x_center)) < (PSEUDO_FORCE_TRIM_RELEASE_DEVIATION * one_percent_range)) && ((abs(diff_y_center)) < (PSEUDO_FORCE_TRIM_RELEASE_DEVIATION * one_percent_range)))
           if (FORCE_TRIM_BUTTON_MODE == "HOLD")
           {
             if (force_trim_button_pressed == 0)
             {
-              
+
               cyclic_force_trim_state = 2;
               x_diff = x - force_trim_x;
               y_diff = y - force_trim_y;
@@ -194,16 +192,16 @@ void poll_cyclic()
               cyclic_force_trim_state = 2;
               x_diff = x - force_trim_x - cyclic_x_adj;
               y_diff = y - force_trim_y - cyclic_y_adj;
-              
+
               cyclic_x_adj = 0;
               cyclic_y_adj = 0;
             }
 
           }
 
-          
+
       }
-      
+
     }
     else if (force_trim_on == 1) // button is pressed
     {
@@ -224,7 +222,7 @@ void poll_cyclic()
         force_trim_y = yval;//force_trim_y + y/2;//(y - ADC_RANGE / 2);//(physical_cyclic_center_y));
         cyclic_force_trim_state = 1;
       }
-      
+
     }
 
 //  }

@@ -8,6 +8,8 @@
 // TRIGGER INTERCOM - PIN 6 TO GND
 // TRIGGER PTT (full press) - PIN 7 TO GND
 
+#define B8STICK_I2C_ADDRESS 20
+
 #include <Wire.h>
 
 //INTERCOM (trigger half-press)
@@ -24,11 +26,11 @@ byte pins[] = {2,3,4,5};
 
 byte data[3]; //2 8 bit axes + 5 buttons in the third byte
 
-void setup() 
+void setup()
 {
   pinMode(10, OUTPUT);           // power up the pot board
   digitalWrite(10, HIGH);
-  Wire.begin(20);                // join i2c bus with address #20
+  Wire.begin(B8STICK_I2C_ADDRESS);                // join i2c bus with address #20
   Wire.onRequest(requestEvent); // register event
   for (int i = 0; i < sizeof(pins); i++)
   {
@@ -38,11 +40,11 @@ void setup()
   pinMode(PTT_PIN, INPUT_PULLUP);
 }
 
-void loop() 
+void loop()
 {
   // Convert 10 bit ADC reading to 8 bit value to speed things up - see i2c_preipheral.ino if you want up to 16 bit values.
   //Keep in mind, smaller amount of data to transfer = smaller input lag, I would recommend using 10+ bit values for main controls only
-  x = analogRead(A1) >> 2; 
+  x = analogRead(A1) >> 2;
   y = analogRead(A0) >> 2;
   uint8_t buf = 0b00000000; // fill the buffer first so all our button values will update simultaneously and wont be affected by interrupts
   for (int i = 0; i < sizeof(pins); i++)
@@ -55,9 +57,9 @@ void loop()
     else
     {
       buf &= ~(1 << i);      // forces ith bit of b to be 0.  all other bits left alone.
-    }  
+    }
   }
-  
+
   bool intercom = !digitalRead(INTERCOM_PIN);
   bool ptt = !digitalRead(PTT_PIN);
   if (ptt == 1)
@@ -68,7 +70,7 @@ void loop()
   {
     buf &= ~(1 << 4);
   }
-  
+
   if (intercom == 1)
   {
     if (intercom_pressed == -1)
@@ -94,11 +96,11 @@ void loop()
   else if (intercom == 0)
   {
     intercom_pressed = -1;
-    buf &= ~(1 << 5); 
+    buf &= ~(1 << 5);
   }
 
   b = buf;
-} 
+}
 
 // function that executes whenever data is received from master
 // this function is registered as an event, see setup()

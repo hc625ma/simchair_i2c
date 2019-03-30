@@ -9,6 +9,7 @@
 
 // This example code is in the public domain.
 
+#define SIMPLE_COLLECTIVE_I2C_ADDRESS 10 // do not change this!
 
 #include <Wire.h>
 
@@ -22,7 +23,7 @@ uint8_t filter_counter_rz = 6;
 
 void setup()
 {
-  pinMode(10, OUTPUT);           // power up the pot board
+  pinMode(SIMPLE_COLLECTIVE_I2C_ADDRESS, OUTPUT);           // power up the pot board
   digitalWrite(10, HIGH);
   Wire.begin(10);                // join i2c bus with address #8
   Wire.onRequest(requestEvent); // register event
@@ -59,6 +60,7 @@ void loop()
   {
     rz = 0;
   }
+
 
   #if defined(CALIBRATE)
     Serial.print(z);

@@ -1,13 +1,9 @@
 void setup_vrmax_panel()
 {
-  Wire.beginTransmission(21);
-  int error = Wire.endTransmission();
-  if (error == 0)
-  {
-    dev_vrmax_panel = 1;
-    
-  }
-  
+  if (!is_device_connected(VRMAX_I2C_ADDRESS))
+    return;
+
+  dev_vrmax_panel = 1;
 }
 
 void poll_vrmax_panel()
@@ -15,8 +11,8 @@ void poll_vrmax_panel()
 
   uint8_t but0,but1,but2;
   uint8_t e[7];
-  
-  
+
+
   Wire.requestFrom(22, 5); //radio panel - top left encoder
   while (Wire.available())
   {
@@ -49,11 +45,11 @@ void poll_vrmax_panel()
     e_state[6].val = b2;
   }
 
-  
+
   // parse encoders
   for (byte i = 0; i < 7; i++)
   {
-    
+
     if ((millis() - e_state[i].enc_ts) > 5)
     {
       e_state[i].button_val = 0;
@@ -68,22 +64,22 @@ void poll_vrmax_panel()
       {
         Serial.println(e_diff);
         e_state[i].last_val = e_state[i].val;
-        //simchair_aux1.setButton(i, 1);       
+        //simchair_aux1.setButton(i, 1);
         set_button_mode_and_radio_switch_aware(i,1,0);
         e_state[i].enc_ts = millis();
-        
-        
+
+
         //e_state[i].button_id = i;
         e_state[i].button_val = 1;
       }
       else if ((e_diff < -1) && (e_diff > - 100)) // right turn
       {
         e_state[i].last_val = e_state[i].val;
-        //simchair_aux1.setButton(7 + i, 1); 
-        //set_button_mode_and_radio_switch_aware(i,1,7);      
+        //simchair_aux1.setButton(7 + i, 1);
+        //set_button_mode_and_radio_switch_aware(i,1,7);
         set_button_mode_and_radio_switch_aware(i,1,1);
         e_state[i].enc_ts = millis();
-        
+
         //e_state[i].button_id = 7 + i;
         e_state[i].button_val = 1;
       }
@@ -98,7 +94,7 @@ void poll_vrmax_panel()
   parse_radio_panel_switches(but0,0);
   parse_radio_panel_switches(but1,8);
   parse_radio_panel_switches(but2,16);
-    
+
 }
 
 void set_button_mode_and_radio_switch_aware (byte i,bool val,byte dir)
@@ -165,7 +161,7 @@ void set_button_mode_and_radio_switch_aware (byte i,bool val,byte dir)
           }
         }
       }
-      
+
     }
     else if (radio_mode == 0)
     {
@@ -242,7 +238,7 @@ void set_button_mode_and_radio_switch_aware (byte i,bool val,byte dir)
     {
       if (nav_mode == 0)
       {
-        //simchair_aux1.setButton(45 + i + offset, val); 
+        //simchair_aux1.setButton(45 + i + offset, val);
         //e_state[i].button_id = (45 + i + offset);
         if (dir == 0)
         {
@@ -257,7 +253,7 @@ void set_button_mode_and_radio_switch_aware (byte i,bool val,byte dir)
       }
       else if (nav_mode == 1)
       {
-       // simchair_aux1.setButton(49 + i + offset, val); 
+       // simchair_aux1.setButton(49 + i + offset, val);
        // e_state[i].button_id = (49 + i + offset);
        if (dir == 0)
         {
@@ -272,7 +268,7 @@ void set_button_mode_and_radio_switch_aware (byte i,bool val,byte dir)
       }
       else if (nav_mode == 2)
       {
-       // simchair_aux1.setButton(52 + i + offset, val); 
+       // simchair_aux1.setButton(52 + i + offset, val);
        // e_state[i].button_id = (52 + i + offset);
        if (dir == 0)
         {
@@ -288,7 +284,7 @@ void set_button_mode_and_radio_switch_aware (byte i,bool val,byte dir)
     }
     else // MAG knob has 1 mode
     {
-      //simchair_aux1.setButton(41 + i + offset, val); 
+      //simchair_aux1.setButton(41 + i + offset, val);
       //e_state[i].button_id = (41 + i + offset);
       if (dir == 0)
       {
@@ -303,8 +299,8 @@ void set_button_mode_and_radio_switch_aware (byte i,bool val,byte dir)
     }
   }
 }
-  
-  
+
+
 
 
 void parse_radio_panel_switches (byte b, byte start_pos)
@@ -370,7 +366,7 @@ void parse_radio_panel_switches (byte b, byte start_pos)
       {
         radio0_unchecked = 1;
       }
-    }   
+    }
     else if (i == RADIO_MODE_SWITCH_LOWER_POSITION_JOY_BUTTON - 1)
     {
       if (v == 1)
@@ -394,7 +390,7 @@ void parse_radio_panel_switches (byte b, byte start_pos)
       {
         radio_mode0_unchecked = 1;
       }
-    }   
+    }
     else if (i == ALTIMETER_SELECTOR_JOY_BUTTON - 1)
     {
       if (v == 1)
@@ -418,7 +414,7 @@ void parse_radio_panel_switches (byte b, byte start_pos)
       {
         alt_mode0_unchecked = 1;
       }
-    }   
+    }
     else if (i == NAV_MODE_SELECTOR_JOY_BUTTON - 1)
     {
       if (v == 1)
@@ -442,7 +438,7 @@ void parse_radio_panel_switches (byte b, byte start_pos)
       {
         nav_mode0_unchecked = 1;
       }
-    }   
+    }
 #endif
 
     else if (v != radio_matrix[i].sw_val) // regular joy button
@@ -450,7 +446,7 @@ void parse_radio_panel_switches (byte b, byte start_pos)
       simchair_aux1.setButton(i, v);
       radio_matrix[i].sw_val = v;
     }
-    
+
     if (i == XPDR_MODE_SW_JOY_BUTTON - 1)
     {
       if (v == 1)
@@ -472,9 +468,8 @@ void parse_radio_panel_switches (byte b, byte start_pos)
       {
         xpdr_mode0_unchecked = 1;
       }
-    }   
+    }
       //simchair_aux1.setButton(first_joy_b + i, v);
 
   }
 }
-

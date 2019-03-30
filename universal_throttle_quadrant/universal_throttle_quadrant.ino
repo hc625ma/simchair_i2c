@@ -1,3 +1,5 @@
+#define THROTTLE_QUADRANT_I2C_ADDRESS 18
+
 #include <Wire.h>
 uint16_t t1,t2,t3,t4,t5,t6;
 
@@ -8,11 +10,11 @@ uint8_t filter_counter_ry = 8;
 uint8_t filter_counter_rz = 8;
 
 void setup() {
-  Wire.begin(18);                // join i2c bus with address #8
+  Wire.begin(THROTTLE_QUADRANT_I2C_ADDRESS);                // join i2c bus with address #8
   Wire.onRequest(requestEvent); // register event
 }
 
-void loop() 
+void loop()
 {
   t1 = filteredRead(A0,filter_counter_rx);
   t2 = filteredRead(A1,filter_counter_ry);
@@ -47,12 +49,12 @@ uint16_t filteredRead (uint16_t input,uint8_t filter_counter)
   uint32_t filter = 0;
   for (uint8_t i=0;i<filter_counter;i++)
   {
-    
+
       filter+= analogRead(input);
-      delay(1); 
+      delay(1);
   }
 
   uint16_t val = filter/filter_counter;
   return val;
-  
+
 }

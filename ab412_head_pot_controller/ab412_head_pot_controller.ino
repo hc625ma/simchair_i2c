@@ -14,6 +14,7 @@
 // ROTARY POT 1 SIGNAL -> A6
 // ROTARY POT 2 SIGNAL -> A7
 
+#define AB412_HEAD_POT_I2C_ADDRESS 14
 
 #include <Wire.h>
 
@@ -25,13 +26,13 @@ byte pins[] = {11,12};
 
 byte data[7]; //6 8 bit axes + 2 buttons in the 7th byte
 
-void setup() 
+void setup()
 {
   pinMode(10, OUTPUT);           // power up pot boards
   digitalWrite(10, HIGH);
   pinMode(9, OUTPUT);           // power up pot boards
   digitalWrite(9, HIGH);
-  Wire.begin(14);                // join i2c bus with address #20
+  Wire.begin(AB412_HEAD_POT_I2C_ADDRESS);                // join i2c bus with address #20
   Wire.onRequest(requestEvent); // register event
   for (int i = 0; i < sizeof(pins); i++)
   {
@@ -39,15 +40,15 @@ void setup()
   }
 }
 
-void loop() 
+void loop()
 {
   // Convert 10 bit ADC reading to 8 bit value to speed things up - see i2c_preipheral.ino if you want up to 16 bit values.
   //Keep in mind, smaller amount of data to transfer = smaller input lag, I would recommend using 10+ bit values for main controls only
-  x1 = analogRead(A0) >> 2; 
+  x1 = analogRead(A0) >> 2;
   y1 = analogRead(A1) >> 2;
-  x2 = analogRead(A2) >> 2; 
+  x2 = analogRead(A2) >> 2;
   y2 = analogRead(A3) >> 2;
-  r1 = analogRead(A6) >> 2; 
+  r1 = analogRead(A6) >> 2;
   r2 = analogRead(A7) >> 2;
 
 
@@ -62,15 +63,15 @@ void loop()
     else
     {
       buf &= ~(1 << i);      // forces ith bit of b to be 0.  all other bits left alone.
-    }  
+    }
   }
 
   b = buf;
-} 
+}
 
 // function that executes whenever data is received from master
 // this function is registered as an event, see setup()
-void requestEvent() 
+void requestEvent()
 {
   data[0] = x1;
   data[1] = y1;

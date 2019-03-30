@@ -1,18 +1,16 @@
 void setup_throttle_quadrant()
 {
-  Wire.beginTransmission(18);
-  int error = Wire.endTransmission();
-  if (error == 0)
-  {
-    simchair_aux1.setRxAxisRange(THROTTLE_QUADRANT_MAIN_AXIS_TRESHOLD, THROTTLE_QUADRANT_PHYSICAL_AXIS_MIN);
-    simchair_aux1.setRyAxisRange(THROTTLE_QUADRANT_MAIN_AXIS_TRESHOLD, THROTTLE_QUADRANT_PHYSICAL_AXIS_MIN);
-    simchair_aux1.setThrottleRange(THROTTLE_QUADRANT_MAIN_AXIS_TRESHOLD, THROTTLE_QUADRANT_PHYSICAL_AXIS_MIN);
-    simchair_aux1.setRzAxisRange(THROTTLE_QUADRANT_SECONDARY_AXIS_TRESHOLD, THROTTLE_QUADRANT_PHYSICAL_AXIS_MAX);
-    simchair_aux1.setRudderRange(THROTTLE_QUADRANT_SECONDARY_AXIS_TRESHOLD, THROTTLE_QUADRANT_PHYSICAL_AXIS_MAX);
-    simchair_aux1.setZAxisRange(THROTTLE_QUADRANT_SECONDARY_AXIS_TRESHOLD, THROTTLE_QUADRANT_PHYSICAL_AXIS_MAX);
-    
-    dev_throttle_quadrant = 1;
-  }
+  if (!is_device_connected(THROTTLE_QUADRANT_I2C_ADDRESS))
+    return;
+
+  simchair_aux1.setRxAxisRange(THROTTLE_QUADRANT_MAIN_AXIS_TRESHOLD, THROTTLE_QUADRANT_PHYSICAL_AXIS_MIN);
+  simchair_aux1.setRyAxisRange(THROTTLE_QUADRANT_MAIN_AXIS_TRESHOLD, THROTTLE_QUADRANT_PHYSICAL_AXIS_MIN);
+  simchair_aux1.setThrottleRange(THROTTLE_QUADRANT_MAIN_AXIS_TRESHOLD, THROTTLE_QUADRANT_PHYSICAL_AXIS_MIN);
+  simchair_aux1.setRzAxisRange(THROTTLE_QUADRANT_SECONDARY_AXIS_TRESHOLD, THROTTLE_QUADRANT_PHYSICAL_AXIS_MAX);
+  simchair_aux1.setRudderRange(THROTTLE_QUADRANT_SECONDARY_AXIS_TRESHOLD, THROTTLE_QUADRANT_PHYSICAL_AXIS_MAX);
+  simchair_aux1.setZAxisRange(THROTTLE_QUADRANT_SECONDARY_AXIS_TRESHOLD, THROTTLE_QUADRANT_PHYSICAL_AXIS_MAX);
+
+  dev_throttle_quadrant = 1;
 }
 
 
@@ -20,7 +18,7 @@ void poll_throttle_quadrant()
 {
   uint16_t rx, ry, throttle;
 
-  Wire.requestFrom(18, 6);
+  Wire.requestFrom(THROTTLE_QUADRANT_I2C_ADDRESS, 6);
   while (Wire.available())
   {
     byte b1 = Wire.read(); // receive a byte as character
@@ -43,7 +41,7 @@ void poll_throttle_quadrant()
 //  Serial.print(" ");
 //  Serial.print(throttle);
 //  Serial.println(" ");
-  
+
 
 
   if (rx < THROTTLE_QUADRANT_MAIN_AXIS_TRESHOLD)
@@ -53,7 +51,7 @@ void poll_throttle_quadrant()
   else if (rx > THROTTLE_QUADRANT_SECONDARY_AXIS_TRESHOLD)
   {
     simchair_aux1.setRzAxis(rx);
-    
+
   }
   else
   {
@@ -68,7 +66,7 @@ void poll_throttle_quadrant()
   else if (ry > THROTTLE_QUADRANT_SECONDARY_AXIS_TRESHOLD)
   {
     simchair_aux1.setRudder(ry);
-    
+
   }
   else
   {
@@ -83,7 +81,7 @@ void poll_throttle_quadrant()
   else if (throttle > THROTTLE_QUADRANT_SECONDARY_AXIS_TRESHOLD)
   {
     simchair_aux1.setZAxis(throttle);
-    
+
   }
   else
   {
@@ -91,9 +89,7 @@ void poll_throttle_quadrant()
     simchair_aux1.setZAxis(THROTTLE_QUADRANT_SECONDARY_AXIS_TRESHOLD);
   }
 
-  
- 
-  
+
+
+
 }
-
-

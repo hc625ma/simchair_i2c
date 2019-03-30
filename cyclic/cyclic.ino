@@ -9,6 +9,7 @@
 
 // This example code is in the public domain.
 
+#define SIMPLE_COLLECTIVE_I2C_ADDRESS 10 // do not change this!
 
 #include <Wire.h>
 #include <Adafruit_ADS1015.h>
@@ -22,7 +23,7 @@ int16_t x,y;
 byte data[4];
 
 void setup() {
-  //Wire.begin(10);                // join i2c bus with address #8
+  //Wire.begin(SIMPLE_COLLECTIVE_I2C_ADDRESS);                // join i2c bus with address #8
  // Wire.onRequest(requestEvent); // register event
   //#if defined(DEBUG)
     //Serial.begin(9600);           // start serial for output
@@ -42,6 +43,7 @@ void loop()
   //Serial.println(x);
   //Serial.println(y);
 #endif
+
 }
 
 // function that executes whenever data is received from master

@@ -1,3 +1,5 @@
+#define TWIN_COLLECTIVE_I2C_ADDRESS 15
+
 #include <Wire.h>
 
 //#define CALIBRATE
@@ -11,7 +13,7 @@ uint8_t filter_counter_ry = 6;
 
 void setup()
 {
-  Wire.begin(15);                // join i2c bus with address #11
+  Wire.begin(TWIN_COLLECTIVE_I2C_ADDRESS); // do not change this!
   Wire.onRequest(requestEvent); // register event
   #if defined(CALIBRATE)
     Serial.begin(9600);           // start serial for output
@@ -25,14 +27,17 @@ void loop()
   rz = filteredRead(A1,filter_counter_rz);
   ry = filteredRead(A2,filter_counter_ry);
   // we have 200 degree turn instead of 300, so a little adjustment is necessary
-  // uncomment #define CALIBRATE statement and change 2nd and 3rd values to physical min and max
-  // of your lever.
-  // You can swap 2 last numbers to invert the axis if needed
-  #if !defined(CALIBRATE)
-    z = map(z,0,1002,1023,0);
-    rz = map(rz,125,1023,1023,0);
-    ry = map(ry,114,1023,1023,0);
-  #endif
+
+  // uncomment Serial.print statements and change 2nd and 3rd values to physical min and max
+  // of your lever
+
+// comment this to calibrate cyclic, then uncomment #define CALIBRATE and enter min and max values as 2 and 3 numbers
+// you can swap 2 last numbers to invert the axis if needed. After calibration, comment this back and check 
+// that the returned values are within 0-1023 range. Repeat if necessary.
+  
+  z = map(z,0,1002,1023,0);
+  rz = map(rz,125,1023,1023,0);
+  ry = map(ry,114,1023,1023,0);
 
   #if defined(CALIBRATE)
     Serial.print(z);

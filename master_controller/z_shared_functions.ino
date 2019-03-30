@@ -1,5 +1,11 @@
 // This file contains subroutines, shared by other files.
 
+bool is_device_connected(uint8_t address)
+{
+  Wire.beginTransmission(address);
+  return (Wire.endTransmission() == 0);
+}
+
 int adjust_sensitivity (int val, int param)
 {
 //  if ((SENS_ADJ_METHOD == "LINEAR") && (param < 100))
@@ -27,7 +33,7 @@ uint16_t coll_head_idle_stop_compat_dcs (uint16_t throttle0, uint16_t throttle1,
     {
       if ((throttle[i] < idle_val[i]) && (throttle_idle_cutoff[i] == 1))
       {
-        
+
         int diff = last_throttle_setting[i] - throttle[i];
         if (diff < - COLL_HEAD_IDLE_STOP_COMPAT_TRESHOLD)
         {
@@ -68,7 +74,7 @@ void parse_coll_head_sw_matrix (int sw, uint8_t start_pos, uint8_t end_pos)
     }
     //
     if (i == MODE_SWITCH_BUTTON - 1)
-    {   
+    {
       if (v == 1)
       {
         coll_head_mode_sw_position = 1;
@@ -88,7 +94,7 @@ void parse_coll_head_sw_matrix (int sw, uint8_t start_pos, uint8_t end_pos)
       else if (switch_matrix[i].sw_val == mode_sw_pos_0)
       {
         coll_head_mode_sw_position = 0;
-        
+
       }
     }
     else if ((i == (COLLECTIVE_HOLD_BUTTON - 1)) && (COLLECTIVE_HOLD_ENABLED == 1))
@@ -114,14 +120,14 @@ void parse_coll_head_sw_matrix (int sw, uint8_t start_pos, uint8_t end_pos)
     else if (switch_matrix[i].sw_type == 2) // momentary button press on switch flip
     {
       if (v != switch_matrix[i].sw_val)
-      {     
+      {
         long now = millis();
         if ((now - switch_matrix[i].sw_ts) > COLL_HEAD_SW_HOLD_TIMEOUT)
         {
           simchair_aux2.setButton(i, v);
           switch_matrix[i].sw_val = v;
           switch_matrix[i].sw_ts = millis();
-        }        
+        }
       }
       else if ((v == 1) && (switch_matrix[i].sw_tr_state == 0))
       {
@@ -142,7 +148,7 @@ void parse_coll_head_sw_matrix (int sw, uint8_t start_pos, uint8_t end_pos)
       }
     }
     else if (switch_matrix[i].sw_type == 3) // selector button switch type 1st button press
-    {          
+    {
       if (v != switch_matrix[i].sw_val)
       {
         set_button_mode_aware(i,v);
@@ -179,13 +185,13 @@ void parse_coll_head_sw_matrix (int sw, uint8_t start_pos, uint8_t end_pos)
             simchair_aux2.setButton(i, v);
             switch_matrix[i].sw_val = v;
             switch_matrix[i].sw_tr_state = 0;
-  
+
             simchair_aux2.setButton(switch_matrix[i].sw_middle_b, v);
             switch_matrix[switch_matrix[i].sw_middle_b].sw_val = v;
             switch_matrix[switch_matrix[i].sw_middle_b].sw_tr_state = 0;
           }
         }
-      
+
     }
     else if (switch_matrix[i].sw_type == 5) // slave button position of switch types 3 and 4
     {
@@ -228,7 +234,7 @@ void parse_coll_head_sw_matrix (int sw, uint8_t start_pos, uint8_t end_pos)
             simchair_aux2.setButton(i, v);
             switch_matrix[i].sw_val = v;
             switch_matrix[i].sw_tr_state = 0;
-  
+
             simchair_aux2.setButton(switch_matrix[i].sw_middle_b, v);
             switch_matrix[switch_matrix[i].sw_middle_b].sw_val = v;
             switch_matrix[switch_matrix[i].sw_middle_b].sw_tr_state = 0;
@@ -236,7 +242,7 @@ void parse_coll_head_sw_matrix (int sw, uint8_t start_pos, uint8_t end_pos)
         }
       }
     }
-  }  
+  }
 }
 
 void set_button_mode_aware (int i, int v)
@@ -336,5 +342,3 @@ int parse_hat_sw (int x, int y, byte dirs)
   }
   return hat_val;
 }
-
-
