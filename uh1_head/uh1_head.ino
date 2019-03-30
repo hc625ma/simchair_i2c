@@ -6,6 +6,9 @@
 #define HUEY_HEAD_I2C_ADDRESS 17
 
 #include <Wire.h>
+
+//#define DEBUG
+
 uint8_t x,y;
 uint8_t b = 0b00000000; //digital pins 0 to 7; x ^= (1 << n); - toggles nth bit of x.  all other bits left alone.
 uint8_t b1 = 0b00000000; //digital pins 8 to 15
@@ -16,9 +19,12 @@ byte pins = 13;
 byte data[4];
 
 void setup() {
-  Wire.begin(HUEY_HEAD_I2C_ADDRESS);                // join i2c bus with address #8
+  Wire.begin(HUEY_HEAD_I2C_ADDRESS); // do not change this!
   Wire.onRequest(requestEvent); // register event
-    //Serial.begin(9600);           // start serial for output
+  #if defined(DEBUG)
+    Serial.begin(9600);           // start serial for output
+  #endif
+
   for (int i = 0; i <= pins; i++)
   {
     pinMode(i, INPUT_PULLUP);
@@ -58,16 +64,17 @@ void loop()
       }
     }
 
-// DEBUG
-//    printBits(b);
-//    Serial.print(" ");
-//    printBits(b1);
-//    Serial.print(" ");
-//    Serial.print(x);
-//    Serial.print(" ");
-//    Serial.print(y);
-//    Serial.println();
 
+    #if defined(DEBUG)
+      printBits(b);
+      Serial.print(" ");
+      printBits(b1);
+      Serial.print(" ");
+      Serial.print(x);
+      Serial.print(" ");
+      Serial.print(y);
+      Serial.println();
+    #endif
  }
 
 }

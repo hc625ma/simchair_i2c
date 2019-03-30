@@ -1,17 +1,11 @@
-// Wire Slave Receiver
-// by Nicholas Zambetti <http://www.zambetti.com>
+// Generic I2C device template
 
-// Demonstrates use of the Wire library
-// Receives data as an I2C/TWI slave device
-// Refer to the "Wire Master Writer" example for use with this
-
-// Created 29 March 2006
-
-// This example code is in the public domain.
-
-#define I2C_PERIPHERAL_I2C_ADDRESS 8
+#define I2C_PERIPHERAL_I2C_ADDRESS 8 // change the address to a free one (look what's occupied in the master sketch)
 
 #include <Wire.h>
+
+//#define DEBUG
+
 uint16_t x,y;
 uint8_t b = 0b00000000; //digital pins 2 to 9; x ^= (1 << n); - toggles nth bit of x.  all other bits left alone.
 byte pins[] = {2};
@@ -22,7 +16,10 @@ byte data[5];
 void setup() {
   Wire.begin(I2C_PERIPHERAL_I2C_ADDRESS);                // join i2c bus with address #8
   Wire.onRequest(requestEvent); // register event
-  Serial.begin(9600);           // start serial for output
+  #if defined(DEBUG)
+    Serial.begin(9600);           // start serial for output
+  #endif
+
   for (int i = 0; i < sizeof(pins); i++)
   {
     pinMode(pins[i], INPUT_PULLUP);
@@ -45,12 +42,16 @@ void loop() {
       b &= ~(1 << i);      // forces ith bit of b to be 0.  all other bits left alone.
     }
 
-    //Serial.println(b);
-
+    #if defined(DEBUG)
+      Serial.println(b);
+    #endif
   }
 
-//Serial.println(x);
-//Serial.println(y);
+  #if defined(DEBUG)
+    Serial.println(x);
+    Serial.println(y);
+  #endif
+
 }
 
 // function that executes whenever data is received from master

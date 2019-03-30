@@ -9,9 +9,12 @@
 
 // This example code is in the public domain.
 
-#define SINGLE_COLLECTIVE_I2C_ADDRESS 12
+#define SINGLE_COLLECTIVE_I2C_ADDRESS 12 // do not change this!
 
 #include <Wire.h>
+
+//#define CALIBRATE
+
 uint16_t z,rz;
 byte data[4];
 
@@ -24,7 +27,9 @@ void setup()
   digitalWrite(10, HIGH);
   Wire.begin(SINGLE_COLLECTIVE_I2C_ADDRESS);                // join i2c bus with address #11
   Wire.onRequest(requestEvent); // register event
-//  Serial.begin(9600);           // start serial for output
+  #if defined(CALIBRATE)
+    Serial.begin(9600);           // start serial for output
+  #endif
 }
 
 void loop()
@@ -32,18 +37,19 @@ void loop()
   z = filteredRead(A0,filter_counter_z);
   rz = filteredRead(A1,filter_counter_rz);
   // we have 200 degree turn instead of 300, so a little adjustment is necessary
-  // uncomment Serial.print statements and change 2nd and 3rd values to physical min and max
+  // uncomment #define CALIBRATE statement and change 2nd and 3rd values to physical min and max
   // of your lever
 
 
   z = map(z,14,1003,1023,0);
   rz = map(rz,0,992,1023,0);
-//
-//  Serial.print(z);
-//  Serial.print(" ");
-//  Serial.println(rz);
 
 
+  #if defined(CALIBRATE)
+    Serial.print(z);
+    Serial.print(" ");
+    Serial.println(rz);
+  #endif
 }
 
 // function that executes whenever data is received from master
