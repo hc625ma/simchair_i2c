@@ -45,6 +45,8 @@ typedef struct
    long enc_ts;
    byte button_id;
    bool button_val;
+   byte press_counter;
+   bool last_dir;
 }  enc_state;
 
 //RADIO PANEL BUTTON CONFIG STRUCTURES

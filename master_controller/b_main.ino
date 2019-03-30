@@ -105,6 +105,10 @@ bool xpdr_mode0_unchecked = 0;
 bool xpdr_mode2_unchecked = 0;
 bool xpdr_val = 0;
 
+bool obs_rate = 0;
+bool dg_rate = 0;
+
+
 byte knob_button_hold_timeout = 100;
 
 enc_state e_state[7]; 

@@ -2,17 +2,19 @@ void setup_vrmax_panel()
 {
   if (!is_device_connected(VRMAX_I2C_ADDRESS))
     return;
-
+  byte b0,b1,b2;
   dev_vrmax_panel = 1;
+  read_bytes_from_vrmax_panel(&b0,&b1,&b2);
+  for (byte i = 0; i < 7; i++)
+  {
+    e_state[i].press_counter = 0;
+    e_state[i].last_val = e_state[i].val;
+  }
 }
 
-void poll_vrmax_panel()
+void read_bytes_from_vrmax_panel(byte* but0, byte* but1, byte* but2)
 {
-
-  uint8_t but0,but1,but2;
-  uint8_t e[7];
-
-
+//  uint8_t but0,but1,but2;
   Wire.requestFrom(22, 5); //radio panel - top left encoder
   while (Wire.available())
   {
@@ -22,8 +24,8 @@ void poll_vrmax_panel()
     byte b4 = Wire.read(); // encoder 2
     byte b5 = Wire.read(); // encoder 3
 
-    but0 = b1;
-    but1 = b2;
+    *but0 = b1;
+    *but1 = b2;
     e_state[0].val = b3;
     e_state[1].val = b4;
     e_state[2].val = b5;
@@ -38,55 +40,101 @@ void poll_vrmax_panel()
     byte b4 = Wire.read(); // encoder 3
     byte b5 = Wire.read(); // encoder 4
 
-    but2 = b1;
+    *but2 = b1;
+    
     e_state[3].val = b5;
     e_state[4].val = b3;
     e_state[5].val = b4;
     e_state[6].val = b2;
   }
 
+  return;
+}
+
+void poll_vrmax_panel()
+{
+  uint8_t but0,but1,but2;
+  uint8_t e[7];
+
+  read_bytes_from_vrmax_panel(&but0,&but1,&but2);
+
 
   // parse encoders
   for (byte i = 0; i < 7; i++)
   {
 
-    if ((millis() - e_state[i].enc_ts) > 5)
+    int e_diff = e_state[i].last_val - e_state[i].val;
+    if (((millis() - e_state[i].enc_ts) > 20) && (e_state[i].button_val == 1))
     {
-      e_state[i].button_val = 0;
-      simchair_aux1.setButton(e_state[i].button_id, 0);
-
-      //simchair_aux1.setButton(7 + i, 0);
+        e_state[i].button_val = 0;
+        simchair_aux1.setButton(e_state[i].button_id, 0);
     }
-    if (e_state[i].last_val != e_state[i].val)
+   else if ((e_state[i].last_val != e_state[i].val) && (e_state[i].press_counter == 0))
     {
-      int e_diff = e_state[i].last_val - e_state[i].val;
-      if ((e_diff > 1) && (e_diff < 100)) // left turn
-      {
-        Serial.println(e_diff);
-        e_state[i].last_val = e_state[i].val;
-        //simchair_aux1.setButton(i, 1);
+      if ((e_diff > 1) && (e_diff < 100)) // fast left turn
+      {         
         set_button_mode_and_radio_switch_aware(i,1,0);
         e_state[i].enc_ts = millis();
-
-
+        if (((obs_rate == 1) && (i == 4))|| ((i == 6) && (dg_rate == 1)))  // OBS knob
+        {
+          e_state[i].press_counter = OBS_HIGH_RATE_BUTTON_PRESSES;
+        }
+        else
+        {
+          e_state[i].press_counter = 0;
+        }
+        e_state[i].last_dir = 0;
         //e_state[i].button_id = i;
         e_state[i].button_val = 1;
-      }
-      else if ((e_diff < -1) && (e_diff > - 100)) // right turn
-      {
         e_state[i].last_val = e_state[i].val;
-        //simchair_aux1.setButton(7 + i, 1);
-        //set_button_mode_and_radio_switch_aware(i,1,7);
+      }
+      else if ((e_diff < -1) && (e_diff > - 100)) // fast right turn
+      {
         set_button_mode_and_radio_switch_aware(i,1,1);
         e_state[i].enc_ts = millis();
-
-        //e_state[i].button_id = 7 + i;
+        if (((obs_rate == 1) && (i == 4))|| ((i == 6) && (dg_rate == 1)))  // OBS knob
+        {
+          e_state[i].press_counter = OBS_HIGH_RATE_BUTTON_PRESSES;
+        }
+        else
+        {
+          e_state[i].press_counter = 0;
+        }
+        e_state[i].last_dir = 1;
         e_state[i].button_val = 1;
+        e_state[i].last_val = e_state[i].val;
+      }
+      
+      else if ((e_diff <= 100) && (e_diff >= 1))// slow left turn
+      {
+        set_button_mode_and_radio_switch_aware(i,1,0);
+        e_state[i].enc_ts = millis();
+        e_state[i].press_counter = 0;
+        e_state[i].last_dir = 0;
+        e_state[i].button_val = 1;
+        e_state[i].last_val = e_state[i].val;
+      }
+      else if ((e_diff >= -100) && (e_diff <= -1)) // slow right turn
+      {
+        set_button_mode_and_radio_switch_aware(i,1,1);
+        e_state[i].enc_ts = millis();
+        e_state[i].press_counter = 0;
+        e_state[i].last_dir = 1;
+        e_state[i].button_val = 1;
+        e_state[i].last_val = e_state[i].val;
       }
       else if ((e_diff > 100) || (e_diff < - 100))
       {
         e_state[i].last_val = e_state[i].val;
       }
+    }
+    else if (((e_state[i].press_counter > 0) && (e_state[i].button_val == 0)) && (millis() - e_state[i].enc_ts > 30))
+    {
+        set_button_mode_and_radio_switch_aware(i,1,e_state[i].last_dir);
+        e_state[i].enc_ts = millis();
+        e_state[i].press_counter--;
+        e_state[i].button_val = 1;   
+        e_state[i].last_val = e_state[i].val;    
     }
   }
 
@@ -498,6 +546,34 @@ void parse_radio_panel_switches (byte b, byte start_pos)
       else
       {
         nav_mode0_unchecked = 1;
+      }
+    }
+    else if (i == OBS_RATE_SELECTOR_JOY_BUTTON - 1)
+    {
+      if (v != radio_matrix[i].sw_val)
+      {
+        if (v == 1)
+        {
+         //Serial.println(obs_rate);
+         obs_rate = !obs_rate;
+         
+         e_state[4].press_counter = 0;
+        }
+        radio_matrix[i].sw_val = v;
+      }
+    }
+    else if (i == DIR_GYRO_RATE_SELECTOR_JOY_BUTTON - 1)
+    {
+      if (v != radio_matrix[i].sw_val)
+      {
+        if (v == 1)
+        {
+         //Serial.println(obs_rate);
+         dg_rate = !dg_rate;
+         
+         e_state[6].press_counter = 0;
+        }
+        radio_matrix[i].sw_val = v;
       }
     }
 #endif

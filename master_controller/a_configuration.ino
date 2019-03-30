@@ -264,6 +264,9 @@
 #define NAV_MODE_SELECTOR_JOY_BUTTON 19 // put the lower button number here
 #define XPDR_MODE_SW_JOY_BUTTON 7 // put the lower button number here
 #define XPDR_MODE_C_JOY_BUTTON 9 // that button will be pressed in middle xpdr switch position
+#define OBS_RATE_SELECTOR_JOY_BUTTON 18 // switches between high and low OBS knob turn rate
+#define DIR_GYRO_RATE_SELECTOR_JOY_BUTTON 17 // switches between high and low DIR G knob turn rate
+#define OBS_HIGH_RATE_BUTTON_PRESSES 200; // how many times the OBS / DIR GYRO knobs buttons will be pressed on knob turn
 
 
 const rp_e_matrix radio_panel_knob_matrix[] =
