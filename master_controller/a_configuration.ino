@@ -17,6 +17,7 @@
  #define HUEY_HEAD_I2C_ADDRESS              17
  #define GA_CONTROLS_I2C_ADDRESS            11
  #define THROTTLE_QUADRANT_I2C_ADDRESS      18
+ #define VRMAX_I2C_ADDRESS                  21
 
   #define ADS1115_RESOLUTION 15 //bits, min 12, max 15
 

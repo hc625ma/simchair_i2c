@@ -1,29 +1,26 @@
 void setup_ab412_coll_head()
 {
-  Wire.beginTransmission(AB412_HEAD_I2C_ADDRESS);
-  int error = Wire.endTransmission();
-  if (error == 0)
+  if (!is_device_connected(AB412_HEAD_I2C_ADDRESS))
+    return;
+
+  COLLECTIVE_HOLD_BUTTON = AB412_HEAD_COLLECTIVE_HOLD_BUTTON;
+  simchair_aux2.setXAxisRange(0, 255);
+  simchair_aux2.setYAxisRange(0, 255);
+  simchair_aux2.setRxAxisRange(0, 255);
+  simchair_aux2.setRyAxisRange(255, 0);
+  simchair_aux2.setZAxisRange(0, 255);
+  simchair_aux2.setRzAxisRange(0, 255);
+  dev_ab412_coll_head = 1;
+
+  for (byte i=0;i<32;i++)
   {
-    COLLECTIVE_HOLD_BUTTON = AB412_HEAD_COLLECTIVE_HOLD_BUTTON;
-    simchair_aux2.setXAxisRange(0, 255);
-    simchair_aux2.setYAxisRange(0, 255);
-    simchair_aux2.setRxAxisRange(0, 255);
-    simchair_aux2.setRyAxisRange(255, 0);
-    simchair_aux2.setZAxisRange(0, 255);
-    simchair_aux2.setRzAxisRange(0, 255);
-    dev_ab412_coll_head = 1;
-
-    for (byte i=0;i<32;i++)
-    {
-      switch_matrix[i].sw_id = pgm_read_byte(&ab412_switch_matrix[i].sw_id);
-      switch_matrix[i].sw_type = pgm_read_byte(&ab412_switch_matrix[i].sw_type);
-      switch_matrix[i].sw_middle_b = pgm_read_byte(&ab412_switch_matrix[i].sw_middle_b) - 1;
-    }
-
-    MODE_SWITCH_BUTTON = AB412_COLL_HEAD_MODE_SWITCH;
-    IDLE_STOP_BUTTON = ab412_coll_head_idle_stop_buttons[0] - 1;
+    switch_matrix[i].sw_id = pgm_read_byte(&ab412_switch_matrix[i].sw_id);
+    switch_matrix[i].sw_type = pgm_read_byte(&ab412_switch_matrix[i].sw_type);
+    switch_matrix[i].sw_middle_b = pgm_read_byte(&ab412_switch_matrix[i].sw_middle_b) - 1;
   }
-  
+
+  MODE_SWITCH_BUTTON = AB412_COLL_HEAD_MODE_SWITCH;
+  IDLE_STOP_BUTTON = ab412_coll_head_idle_stop_buttons[0] - 1;
 }
 
 void poll_ab412_coll_head()

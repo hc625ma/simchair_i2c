@@ -1,32 +1,31 @@
 void setup_pedals()
 {
-  Wire.beginTransmission(HELICOPTER_PEDALS_I2C_ADDRESS);
-  int error = Wire.endTransmission();
-  if (error == 0)
-  {
-    //initialize ADS1115 filters
-    for (int thisReading = 0; thisReading < xy_readings; thisReading++)
-    {
-      buf_rudder[thisReading] = 0;
-    }
-    if (INVERT_RUDDER == 1)
-    {
-      simchair.setRudderRange(ADC_RANGE, 0);
-    }
-    else
-    {
-      simchair.setRudderRange(0, ADC_RANGE);
-    }
-    dev_pedals = 1;
-    pedals.begin();
-    pedals.setGain(GAIN_ONE);
+  if (!is_device_connected(HELICOPTER_PEDALS_I2C_ADDRESS))
+    return;
 
-    physical_pedals_center = pedals.readADC_SingleEnded(0) >> (15 - ADS1115_RESOLUTION);
-    if (INVERT_RUDDER == 1)
-    {
-      physical_pedals_center = ADC_RANGE - physical_pedals_center;
-    }
+  //initialize ADS1115 filters
+  for (int thisReading = 0; thisReading < xy_readings; thisReading++)
+  {
+    buf_rudder[thisReading] = 0;
   }
+  if (INVERT_RUDDER == 1)
+  {
+    simchair.setRudderRange(ADC_RANGE, 0);
+  }
+  else
+  {
+    simchair.setRudderRange(0, ADC_RANGE);
+  }
+  dev_pedals = 1;
+  pedals.begin();
+  pedals.setGain(GAIN_ONE);
+
+  physical_pedals_center = pedals.readADC_SingleEnded(0) >> (15 - ADS1115_RESOLUTION);
+  if (INVERT_RUDDER == 1)
+  {
+    physical_pedals_center = ADC_RANGE - physical_pedals_center;
+  }
+
   force_trim_rudder = physical_pedals_center;
 }
 
@@ -181,7 +180,7 @@ void poll_pedals()
           {
             if (force_trim_button_pressed == 0)
             {
-              
+
               pedals_force_trim_state = 2;
               rudder_diff = rudder - force_trim_rudder;
             }

@@ -1,8 +1,6 @@
 void setup_cyclic()
 {
-  Wire.beginTransmission(FLIGHT_STICK_GIMBAL_I2C_ADDRESS);
-  int error = Wire.endTransmission();
-  if (error == 0)
+  if (is_device_connected(FLIGHT_STICK_GIMBAL_I2C_ADDRESS))
   {
     //initialize ADS1115 filters
     for (int thisReading = 0; thisReading < xy_readings; thisReading++)

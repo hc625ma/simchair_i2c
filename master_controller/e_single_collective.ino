@@ -1,14 +1,11 @@
 void setup_single_engine_collective()
 {
-  Wire.beginTransmission(SINGLE_COLLECTIVE_I2C_ADDRESS);
-  int error = Wire.endTransmission();
-  if (error == 0)
-  {
-    simchair.setZAxisRange(SINGLE_COLLECTIVE_MIN, SINGLE_COLLECTIVE_MAX);
-    simchair.setThrottleRange(SINGLE_COLLECTIVE_THR_MIN,SINGLE_COLLECTIVE_THR_MAX);//SINGLE_ENGINE_COLLECTIVE_IDLE_STOP_AXIS_VAL, 1023);
-    dev_single_engine_collective = 1;
-  }
+  if (!is_device_connected(SINGLE_COLLECTIVE_I2C_ADDRESS))
+    return;
 
+  simchair.setZAxisRange(SINGLE_COLLECTIVE_MIN, SINGLE_COLLECTIVE_MAX);
+  simchair.setThrottleRange(SINGLE_COLLECTIVE_THR_MIN,SINGLE_COLLECTIVE_THR_MAX);//SINGLE_ENGINE_COLLECTIVE_IDLE_STOP_AXIS_VAL, 1023);
+  dev_single_engine_collective = 1;
 }
 
 void set_idle_stop_latch_state(uint16_t throttle)

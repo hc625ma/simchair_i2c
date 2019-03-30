@@ -1,14 +1,12 @@
 void setup_twin_engine_collective()
 {
-  Wire.beginTransmission(TWIN_COLLECTIVE_I2C_ADDRESS);
-  int error = Wire.endTransmission();
-  if (error == 0)
-  {
-    simchair.setZAxisRange(TWIN_COLLECTIVE_MIN, TWIN_COLLECTIVE_MAX);
-    simchair.setThrottleRange(TWIN_COLLECTIVE_THR1_MIN,TWIN_COLLECTIVE_THR1_MAX);//SINGLE_ENGINE_COLLECTIVE_IDLE_STOP_AXIS_VAL, 1023);
-    simchair.setRyAxisRange(TWIN_COLLECTIVE_THR2_MIN,TWIN_COLLECTIVE_THR2_MAX);
-    dev_twin_engine_collective = 1;
-  }
+  if (!is_device_connected(TWIN_COLLECTIVE_I2C_ADDRESS))
+    return;
+
+  simchair.setZAxisRange(TWIN_COLLECTIVE_MIN, TWIN_COLLECTIVE_MAX);
+  simchair.setThrottleRange(TWIN_COLLECTIVE_THR1_MIN,TWIN_COLLECTIVE_THR1_MAX);//SINGLE_ENGINE_COLLECTIVE_IDLE_STOP_AXIS_VAL, 1023);
+  simchair.setRyAxisRange(TWIN_COLLECTIVE_THR2_MIN,TWIN_COLLECTIVE_THR2_MAX);
+  dev_twin_engine_collective = 1;
 }
 
 void poll_twin_engine_collective()

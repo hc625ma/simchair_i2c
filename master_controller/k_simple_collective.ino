@@ -1,13 +1,11 @@
 void setup_simple_collective()
 {
-  Wire.beginTransmission(SIMPLE_COLLECTIVE_I2C_ADDRESS);
-  int error = Wire.endTransmission();
-  if (error == 0)
-  {
-    simchair.setZAxisRange(SIMPLE_COLLECTIVE_MIN, SIMPLE_COLLECTIVE_MAX);
-    simchair.setThrottleRange(SIMPLE_COLLECTIVE_THR_MIN, SIMPLE_COLLECTIVE_THR_MAX);
-    dev_simple_collective = 1;
-  }
+  if (!is_device_connected(SIMPLE_COLLECTIVE_I2C_ADDRESS))
+    return;
+
+  simchair.setZAxisRange(SIMPLE_COLLECTIVE_MIN, SIMPLE_COLLECTIVE_MAX);
+  simchair.setThrottleRange(SIMPLE_COLLECTIVE_THR_MIN, SIMPLE_COLLECTIVE_THR_MAX);
+  dev_simple_collective = 1;
 }
 
 void poll_simple_collective()
