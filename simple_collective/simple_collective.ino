@@ -1,95 +1,103 @@
-// Wire Slave Receiver
-// by Nicholas Zambetti <http://www.zambetti.com>
-
-// Demonstrates use of the Wire library
-// Receives data as an I2C/TWI slave device
-// Refer to the "Wire Master Writer" example for use with this
-
-// Created 29 March 2006
-
-// This example code is in the public domain.
+#include <Wire.h>
 
 #define SIMPLE_COLLECTIVE_I2C_ADDRESS 10 // do not change this!
 
-#include <Wire.h>
-
+/*
+ * Uncomment #define CALIBRATE statement and change the following constants
+ * to define the min and max values of your device.
+ */
 //#define CALIBRATE
+#define COLLECTIVE_CALIBRATE_MIN  1002
+#define COLLECTIVE_CALIBRATE_MAX  18
+#define THROTTLE_CALIBRATE_MIN    10
+#define THROTTLE_CALIBRATE_MAX    976
 
-uint16_t z,rz;
-byte data[4];
+#define COLLECTIVE_FILTER_SAMPLES  6
+#define THROTTLE_FILTER_SAMPLES    6
 
-uint8_t filter_counter_z = 6;
-uint8_t filter_counter_rz = 6;
+#define POT_BOARD_VCC_PIN  10
+#define COLLECTIVE_PIN     A0
+#define THROTTLE_PIN       A1
+
+uint16_t collective;
+uint16_t throttle;
+
 
 void setup()
 {
-  pinMode(SIMPLE_COLLECTIVE_I2C_ADDRESS, OUTPUT);           // power up the pot board
-  digitalWrite(10, HIGH);
-  Wire.begin(10);                // join i2c bus with address #8
-  Wire.onRequest(requestEvent); // register event
+  Wire.begin(SIMPLE_COLLECTIVE_I2C_ADDRESS);
+  Wire.onRequest(requestEvent);
+
   #if defined(CALIBRATE)
-    Serial.begin(9600);           // start serial for output
+    Serial.begin(9600);
   #endif
+
+  // Power up the pot board
+  pinMode(POT_BOARD_VCC_PIN, OUTPUT);
+  digitalWrite(POT_BOARD_VCC_PIN, HIGH);
 }
 
 void loop()
 {
-  z = filteredRead(A0,filter_counter_z);
-  rz = filteredRead(A1,filter_counter_rz);
-  // uncomment #define CALIBRATE statement and change 2nd and 3rd values to physical min and max
-  // of your lever; change the order of 2 last values to invert an axis
-  z = map(z,1002,18,0,1023);
-  rz = map(rz,10,976,1023,0);
+  collective = filteredRead(COLLECTIVE_PIN, COLLECTIVE_FILTER_SAMPLES);
+  throttle = filteredRead(THROTTLE_PIN, THROTTLE_FILTER_SAMPLES);
 
-  if (z > 1023)
-  {
-    z = 1023;
-  }
+  // Change the order of the last 2 values to invert the axis
+  collective = map(collective, COLLECTIVE_CALIBRATE_MIN, COLLECTIVE_CALIBRATE_MAX, 0, 1023);
+  throttle = map(throttle, THROTTLE_CALIBRATE_MIN, THROTTLE_CALIBRATE_MAX, 1023, 0);
 
-  if (rz > 1023)
-  {
-    rz = 1023;
-  }
-
-  if (z > 30000)
-  {
-    z = 0;
-  }
-
-  if (rz > 30000)
-  {
-    rz = 0;
-  }
-
+  validate(collective);
+  validate(throttle);
 
   #if defined(CALIBRATE)
-    Serial.print(z);
+    Serial.print(collective);
     Serial.print(" ");
-    Serial.println(rz);
+    Serial.println(throttle);
   #endif
 }
 
-// function that executes whenever data is received from master
-// this function is registered as an event, see setup()
+/*
+ * Function that executes whenever data is received from master
+ * this function is registered as an event, see setup()
+ *
+ * I2C communication protocol
+ *
+ * Byte 0: collective high nibble
+ * Byte 1: collective low nibble
+ * Byte 2: throttle high nibble
+ * Byte 3: throttle low nibble
+ */
 void requestEvent() {
-  data[0] = (z >> 8) & 0xFF;
-  data[1] = z & 0xFF;
-  data[2] = (rz >> 8) & 0xFF;
-  data[3] = rz & 0xFF;
-  Wire.write(data,4);
+  uint8_t data[4];
+  data[0] = (collective >> 8) & 0xFF;
+  data[1] = collective & 0xFF;
+  data[2] = (throttle >> 8) & 0xFF;
+  data[3] = throttle & 0xFF;
+  Wire.write(data, 4);
 }
 
-uint16_t filteredRead (uint16_t input,uint8_t filter_counter)
+uint16_t filteredRead (uint8_t input, uint8_t samples)
 {
   uint32_t filter = 0;
-  for (uint8_t i=0;i<filter_counter;i++)
-  {
 
-      filter+= analogRead(input);
+  for (uint8_t i = 0; i < samples; i++)
+  {
+      filter += analogRead(input);
       delay(1);
   }
 
-  uint16_t val = filter/filter_counter;
-  return val;
+  return filter / samples;
+}
 
+void validate(uint16_t& value)
+{
+  if (value > 1023)
+  {
+    value = 1023;
+  }
+
+  if (value > 30000)
+  {
+    value = 0;
+  }
 }
