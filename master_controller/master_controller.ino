@@ -6,17 +6,8 @@
 #include <Keyboard.h>
 #include <avr/pgmspace.h>
 
-
-
-//Joystick_ b8stick(0x20,JOYSTICK_TYPE_GAMEPAD,
-//  6, 0,                  // Button Count, Hat Switch Count
-//  true, true, false,     // X and Y, but no Z Axis
-//  false, false, false,   // No Rx, Ry, or Rz
-//  false, false,          // No rudder or throttle
-//  false, false, false);  // No accelerator, brake, or steering
-
 Joystick_ simchair(0x20, 0x04, 32, 1, true, true, true, true, true, false, true, true, false, false, false);
-Joystick_ simchair_aux1(0x21, 0x04, 142, 1, true, true, true, true, true, true, true, true, true, true, true);
+Joystick_ simchair_aux1(0x21, 0x04, 154, 1, true, true, true, true, true, true, true, true, true, true, true);
 Joystick_ simchair_aux2(0x22, 0x04, 128, 1, false, false, false, true, true, false, false, false, false, false, false);
 
 Adafruit_ADS1115 cyclic;
@@ -34,7 +25,19 @@ typedef struct
 
 typedef struct
 {
-   bool sw_val;
+  bool sw_val;
+  uint8_t c1f;
+  uint8_t c1c;
+  uint8_t n1f;
+  uint8_t n1c;
+  uint8_t c2f;
+  uint8_t c2c;
+  uint8_t n2f;
+  uint8_t n2c;
+  uint8_t x1;
+  uint8_t x2;
+  uint8_t x3;
+  uint8_t x4;
 }  r_matrix;
 
 typedef struct

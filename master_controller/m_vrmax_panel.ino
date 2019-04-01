@@ -576,6 +576,90 @@ void parse_radio_panel_switches (byte b, byte start_pos)
         radio_matrix[i].sw_val = v;
       }
     }
+    else if (i == RP_COM_FINE_PB_JOY_BUTTON - 1)
+    {
+      if (v != radio_matrix[i].sw_val)
+      {
+          if (radio_device == 0)
+          {
+            simchair_aux1.setButton(radio_panel_pb_matrix[0].c1f, v);
+            radio_matrix[i].sw_val = v;
+          }
+          else if (radio_device == 1)
+          {
+            simchair_aux1.setButton(radio_panel_pb_matrix[0].c2f, v);
+            radio_matrix[i].sw_val = v;
+          } 
+          if (radio_device == 2)
+          {
+            simchair_aux1.setButton(radio_panel_pb_matrix[0].x1, v);
+            radio_matrix[i].sw_val = v;
+          }
+      }
+    }
+    else if (i == RP_COM_COARSE_PB_JOY_BUTTON - 1)
+    {
+      if (v != radio_matrix[i].sw_val)
+      {
+          if (radio_device == 0)
+          {
+            simchair_aux1.setButton(radio_panel_pb_matrix[0].c1c, v);
+            radio_matrix[i].sw_val = v;
+          }
+          else if (radio_device == 1)
+          {
+            simchair_aux1.setButton(radio_panel_pb_matrix[0].c2c, v);
+            radio_matrix[i].sw_val = v;
+          } 
+          if (radio_device == 2)
+          {
+            simchair_aux1.setButton(radio_panel_pb_matrix[0].x2, v);
+            radio_matrix[i].sw_val = v;
+          }
+      }
+    }
+    else if (i == RP_NAV_FINE_PB_JOY_BUTTON - 1)
+    {
+      if (v != radio_matrix[i].sw_val)
+      {
+          if (radio_device == 0)
+          {
+            simchair_aux1.setButton(radio_panel_pb_matrix[0].n1f, v);
+            radio_matrix[i].sw_val = v;
+          }
+          else if (radio_device == 1)
+          {
+            simchair_aux1.setButton(radio_panel_pb_matrix[0].n2f, v);
+            radio_matrix[i].sw_val = v;
+          } 
+          if (radio_device == 2)
+          {
+            simchair_aux1.setButton(radio_panel_pb_matrix[0].x3, v);
+            radio_matrix[i].sw_val = v;
+          }
+      }
+    }
+    else if (i == RP_NAV_COARSE_PB_JOY_BUTTON - 1)
+    {
+      if (v != radio_matrix[i].sw_val)
+      {
+          if (radio_device == 0)
+          {
+            simchair_aux1.setButton(radio_panel_pb_matrix[0].n1c, v);
+            radio_matrix[i].sw_val = v;
+          }
+          else if (radio_device == 1)
+          {
+            simchair_aux1.setButton(radio_panel_pb_matrix[0].n2c, v);
+            radio_matrix[i].sw_val = v;
+          } 
+          if (radio_device == 2)
+          {
+            simchair_aux1.setButton(radio_panel_pb_matrix[0].x4, v);
+            radio_matrix[i].sw_val = v;
+          }
+      }
+    }
 #endif
 
     else if (v != radio_matrix[i].sw_val) // regular joy button
