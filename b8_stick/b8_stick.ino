@@ -21,6 +21,8 @@
 
 #include <Wire.h>
 
+
+
 //#define GRIP_TEST
 
 #define B8STICK_I2C_ADDRESS 20
@@ -40,11 +42,11 @@ uint8_t pot_y_value;     // hat potentiometer Y axis reading
 uint8_t buttons = 0x00;  // bit array with the state of the buttons connected
                          // to digital pins 2 to 7 (0 = released, 1 = pressed)
 uint8_t buf = 0x00;    
-bool ptt_press = 0;
+bool ptt_pressed = false;
 
 void setup()
 {
-  #if (defined GRIP_TEST)
+  #if defined(GRIP_TEST)
     Serial.begin(9600);
   #endif
   Wire.begin(B8STICK_I2C_ADDRESS);
@@ -64,8 +66,8 @@ void setup()
    * input, writing a 0 to bits 2..7 of DDRD register. Then the output is put
    * to HIGH to enable pullup resistors, writing a 1 to 2..7 bits of PORTD register.
    */
-  DDRD &= ~0b11111110;  // set pins 2..7 of port D as inputs, writing a 0 in the corresponding bits
-  PORTD |= 0b11111110;  // activate pullup resistors of 2..7 pins, writing a 1 in the corresponding bits
+  DDRD &= ~0b11111100;  // set pins 2..7 of port D as inputs, writing a 0 in the corresponding bits
+  PORTD |= 0b11111100;  // activate pullup resistors of 2..7 pins, writing a 1 in the corresponding bits
 }
 
 void loop()
@@ -92,6 +94,7 @@ void loop()
   buf = buttons; // we need some processing done over INTERCOM and PTT buttons, so this is needed to avoid sending raw values
   buf &= ~(1 << (INTERCOM_BUTTON_PIN - 2)); // intercom button is always depressed by default
 
+
   /*
    * The trigger has two positions: half-press (intercom) and full-press
    * with a click (radio push to talk). When the trigger is fully pressed,
@@ -105,7 +108,7 @@ void loop()
 
   if (buttons & (1 << (INTERCOM_BUTTON_PIN - 2))) // intercom pressed
   {
-    if (ptt_press == 0) // PTT has not been pressed yet
+    if (ptt_pressed == false) // PTT has not been pressed yet
     {
       if (intercom_press_ts == 0) // if we are pressing INTERCOM for the 1st time
       {
@@ -118,10 +121,11 @@ void loop()
           if (!(buttons & (1 << (PTT_BUTTON_PIN - 2)))) // and the PTT button is not pressed
           {
             buf |= (1 << (INTERCOM_BUTTON_PIN - 2));  // press INTERCOM button
+
           }
           else
           {
-            ptt_press = 1;
+            ptt_pressed = true;
           }
         }
       }
@@ -130,7 +134,7 @@ void loop()
   else 
   {
     intercom_press_ts = 0;
-    ptt_press = 0;
+    ptt_pressed = false;
   }
 
   #if (defined GRIP_TEST)
