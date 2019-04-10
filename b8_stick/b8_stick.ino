@@ -1,112 +1,179 @@
-//Simchair MKIII B8 stick firmware. The stick has 6 buttons and 2 8 bit analog axes.
-
-// CONNECT BUTTONS AS FOLLOWS:
-// POT BUTTON - PIN 2 TO GND
-// TOP (TRIMMER) - PIN 3 TO GND
-// MIDDLE (FIRE) - PIN 4 TO GND
-// BOTTOM - PIN 5 TO GND
-// TRIGGER INTERCOM - PIN 6 TO GND
-// TRIGGER PTT (full press) - PIN 7 TO GND
-
-#define B8STICK_I2C_ADDRESS 20
+/**
+ * Simchair MKIII B8 stick firmware. The stick has 6 buttons and 2 8-bit analog
+ * axes.
+ *
+ * Connect buttons as follow:
+ *     POT BOARD VCC to PIN 10
+ *     POT BOARD GND -> Arduino GND
+ *     POT VRx -> A0
+ *     POT VRy -> A1
+ *     POT BOARD BUTTON – PIN 2
+ *     TOP (TRIMMER) – between PIN 3 and GND
+ *     MIDDLE (FIRE) – between PIN 4 and GND
+ *     BOTTOM – between PIN 5 and GND
+ *     TRIGGER INTERCOM – between PIN 6 and GND
+ *     TRIGGER PTT (full press) – between PIN 7 and GND
+ *     A4 (SDA) -> ethernet cable blue wire
+ *     A5 (SCL) -> ethernet cable green-white wire
+ *     VCC -> ethernet cable orange-white wire
+ *     GND -> ethernet cable orange wire
+ */
 
 #include <Wire.h>
 
-//INTERCOM (trigger half-press)
-#define INTERCOM_PIN 6
-#define INTERCOM_PRESS_DURATION 130 //adjust to your liking, values below 100 are not recommended
-long intercom_pressed = -1;
-#define PTT_PIN 7
 
-uint8_t x,y;
-uint8_t b = 0b00000000; //digital pins 2 to 9; x ^= (1 << n); - toggles nth bit of x.  all other bits left alone.
 
-//INTERCOM TRIGGER PIN IS DEFINED SEPARATELY!
-byte pins[] = {2,3,4,5};
+//#define GRIP_TEST
 
-byte data[3]; //2 8 bit axes + 5 buttons in the third byte
+#define B8STICK_I2C_ADDRESS 20
+
+#define POT_BOARD_BUTTON_PIN  2
+#define TOP_BUTTON_PIN        3
+#define MIDDLE_BUTTON_PIN     4
+#define BOTTOM_BUTTON_PIN     5
+#define INTERCOM_BUTTON_PIN   6
+#define PTT_BUTTON_PIN        7
+
+#define INTERCOM_PRESS_DURATION 130  // adjust to your liking, values below 100 are not recommended
+unsigned long intercom_press_ts = 0;
+
+uint8_t pot_x_value;     // hat potentiometer X axis reading
+uint8_t pot_y_value;     // hat potentiometer Y axis reading
+uint8_t buttons = 0x00;  // bit array with the state of the buttons connected
+                         // to digital pins 2 to 7 (0 = released, 1 = pressed)
+uint8_t buf = 0x00;    
+bool ptt_pressed = false;
 
 void setup()
 {
-  pinMode(10, OUTPUT);           // power up the pot board
+  #if defined(GRIP_TEST)
+    Serial.begin(9600);
+  #endif
+  Wire.begin(B8STICK_I2C_ADDRESS);
+  Wire.onRequest(requestEvent);
+
+  // Power up the pot board
+  pinMode(10, OUTPUT);
   digitalWrite(10, HIGH);
-  Wire.begin(B8STICK_I2C_ADDRESS);                // join i2c bus with address #20
-  Wire.onRequest(requestEvent); // register event
-  for (int i = 0; i < sizeof(pins); i++)
-  {
-    pinMode(pins[i], INPUT_PULLUP);
-  }
-  pinMode(INTERCOM_PIN, INPUT_PULLUP);
-  pinMode(PTT_PIN, INPUT_PULLUP);
+
+  /*
+   * Setup button pins as input pullup.
+   *
+   * As the buttons are physically connected to pins 2 to 7, all of them
+   * belong to PORTD. Thus, all those pins can be set as input pullups at the
+   * same time, directly manipulating the PORTD register.
+   * In order to do this first the direction of the pins has to be defined as
+   * input, writing a 0 to bits 2..7 of DDRD register. Then the output is put
+   * to HIGH to enable pullup resistors, writing a 1 to 2..7 bits of PORTD register.
+   */
+  DDRD &= ~0b11111100;  // set pins 2..7 of port D as inputs, writing a 0 in the corresponding bits
+  PORTD |= 0b11111100;  // activate pullup resistors of 2..7 pins, writing a 1 in the corresponding bits
 }
 
 void loop()
 {
-  // Convert 10 bit ADC reading to 8 bit value to speed things up - see i2c_preipheral.ino if you want up to 16 bit values.
-  //Keep in mind, smaller amount of data to transfer = smaller input lag, I would recommend using 10+ bit values for main controls only
-  x = analogRead(A1) >> 2;
-  y = analogRead(A0) >> 2;
-  uint8_t buf = 0b00000000; // fill the buffer first so all our button values will update simultaneously and wont be affected by interrupts
-  for (int i = 0; i < sizeof(pins); i++)
-  {
-    bool pin = !digitalRead(pins[i]);
-    if (pin == 1)
-    {
-      buf |= (1 << i);       // forces ith bit of b to be 1.  all other bits left alone.
-    }
-    else
-    {
-      buf &= ~(1 << i);      // forces ith bit of b to be 0.  all other bits left alone.
-    }
-  }
+  /*
+   * Convert 10 bit ADC reading to 8 bit value to speed things up.
+   * See i2c_preipheral.ino if you want up to 16 bit values.
+   * Keep in mind, smaller amount of data to transfer = smaller input lag.
+   * I would recommend using 10+ bit values for main controls only.
+   */
+  pot_x_value = analogRead(A1) >> 2;
+  pot_y_value = analogRead(A0) >> 2;
 
-  bool intercom = !digitalRead(INTERCOM_PIN);
-  bool ptt = !digitalRead(PTT_PIN);
-  if (ptt == 1)
-  {
-    buf |= (1 << 4);
-  }
-  else
-  {
-    buf &= ~(1 << 4);
-  }
+  /*
+   * Read all the button pins in one single instruction. This avoids using
+   * Arduino's digitalRead(), that is well known for being veeeeery slow
+   * compared to direct port register manipulation.
+   *
+   * After reading the D port pins, as the first button is connected to pin 2,
+   * everything is moved 2 bits to the right, to build the byte that will
+   * be transmitted by I2C (which is 0 based).
+   */
+  buttons = ~PIND >> 2;
+  buf = buttons; // we need some processing done over INTERCOM and PTT buttons, so this is needed to avoid sending raw values
+  buf &= ~(1 << (INTERCOM_BUTTON_PIN - 2)); // intercom button is always depressed by default
 
-  if (intercom == 1)
+
+  /*
+   * The trigger has two positions: half-press (intercom) and full-press
+   * with a click (radio push to talk). When the trigger is fully pressed,
+   * a half-press button is disabled by the software, so your sim will see
+   * these two positions as entirely separate buttons.
+   * 
+   * We will only press intercom when we are sure we actually want it, because some games
+   * will only detect the 1st button press and for some reason will ignore the second one,
+   * e.g. ARMA3.
+   */
+
+  if (buttons & (1 << (INTERCOM_BUTTON_PIN - 2))) // intercom pressed
   {
-    if (intercom_pressed == -1)
+    if (ptt_pressed == false) // PTT has not been pressed yet
     {
-      intercom_pressed = millis();
-    }
-    else
-    {
-      if ((millis() - intercom_pressed) > INTERCOM_PRESS_DURATION)
+      if (intercom_press_ts == 0) // if we are pressing INTERCOM for the 1st time
       {
-        if (ptt == 0)
+        intercom_press_ts = millis();
+      }
+      else
+      {
+        if ((millis() - intercom_press_ts) > INTERCOM_PRESS_DURATION) // if intercom is pressed for long enough we are sure we want it rather than PTT
         {
-          buf |= (1 << 5); // press button 6
-        }
-        else
-        {
-          intercom_pressed = -1;
-          buf &= ~(1 << 5); //release button 6
+          if (!(buttons & (1 << (PTT_BUTTON_PIN - 2)))) // and the PTT button is not pressed
+          {
+            buf |= (1 << (INTERCOM_BUTTON_PIN - 2));  // press INTERCOM button
+
+          }
+          else
+          {
+            ptt_pressed = true;
+          }
         }
       }
     }
   }
-  else if (intercom == 0)
+  else 
   {
-    intercom_pressed = -1;
-    buf &= ~(1 << 5);
+    intercom_press_ts = 0;
+    ptt_pressed = false;
   }
 
-  b = buf;
+  #if (defined GRIP_TEST)
+    printBits(buf);
+  #endif
+   
 }
 
-// function that executes whenever data is received from master
-// this function is registered as an event, see setup()
-void requestEvent() {
-  data[0] = x;
-  data[1] = y;
-  data[2] = b;
-  Wire.write(data,3);
+/**
+ * I2C communication protocol
+ *
+ * Byte 1: hat potentiometer X value (8-bit resolution)
+ * Byte 2: hat potentiometer Y value (8-bit resolution)
+ * Byte 3: bit array with the state of the buttons (0 = released, 1 = pressed)
+ *     - Bit 0: pot board button
+ *     - Bit 1: top button
+ *     - Bit 2: middle button
+ *     - Bit 3: bottom button
+ *     - Bit 4: intercom button
+ *     - Bit 5: ptt button
+ */
+
+void printBits(byte myByte)
+{
+  for(byte mask = 0x80; mask; mask >>= 1)
+  {
+    if(mask  & myByte)
+        Serial.print('1');
+    else
+        Serial.print('0');
+  }
+  Serial.println();
+}
+ 
+void requestEvent() 
+{
+  uint8_t data[3];
+  data[0] = pot_x_value;
+  data[1] = pot_y_value;
+  data[2] = buf;
+  Wire.write(data, 3);
 }
