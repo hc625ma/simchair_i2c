@@ -13,7 +13,7 @@ Joystick_ simchair_aux2(0x22, 0x04, 128, 1, false, false, false, true, true, fal
 Adafruit_ADS1115 cyclic;
 Adafruit_ADS1115 pedals(0x4A);
 
-typedef struct
+typedef struct __attribute__((__packed__)) 
 {
    uint8_t sw_id;
    uint8_t sw_type;
@@ -23,7 +23,7 @@ typedef struct
    bool sw_tr_state;
 }  sw_matrix;
 
-typedef struct
+typedef struct __attribute__((__packed__)) 
 {
   bool sw_val;
   uint8_t c1f;
@@ -40,7 +40,7 @@ typedef struct
   uint8_t x4;
 }  r_matrix;
 
-typedef struct
+typedef struct __attribute__((__packed__)) 
 {
    uint8_t enc_id;
    uint8_t val;
@@ -54,7 +54,7 @@ typedef struct
 
 //RADIO PANEL BUTTON CONFIG STRUCTURES
 
-typedef struct 
+typedef struct __attribute__((__packed__)) 
 {
   uint8_t e; // encoder id
   uint8_t r0l; // radio stack selector pos 0 left
@@ -88,14 +88,14 @@ typedef struct
   uint8_t r2rpm2; // radio stack selector pos 2 right panel mode sw in pos 2
 } rp_e_matrix;
 
-typedef struct 
+typedef struct __attribute__((__packed__)) 
 {
   uint8_t e; // encoder id
   uint8_t l; // MAG left
   uint8_t r; // MAG right
 } mag_conf;
 
-typedef struct // e  n0l n0r n1l n1r n2l n2r
+typedef struct __attribute__((__packed__)) // e  n0l n0r n1l n1r n2l n2r
 {
   uint8_t e;
   uint8_t n0l; // VOR 1 OBS left
@@ -106,7 +106,7 @@ typedef struct // e  n0l n0r n1l n1r n2l n2r
   uint8_t n2r; // VOR 2 OBS right
 } nav_conf;
 
-typedef struct // e  n0l n0r n1l n1r n2l n2r
+typedef struct __attribute__((__packed__)) // e  n0l n0r n1l n1r n2l n2r
 {
   uint8_t e;
   uint8_t a0l;
@@ -116,4 +116,5 @@ typedef struct // e  n0l n0r n1l n1r n2l n2r
   uint8_t a2l;
   uint8_t a2r;
 } alt_conf;
+
 
