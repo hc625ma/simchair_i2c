@@ -10,7 +10,7 @@ void setup_ab412_coll_head()
   simchair_aux2.setRyAxisRange(255, 0);
   simchair_aux2.setZAxisRange(0, 255);
   simchair_aux2.setRzAxisRange(0, 255);
-  dev_ab412_coll_head = 1;
+  connected_devices |= (1 << DEVICE_AB412_HEAD);
 
   for (byte i=0;i<32;i++)
   {

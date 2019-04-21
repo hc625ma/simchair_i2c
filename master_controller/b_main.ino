@@ -20,17 +20,23 @@ bool throttle_idle_cutoff[] = {1,1}; //we presume engines are off on startup
 
 
 bool b8stick_lastButtonState[] = {0, 0, 0, 0, 0, 0};
-bool dev_b8stick = 0;
-bool dev_cyclic = 0;
-bool dev_simple_collective = 0;
-bool dev_single_engine_collective = 0;
-bool dev_twin_engine_collective = 0;
-bool dev_pedals = 0;
-bool dev_cessna_engine_and_prop_controls = 0;
-bool dev_ab412_coll_head = 0;
-bool dev_huey_coll_head = 0;
-bool dev_throttle_quadrant = 0;
-bool dev_vrmax_panel = 0;
+
+enum Device: uint8_t {
+  DEVICE_B8_STICK,
+  DEVICE_CYCLIC,
+  DEVICE_SIMPLE_COLLECTIVE,
+  DEVICE_SINGLE_COLLECTIVE,
+  DEVICE_TWIN_COLLECTIVE,
+  DEVICE_PEDALS,
+  DEVICE_GA_CONTROLS,
+  DEVICE_THROTTLE_QUADRANT,
+  DEVICE_AB412_HEAD,
+  DEVICE_HUEY_HEAD,
+  DEVICE_VRMAX
+};
+
+uint16_t connected_devices = 0;
+
 bool SW_MODE_BUTTON = 0;
 bool SW_MODE_TOGGLE = 1;
 bool zero = 0;
@@ -111,7 +117,7 @@ bool dg_rate = 0;
 
 byte knob_button_hold_timeout = 100;
 
-enc_state e_state[7]; 
+enc_state e_state[7];
 byte MODE_SWITCH_BUTTON = 0;
 byte IDLE_STOP_BUTTON = 0;
 
@@ -148,49 +154,48 @@ void setup()
 void loop()
 {
   //Serial.println("WHEEE");
-  if (dev_b8stick == 1)
+  if (connected_devices | DEVICE_B8_STICK)
   {
     poll_b8stick();
   }
-  if (dev_cyclic == 1)
+  if (connected_devices | DEVICE_CYCLIC)
   {
     poll_cyclic();
   }
-  if (dev_simple_collective == 1)
+  if (connected_devices | DEVICE_SIMPLE_COLLECTIVE)
   {
     poll_simple_collective();
   }
-  if (dev_single_engine_collective == 1)
+  if (connected_devices | DEVICE_SINGLE_COLLECTIVE)
   {
     poll_single_engine_collective();
   }
-  if (dev_twin_engine_collective == 1)
+  if (connected_devices | DEVICE_TWIN_COLLECTIVE)
   {
     poll_twin_engine_collective();
   }
-  if (dev_pedals == 1)
+  if (connected_devices | DEVICE_PEDALS)
   {
     poll_pedals();
   }
-  if (dev_cessna_engine_and_prop_controls == 1)
+  if (connected_devices | DEVICE_GA_CONTROLS)
   {
     poll_cessna_engine_and_prop_controls();
   }
-  if (dev_ab412_coll_head == 1)
+  if (connected_devices | DEVICE_AB412_HEAD)
   {
     poll_ab412_coll_head();
   }
-  if (dev_vrmax_panel == 1)
+  if (connected_devices | DEVICE_VRMAX)
   {
     poll_vrmax_panel();
   }
-  if (dev_huey_coll_head == 1)
+  if (connected_devices | DEVICE_HUEY_HEAD)
   {
     poll_huey_coll_head();
   }
-  if (dev_throttle_quadrant == 1)
+  if (connected_devices | DEVICE_THROTTLE_QUADRANT)
   {
     poll_throttle_quadrant();
   }
 }
-

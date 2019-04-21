@@ -3,7 +3,7 @@ void setup_vrmax_panel()
   if (!is_device_connected(VRMAX_I2C_ADDRESS))
     return;
   byte b0,b1,b2;
-  dev_vrmax_panel = 1;
+  connected_devices |= (1 << DEVICE_VRMAX);
   read_bytes_from_vrmax_panel(&b0,&b1,&b2);
   for (byte i = 0; i < 7; i++)
   {
@@ -41,7 +41,7 @@ void read_bytes_from_vrmax_panel(byte* but0, byte* but1, byte* but2)
     byte b5 = Wire.read(); // encoder 4
 
     *but2 = b1;
-    
+
     e_state[3].val = b5;
     e_state[4].val = b3;
     e_state[5].val = b4;
@@ -72,7 +72,7 @@ void poll_vrmax_panel()
    else if ((e_state[i].last_val != e_state[i].val) && (e_state[i].press_counter == 0))
     {
       if ((e_diff > 1) && (e_diff < 100)) // fast left turn
-      {         
+      {
         set_button_mode_and_radio_switch_aware(i,1,0);
         e_state[i].enc_ts = millis();
         if (((obs_rate == 1) && (i == 4))|| ((i == 6) && (dg_rate == 1)))  // OBS knob
@@ -104,7 +104,7 @@ void poll_vrmax_panel()
         e_state[i].button_val = 1;
         e_state[i].last_val = e_state[i].val;
       }
-      
+
       else if ((e_diff <= 100) && (e_diff >= 1))// slow left turn
       {
         set_button_mode_and_radio_switch_aware(i,1,0);
@@ -133,8 +133,8 @@ void poll_vrmax_panel()
         set_button_mode_and_radio_switch_aware(i,1,e_state[i].last_dir);
         e_state[i].enc_ts = millis();
         e_state[i].press_counter--;
-        e_state[i].button_val = 1;   
-        e_state[i].last_val = e_state[i].val;    
+        e_state[i].button_val = 1;
+        e_state[i].last_val = e_state[i].val;
     }
   }
 
@@ -250,7 +250,7 @@ void set_button_mode_and_radio_switch_aware (byte i,bool val,byte dir)
         {
           simchair_aux1.setButton(radio_panel_knob_matrix[i].r2rpm1 - 1,val);
           e_state[i].button_id = (radio_panel_knob_matrix[i].r2rpm1 - 1);
-        }       
+        }
       }
 
     }
@@ -295,7 +295,7 @@ void set_button_mode_and_radio_switch_aware (byte i,bool val,byte dir)
         {
           simchair_aux1.setButton(radio_panel_knob_matrix[i].r2rpm2 - 1,val);
           e_state[i].button_id = (radio_panel_knob_matrix[i].r2rpm2 - 1);
-        }       
+        }
       }
     }
   }
@@ -556,7 +556,7 @@ void parse_radio_panel_switches (byte b, byte start_pos)
         {
          //Serial.println(obs_rate);
          obs_rate = !obs_rate;
-         
+
          e_state[4].press_counter = 0;
         }
         radio_matrix[i].sw_val = v;
@@ -570,7 +570,7 @@ void parse_radio_panel_switches (byte b, byte start_pos)
         {
          //Serial.println(obs_rate);
          dg_rate = !dg_rate;
-         
+
          e_state[6].press_counter = 0;
         }
         radio_matrix[i].sw_val = v;
@@ -589,7 +589,7 @@ void parse_radio_panel_switches (byte b, byte start_pos)
           {
             simchair_aux1.setButton(radio_panel_pb_matrix[0].c2f, v);
             radio_matrix[i].sw_val = v;
-          } 
+          }
           if (radio_device == 2)
           {
             simchair_aux1.setButton(radio_panel_pb_matrix[0].x1, v);
@@ -610,7 +610,7 @@ void parse_radio_panel_switches (byte b, byte start_pos)
           {
             simchair_aux1.setButton(radio_panel_pb_matrix[0].c2c, v);
             radio_matrix[i].sw_val = v;
-          } 
+          }
           if (radio_device == 2)
           {
             simchair_aux1.setButton(radio_panel_pb_matrix[0].x2, v);
@@ -631,7 +631,7 @@ void parse_radio_panel_switches (byte b, byte start_pos)
           {
             simchair_aux1.setButton(radio_panel_pb_matrix[0].n2f, v);
             radio_matrix[i].sw_val = v;
-          } 
+          }
           if (radio_device == 2)
           {
             simchair_aux1.setButton(radio_panel_pb_matrix[0].x3, v);
@@ -652,7 +652,7 @@ void parse_radio_panel_switches (byte b, byte start_pos)
           {
             simchair_aux1.setButton(radio_panel_pb_matrix[0].n2c, v);
             radio_matrix[i].sw_val = v;
-          } 
+          }
           if (radio_device == 2)
           {
             simchair_aux1.setButton(radio_panel_pb_matrix[0].x4, v);

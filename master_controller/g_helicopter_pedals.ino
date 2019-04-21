@@ -16,7 +16,7 @@ void setup_pedals()
   {
     simchair.setRudderRange(0, ADC_RANGE);
   }
-  dev_pedals = 1;
+  connected_devices |= (1 << DEVICE_PEDALS);
   pedals.begin();
   pedals.setGain(GAIN_ONE);
 

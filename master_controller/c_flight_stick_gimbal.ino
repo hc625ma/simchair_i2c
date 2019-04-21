@@ -10,7 +10,7 @@ void setup_cyclic()
     }
     simchair.setXAxisRange(0, ADC_RANGE);
     simchair.setYAxisRange(0, ADC_RANGE);
-    dev_cyclic = 1;
+    connected_devices |= (1 << DEVICE_CYCLIC);
     cyclic.begin();
     cyclic.setGain(GAIN_ONE);
   }

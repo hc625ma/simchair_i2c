@@ -6,7 +6,7 @@ void setup_b8stick()
 
   simchair_aux1.setXAxisRange(0, 255);
   simchair_aux1.setYAxisRange(0, 255);
-  dev_b8stick = 1;
+  connected_devices |= (1 << DEVICE_B8_STICK);
 }
 
 void poll_b8stick()

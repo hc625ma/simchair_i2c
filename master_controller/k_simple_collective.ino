@@ -5,7 +5,7 @@ void setup_simple_collective()
 
   simchair.setZAxisRange(SIMPLE_COLLECTIVE_MIN, SIMPLE_COLLECTIVE_MAX);
   simchair.setThrottleRange(SIMPLE_COLLECTIVE_THR_MIN, SIMPLE_COLLECTIVE_THR_MAX);
-  dev_simple_collective = 1;
+  connected_devices |= (1 << DEVICE_SIMPLE_COLLECTIVE);
 }
 
 void poll_simple_collective()
