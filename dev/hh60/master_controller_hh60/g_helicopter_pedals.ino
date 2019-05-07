@@ -53,7 +53,7 @@ void poll_pedals()
   if (ftcr == 255)
   {
     rudder_diff = 0;
-    //physical_pedals_center = rudder;
+    physical_pedals_center = rudder;
     if (INVERT_RUDDER == 1)
     {
       physical_pedals_center = ADC_RANGE - physical_pedals_center;
@@ -177,7 +177,7 @@ void poll_pedals()
 
 
 //         }
-          if (FORCE_TRIM_BUTTON_MODE == "CONTINUOUS")
+          if (FORCE_TRIM_BUTTON_MODE == "HOLD")
           {
             if (force_trim_button_pressed == 0)
             {
