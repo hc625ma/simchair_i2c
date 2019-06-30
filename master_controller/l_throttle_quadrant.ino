@@ -10,7 +10,7 @@ void setup_throttle_quadrant()
   simchair_aux1.setRudderRange(THROTTLE_QUADRANT_SECONDARY_AXIS_TRESHOLD, THROTTLE_QUADRANT_PHYSICAL_AXIS_MAX);
   simchair_aux1.setZAxisRange(THROTTLE_QUADRANT_SECONDARY_AXIS_TRESHOLD, THROTTLE_QUADRANT_PHYSICAL_AXIS_MAX);
 
-  dev_throttle_quadrant = 1;
+  connected_devices |= (1 << DEVICE_THROTTLE_QUADRANT);
 }
 
 

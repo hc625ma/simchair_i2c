@@ -6,7 +6,7 @@ void setup_twin_engine_collective()
   simchair.setZAxisRange(TWIN_COLLECTIVE_MIN, TWIN_COLLECTIVE_MAX);
   simchair.setThrottleRange(TWIN_COLLECTIVE_THR1_MIN,TWIN_COLLECTIVE_THR1_MAX);//SINGLE_ENGINE_COLLECTIVE_IDLE_STOP_AXIS_VAL, 1023);
   simchair.setRyAxisRange(TWIN_COLLECTIVE_THR2_MIN,TWIN_COLLECTIVE_THR2_MAX);
-  dev_twin_engine_collective = 1;
+  connected_devices |= (1 << DEVICE_TWIN_COLLECTIVE);
 }
 
 void poll_twin_engine_collective()

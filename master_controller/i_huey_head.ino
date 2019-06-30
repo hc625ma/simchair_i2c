@@ -6,7 +6,7 @@ void setup_huey_coll_head()
   COLLECTIVE_HOLD_BUTTON = HUEY_HEAD_COLLECTIVE_HOLD_BUTTON;
   simchair_aux2.setXAxisRange(0, 255);
   simchair_aux2.setYAxisRange(0, 255);
-  dev_huey_coll_head = 1;
+  connected_devices |= (1 << DEVICE_HUEY_HEAD);
   IDLE_STOP_BUTTON = huey_coll_head_idle_stop_buttons[0];
   for (byte i=0;i<32;i++)
   {

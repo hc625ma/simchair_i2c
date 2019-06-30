@@ -6,7 +6,7 @@ void setup_cessna_engine_and_prop_controls()
   simchair_aux1.setRxAxisRange(0, 1023);
   simchair_aux1.setRyAxisRange(0, 1023);
   simchair_aux1.setThrottleRange(0, 1023);
-  dev_cessna_engine_and_prop_controls = 1;
+  connected_devices |= (1 << DEVICE_GA_CONTROLS);
 }
 
 
